@@ -119,6 +119,8 @@ This is a sample implementation of IMKit App with Swift/SwiftUI.
 * App doesn't run!
   * Check the path of build product file. If it isn't at `/Library/Input Methods/...`, some thing went wrong.
   * Maybe build setting went wrong. Check the settings. Especially, if `CONFIGURATION_BUILD_DIR="";` found, remove the line.
+* Where's my InputMethod!?!?
+  * Check English section. You would found it.
 
 ## Reference
 
