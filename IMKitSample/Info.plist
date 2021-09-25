@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+	<string>$(PRODUCT_MODULE_NAME).NSManualApplication</string>
 	<key>InputMethodConnectionName</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)_Connection</string>
 	<key>InputMethodServerControllerClass</key>
