@@ -11,7 +11,10 @@ This is a sample implementation of IMKit App with Swift/SwiftUI.
 ## Procedure to make project
 
 * Create new project. Bundle Identifier must contain `.inputmethod.` part in the String.
+
 * Run.
+
+* Remove `IMKitSampleApp.swift`, `ContentView.swift`
 
 * Add Swift files `AppDelegate.swift` and `IMKitSampleInputController.swift`.
 
@@ -20,6 +23,21 @@ This is a sample implementation of IMKit App with Swift/SwiftUI.
   import Cocoa
   import InputMethodKit
   
+  // necessary to launch this app
+  class NSManualApplication: NSApplication {
+      private let appDelegate = AppDelegate()
+  
+      override init() {
+          super.init()
+          self.delegate = appDelegate
+      }
+  
+      required init?(coder: NSCoder) {
+          fatalError("init(coder:) has not been implemented")
+      }
+  }
+  
+  @main
   class AppDelegate: NSObject, NSApplicationDelegate {
       var server = IMKServer()
       var candidatesWindow = IMKCandidates()
@@ -56,29 +74,12 @@ This is a sample implementation of IMKit App with Swift/SwiftUI.
   }
   ```
 
-* Modify `IMKitSampleApp`.
-
-  ```swift
-  // IMKitSampleApp.swift
-  import SwiftUI
-  
-  @main
-  struct IMKitSampleApp: App {
-      @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-      var body: some Scene {
-          WindowGroup {
-              ContentView()
-          }
-      }
-  }
-  ```
-
 * Add icon file `main.tiff`.
 
 * Modify Info.plist
 
   ```
-  key: NSPrincipalClass  type: _  value: NSApplication
+  key: NSPrincipalClass  type: _  value: $(PRODUCT_MODULE_NAME).NSManualApplication
   key: InputMethodConnectionName  type: String  value: $(PRODUCT_BUNDLE_IDENTIFIER)_Connection
   key: InputMethodServerControllerClass  type: String  value: $(PRODUCT_MODULE_NAME).IMKitSampleInputController
   key: Application is background only  type: Boolean  value: YES
@@ -99,6 +100,7 @@ This is a sample implementation of IMKit App with Swift/SwiftUI.
     ```
 
 * Do `sudo chmod -R 777 /Library/Input\ Methods` on terminal.
+
 * Modify build settings.
   * Go **Build Locations** → **Build Products Path** of debug → value ``/Library/Input Methods`
   * Go **+** → **Add User-Defined Setting** → Set key `CONFIGURATION_BUILD_DIR`, value `/Library/Input Methods`.

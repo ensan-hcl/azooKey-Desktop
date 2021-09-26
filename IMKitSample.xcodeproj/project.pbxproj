@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1A41E61826E745D9009B65D7 /* IMKitSampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E61726E745D9009B65D7 /* IMKitSampleApp.swift */; };
-		1A41E61A26E745D9009B65D7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E61926E745D9009B65D7 /* ContentView.swift */; };
 		1A41E61C26E745DD009B65D7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E61B26E745DD009B65D7 /* Assets.xcassets */; };
 		1A41E61F26E745DD009B65D7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E61E26E745DD009B65D7 /* Preview Assets.xcassets */; };
 		1A41E62926E745DD009B65D7 /* IMKitSampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E62826E745DD009B65D7 /* IMKitSampleTests.swift */; };
@@ -38,8 +36,6 @@
 
 /* Begin PBXFileReference section */
 		1A41E61426E745D9009B65D7 /* IMKitSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IMKitSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		1A41E61726E745D9009B65D7 /* IMKitSampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IMKitSampleApp.swift; sourceTree = "<group>"; };
-		1A41E61926E745D9009B65D7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1A41E61B26E745DD009B65D7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A41E61E26E745DD009B65D7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1A41E62426E745DD009B65D7 /* IMKitSampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IMKitSampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -104,8 +100,6 @@
 			children = (
 				1A41E64526E7470D009B65D7 /* Info.plist */,
 				1A41E64826E7495A009B65D7 /* IMKitSample.entitlements */,
-				1A41E61726E745D9009B65D7 /* IMKitSampleApp.swift */,
-				1A41E61926E745D9009B65D7 /* ContentView.swift */,
 				1A41E64326E74669009B65D7 /* IMKitSampleInputController.swift */,
 				1A41E64126E74627009B65D7 /* AppDelegate.swift */,
 				1A41E61B26E745DD009B65D7 /* Assets.xcassets */,
@@ -272,9 +266,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */,
-				1A41E61A26E745D9009B65D7 /* ContentView.swift in Sources */,
 				1A41E64426E74669009B65D7 /* IMKitSampleInputController.swift in Sources */,
-				1A41E61826E745D9009B65D7 /* IMKitSampleApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
