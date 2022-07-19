@@ -4,11 +4,27 @@ This is a sample implementation of IMKit App with Swift/SwiftUI.
 
 ## Working Environment
 
+Check in July 2022.
+* macOS 12.4
+* Swift 5.6
+* Xcode 13.4.1
+
+Check in 2021.
 * macOS 11.5
 * Swift 5.5
 * Xcode13 (beta)
 
+## Usage
+To try this sample project, use following steps.
+
+* Open this project in Xcode.
+* Do `sudo chmod -R 777 /Library/Input\ Methods` on terminal.
+* Run the project.
+* Add 'IMKitSample' in **setting** > **keyboard** > **input source** > **English**.
+* Choose IMKitSample as input source and try it on some text field.
+
 ## Procedure to make project
+I used following steps to prepare this sample project.
 
 * Create new project. Bundle Identifier must contain `.inputmethod.` part in the String.
 
@@ -102,7 +118,7 @@ This is a sample implementation of IMKit App with Swift/SwiftUI.
 * Do `sudo chmod -R 777 /Library/Input\ Methods` on terminal.
 
 * Modify build settings.
-  * Go **Build Locations** → **Build Products Path** of debug → value ``/Library/Input Methods`
+  * Go **Build Locations** → **Build Products Path** of debug → value `/Library/Input Methods`
   * Go **+** → **Add User-Defined Setting** → Set key `CONFIGURATION_BUILD_DIR`, value `/Library/Input Methods`.
   * !!! DO NOT edit thinklessly, this setting is really fragile.
 
@@ -110,7 +126,7 @@ This is a sample implementation of IMKit App with Swift/SwiftUI.
 
 ## Trouble Shooting
 
-*I'm not expert of macOS. Please don't ask too much, I don't know either. It's just my experience.*
+*I'm not an expert of macOS. Please don't ask too much, I don't know either.*
 
 * InputMethods says **connection \*\*Failed\*\*** all though there are no diff!
   * Open 'Activity Monitor' app, search the name of your InputMethods, and kill the process. Then try again.
@@ -119,7 +135,7 @@ This is a sample implementation of IMKit App with Swift/SwiftUI.
   * Use `NSLog()`.
 
 * App doesn't run!
-  * Check the path of build product file. If it isn't at `/Library/Input Methods/...`, some thing went wrong.
+  * Check the path of build product file. If it isn't at `/Library/Input Methods/...`, something went wrong.
   * Maybe build setting went wrong. Check the settings. Especially, if `CONFIGURATION_BUILD_DIR="";` found, remove the line.
 * Where's my InputMethod!?!?
   * Check English section. You would found it.
