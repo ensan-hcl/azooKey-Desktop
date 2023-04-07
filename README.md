@@ -1,36 +1,34 @@
 # What is this?
 
-This is a sample implementation of IMKit App with Swift/SwiftUI.
+This is a sample implementation of the IMKit App with Swift/SwiftUI.
 
 ## Working Environment
 
-Check in July 2022.
+Checked in July 2022.
 * macOS 12.4
 * Swift 5.6
 * Xcode 13.4.1
 
-Check in 2021.
+Checked in 2021.
 * macOS 11.5
 * Swift 5.5
-* Xcode13 (beta)
+* Xcode 13 (beta)
 
 ## Usage
-To try this sample project, use following steps.
+To try this sample project, follow these steps:
 
 * Open this project in Xcode.
-* Do `sudo chmod -R 777 /Library/Input\ Methods` on terminal.
 * Run the project.
-* Add 'IMKitSample' in **setting** > **keyboard** > **input source** > **English**.
-* Choose IMKitSample as input source and try it on some text field.
+* In the terminal, type `sudo chmod -R 777 /Library/Input\ Methods`.
+* Add 'IMKitSample' under **Settings** > **Keyboard** > **Input Sources** > **English**.
+* Choose IMKitSample as the input source and try it on a text field.
 
 ## Procedure to make project
-I used following steps to prepare this sample project.
+I used the following steps to prepare this sample project:
 
-* Create new project. Bundle Identifier must contain `.inputmethod.` part in the String.
-
-* Run.
-
-* Remove `IMKitSampleApp.swift`, `ContentView.swift`
+* Create a new project with a bundle identifier that contains `.inputmethod.` in the string.
+* Run the project.
+* Remove `IMKitSampleApp.swift` and `ContentView.swift`.
 
 * Add Swift files `AppDelegate.swift` and `IMKitSampleInputController.swift`.
 
@@ -89,7 +87,6 @@ I used following steps to prepare this sample project.
       }
   }
   ```
-
 * Add icon file `main.tiff`.
 
 * Modify Info.plist
@@ -109,16 +106,16 @@ I used following steps to prepare this sample project.
 
   * Go IMKitSample.entitlements, add 
 
-    ```
-    key: com.apple.security.temporary-exception.mach-register.global-name
-    type: String
-    value: $(PRODUCT_BUNDLE_IDENTIFIER)_Connection
-    ```
+  ```
+  key: com.apple.security.temporary-exception.mach-register.global-name
+  type: String
+  value: $(PRODUCT_BUNDLE_IDENTIFIER)_Connection
+  ```
 
-* Do `sudo chmod -R 777 /Library/Input\ Methods` on terminal.
+  * Do `sudo chmod -R 777 /Library/Input\ Methods` on terminal.
 
 * Modify build settings.
-  * Go **Build Locations** → **Build Products Path** of debug → value `/Library/Input Methods`
+  * Go **Build Locations** → **Build Products Path** of debug → value `/Library/Input Methods`
   * Go **+** → **Add User-Defined Setting** → Set key `CONFIGURATION_BUILD_DIR`, value `/Library/Input Methods`.
   * !!! DO NOT edit thinklessly, this setting is really fragile.
 
@@ -139,7 +136,7 @@ I used following steps to prepare this sample project.
   * Maybe build setting went wrong. Check the settings. Especially, if `CONFIGURATION_BUILD_DIR="";` found, remove the line.
 * Where's my InputMethod!?!?
   * Check English section. You would found it.
-  * If still not, you fill have to restart your computer.
+  * If still not, you will have to restart your computer.
 
 ## Reference
 
