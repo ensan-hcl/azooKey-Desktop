@@ -139,6 +139,7 @@ I used following steps to prepare this sample project.
   * Maybe build setting went wrong. Check the settings. Especially, if `CONFIGURATION_BUILD_DIR="";` found, remove the line.
 * Where's my InputMethod!?!?
   * Check English section. You would found it.
+  * If still not, you fill have to restart your computer.
 
 ## Reference
 
