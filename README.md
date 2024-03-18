@@ -20,17 +20,17 @@ To try this sample project, follow these steps:
 * Open this project in Xcode.
 * Run the project.
 * In the terminal, type `sudo chmod -R 777 /Library/Input\ Methods`.
-* Add 'IMKitSample' under **Settings** > **Keyboard** > **Input Sources** > **English**.
-* Choose IMKitSample as the input source and try it on a text field.
+* Add 'azooKeyMac' under **Settings** > **Keyboard** > **Input Sources** > **English**.
+* Choose azooKeyMac as the input source and try it on a text field.
 
 ## Procedure to make project
 I used the following steps to prepare this sample project:
 
 * Create a new project with a bundle identifier that contains `.inputmethod.` in the string.
 * Run the project.
-* Remove `IMKitSampleApp.swift` and `ContentView.swift`.
+* Remove `azooKeyMacApp.swift` and `ContentView.swift`.
 
-* Add Swift files `AppDelegate.swift` and `IMKitSampleInputController.swift`.
+* Add Swift files `AppDelegate.swift` and `azooKeyMacInputController.swift`.
 
   ```swift
   // AppDelegate.swift
@@ -70,12 +70,12 @@ I used the following steps to prepare this sample project:
   ```
 
   ```swift
-  // IMKitSampleInputController.swift
+  // azooKeyMacInputController.swift
   import Cocoa
   import InputMethodKit
   
-  @objc(IMKitSampleInputController)
-  class IMKitSampleInputController: IMKInputController {
+  @objc(azooKeyMacInputController)
+  class azooKeyMacInputController: IMKInputController {
       override func inputText(_ string: String!, client sender: Any!) -> Bool {
           NSLog(string)
           // get client to insert
@@ -94,7 +94,7 @@ I used the following steps to prepare this sample project:
   ```
   key: NSPrincipalClass  type: _  value: $(PRODUCT_MODULE_NAME).NSManualApplication
   key: InputMethodConnectionName  type: String  value: $(PRODUCT_BUNDLE_IDENTIFIER)_Connection
-  key: InputMethodServerControllerClass  type: String  value: $(PRODUCT_MODULE_NAME).IMKitSampleInputController
+  key: InputMethodServerControllerClass  type: String  value: $(PRODUCT_MODULE_NAME).azooKeyMacInputController
   key: Application is background only  type: Boolean  value: YES
   key: tsInputMethodCharacterRepertoireKey  type: Array  value: [item0: String = Latn]
   key: tsInputMethodIconFileKey  type: String  value: main.tiff
@@ -104,7 +104,7 @@ I used the following steps to prepare this sample project:
 
   * Go **Signing & Capabilities** → **+Capability** → **App Sandbox**
 
-  * Go IMKitSample.entitlements, add 
+  * Go azooKeyMac.entitlements, add 
 
   ```
   key: com.apple.security.temporary-exception.mach-register.global-name

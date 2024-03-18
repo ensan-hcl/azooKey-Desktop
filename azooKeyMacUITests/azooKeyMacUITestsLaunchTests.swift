@@ -1,13 +1,13 @@
 //
-//  IMKitSampleUITestsLaunchTests.swift
-//  IMKitSampleUITests
+//  azooKeyMacUITestsLaunchTests.swift
+//  azooKeyMacUITests
 //
 //  Created by β α on 2021/09/07.
 //
 
 import XCTest
 
-class IMKitSampleUITestsLaunchTests: XCTestCase {
+class azooKeyMacUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

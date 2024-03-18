@@ -1,13 +1,13 @@
 //
-//  IMKitSampleUITests.swift
-//  IMKitSampleUITests
+//  azooKeyMacUITests.swift
+//  azooKeyMacUITests
 //
 //  Created by β α on 2021/09/07.
 //
 
 import XCTest
 
-class IMKitSampleUITests: XCTestCase {
+class azooKeyMacUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
