@@ -14,8 +14,6 @@
 	<true/>
 	<key>tsInputMethodCharacterRepertoireKey</key>
 	<array>
-		<string>Kana</string>
-		<string>Hira</string>
 		<string>Latn</string>
 	</array>
 	<key>tsInputMethodIconFileKey</key>

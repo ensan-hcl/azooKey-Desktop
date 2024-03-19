@@ -22,7 +22,7 @@ enum UserAction {
     }
 }
 
-enum ClientAction {
+indirect enum ClientAction {
     case ignore
     case showCandidateWindow
     case hideCandidateWindow
@@ -33,6 +33,7 @@ enum ClientAction {
     case removeLastMarkedText
     case forwardToCandidateWindow(NSEvent)
     case nextCandidate
+    case sequence([ClientAction])
 }
 
 enum InputState {
@@ -72,7 +73,7 @@ enum InputState {
             switch userAction {
             case .input(let string):
                 self = .composing
-                return .appendToMarkedText(string)
+                return .sequence([.submitSelectedCandidate, .appendToMarkedText(string)])
             case .enter:
                 self = .none
                 return .submitSelectedCandidate
@@ -83,8 +84,8 @@ enum InputState {
                 return .nextCandidate
             case .navigation:
                 return .forwardToCandidateWindow(event)
-            default:
-                return .forwardToCandidateWindow(event)
+            case .unknown:
+                return .ignore
             }
         }
     }
@@ -97,13 +98,14 @@ class azooKeyMacInputController: IMKInputController {
     private var inputState: InputState = .none
     private var candidatesWindow: IMKCandidates = IMKCandidates()
     @MainActor private var kanaKanjiConverter = KanaKanjiConverter()
+    @MainActor private var rawCandidates: [Candidate] = []
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleColumnScrollingCandidatePanel)
         super.init(server: server, delegate: delegate, client: inputClient)
     }
 
-    override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
+    @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         // get client to insert
         guard let client = sender as? IMKTextInput else {
             return false
@@ -115,6 +117,10 @@ class azooKeyMacInputController: IMKInputController {
             self.inputState.event(event, userAction: .space)
         case 51: // Delete
             self.inputState.event(event, userAction: .delete)
+        case 102: // Lang1
+            self.inputState.event(event, userAction: .unknown)
+        case 104: // Lang2
+            self.inputState.event(event, userAction: .unknown)
         case 123: // Left
             self.inputState.event(event, userAction: .navigation(.left))
         case 124: // Right
@@ -125,8 +131,26 @@ class azooKeyMacInputController: IMKInputController {
             self.inputState.event(event, userAction: .navigation(.up))
         default:
             if let text = event.characters {
-                if text == "-" {
+                if text == "." {
+                    self.inputState.event(event, userAction: .input("。"))
+                } else if text == "," {
+                    self.inputState.event(event, userAction: .input("、"))
+                } else if text == "!" {
+                    self.inputState.event(event, userAction: .input("！"))
+                } else if text == "?" {
+                    self.inputState.event(event, userAction: .input("？"))
+                } else if text == "~" {
+                    self.inputState.event(event, userAction: .input("〜"))
+                } else if text == "-" {
                     self.inputState.event(event, userAction: .input("ー"))
+                } else if text == "(" {
+                    self.inputState.event(event, userAction: .input("（"))
+                } else if text == ")" {
+                    self.inputState.event(event, userAction: .input("）"))
+                } else if text == "[" {
+                    self.inputState.event(event, userAction: .input("「 "))
+                } else if text == "]" {
+                    self.inputState.event(event, userAction: .input("」"))
                 } else {
                     self.inputState.event(event, userAction: .input(text))
                 }
@@ -137,21 +161,25 @@ class azooKeyMacInputController: IMKInputController {
         return self.handleClientAction(clientAction, client: client)
     }
 
-    func handleClientAction(_ clientAction: ClientAction, client: IMKTextInput) -> Bool {
+    func showCandidateWindow() {
+        self.candidatesWindow.update()
+        self.candidatesWindow.show()
+        // MARK: this is required to move the window front of the spotlight panel
+        self.candidatesWindow.perform(Selector(("setWindowLevel:")), with: NSWindow.Level.screenSaver)
+    }
+
+    @MainActor func handleClientAction(_ clientAction: ClientAction, client: IMKTextInput) -> Bool {
         // return only false
         switch clientAction {
         case .showCandidateWindow:
-            self.candidatesWindow.update()
-            self.candidatesWindow.show()
-            // MARK: this is required to move the window front of the spotlight panel
-            self.candidatesWindow.perform(Selector(("setWindowLevel:")), with: NSWindow.Level.modalPanel)
+            self.showCandidateWindow()
         case .hideCandidateWindow:
             self.candidatesWindow.hide()
         case .appendToMarkedText(let string):
             self.candidatesWindow.hide()
             self.composingText.insertAtCursorPosition(string, inputStyle: .roman2kana)
             client.setMarkedText(
-                self.composingText.convertTarget,
+                NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
                 selectionRange: .notFound,
                 replacementRange: .notFound
             )
@@ -160,17 +188,33 @@ class azooKeyMacInputController: IMKInputController {
             self.composingText.stopComposition()
             self.candidatesWindow.hide()
         case .submitSelectedCandidate:
-            client.insertText(self.selectedCandidate ?? self.composingText.convertTarget, replacementRange: .notFound)
+            let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
+            client.insertText(candidateString, replacementRange: .notFound)
+            guard let candidate = self.rawCandidates.first(where: {$0.text == candidateString}) else {
+                self.composingText.stopComposition()
+                return true
+            }
+            self.composingText.prefixComplete(correspondingCount: candidate.correspondingCount)
             self.selectedCandidate = nil
-            self.composingText.stopComposition()
-            self.candidatesWindow.hide()
+            if self.composingText.isEmpty {
+                self.composingText.stopComposition()
+                self.candidatesWindow.hide()
+            } else {
+                self.inputState = .selecting
+                client.setMarkedText(
+                    NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
+                    selectionRange: .notFound,
+                    replacementRange: .notFound
+                )
+                self.showCandidateWindow()
+            }
         case .insertText(let string):
             client.insertText(string, replacementRange: .notFound)
         case .removeLastMarkedText:
             self.candidatesWindow.hide()
             self.composingText.deleteBackwardFromCursorPosition(count: 1)
             client.setMarkedText(
-                self.composingText.convertTarget,
+                NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
                 selectionRange: .notFound,
                 replacementRange: .notFound
             )
@@ -183,6 +227,14 @@ class azooKeyMacInputController: IMKInputController {
             return false
         case .forwardToCandidateWindow(let event):
             self.candidatesWindow.interpretKeyEvents([event])
+        case .sequence(let actions):
+            var found = false
+            for action in actions {
+                if self.handleClientAction(action, client: client) {
+                    found = true
+                }
+            }
+            return found
         }
         return true
     }
@@ -192,24 +244,31 @@ class azooKeyMacInputController: IMKInputController {
     @MainActor override func candidates(_ sender: Any!) -> [Any]! {
         let options = ConvertRequestOptions.withDefaultDictionary(requireJapanesePrediction: false, requireEnglishPrediction: false, keyboardLanguage: .ja_JP, learningType: .nothing, memoryDirectoryURL: URL(string: "none")!, sharedContainerURL: URL(string: "none")!, metadata: .init(appVersionString: "1.0"))
         let result = self.kanaKanjiConverter.requestCandidates(composingText, options: options)
+        self.rawCandidates = result.mainResults
         return result.mainResults.map { $0.text }
     }
 
-    override func candidateSelected(_ candidateString: NSAttributedString!) {
+    @MainActor
+    func updateMarkedTextWithCandidate(_ candidateString: String) {
+        guard let candidate = self.rawCandidates.first(where: {$0.text == candidateString}) else {
+            return
+        }
+        var afterComposingText = self.composingText
+        afterComposingText.prefixComplete(correspondingCount: candidate.correspondingCount)
         self.client()?.setMarkedText(
-            candidateString.string,
-            selectionRange: .notFound,
-            replacementRange: .notFound
+            NSAttributedString(string: candidateString + afterComposingText.convertTarget, attributes: [:]),
+            selectionRange: NSRange(location: self.selectionRange().location, length: candidateString.count),
+            replacementRange: NSRange(location: self.selectionRange().location, length: candidateString.count)
         )
+     }
+
+    @MainActor override func candidateSelected(_ candidateString: NSAttributedString!) {
+        self.updateMarkedTextWithCandidate(candidateString.string)
         self.selectedCandidate = candidateString.string
     }
 
-    override func candidateSelectionChanged(_ candidateString: NSAttributedString!) {
-        self.client()?.setMarkedText(
-            candidateString.string,
-            selectionRange: .notFound,
-            replacementRange: .notFound
-        )
+    @MainActor override func candidateSelectionChanged(_ candidateString: NSAttributedString!) {
+        self.updateMarkedTextWithCandidate(candidateString.string)
         self.selectedCandidate = candidateString.string
     }
 }
