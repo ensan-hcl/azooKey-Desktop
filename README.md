@@ -1,12 +1,12 @@
 # azooKey on Desktop
 
-iOSのキーボードアプリ「azooKey」のデスクトップ版です。
+iOSのキーボードアプリ「[azooKey](https://github.com/ensan-hcl/azooKey)」のデスクトップ版です。
 
 現在アルファ版のため、動作は一切保証できません。
 
 ## 動作環境
 
-macOS 14.3で動作確認しています。
+macOS 14.3で動作確認しています。古いOSでの動作は検証していません。
 
 ## インストール
 
