@@ -22,6 +22,13 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 
 出来上がった`.app`を`/Library/Input\ Methods`に配置して、macOSからログアウトし、再ログインしてください。
 
+## 機能
+
+* iOSのキーボードアプリazooKeyと同レベルの日本語入力のサポート
+* 英字入力のサポート
+* 部分変換のサポート
+* ライブ変換のサポート
+
 ## 開発ガイド
 
 コントリビュート歓迎です！！
@@ -30,11 +37,16 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 
 * 変換範囲のエディットを可能にする
 * 変換候補ウィンドウが再前面に表示されないことがある問題を修正する
-* インストーラのCIを実装する
+  * 入力中に自動で変換候補ウィンドウを表示する
+  * 予測変換を表示する
+
+* インストーラを実装する
+  * CIで自動リリースする
+
 * 学習機能を有効化する
-* 予測変換を表示する
-* ライブ変換をサポートする
 * 設定メニューを作る
+  * ライブ変換のオンオフを設定できるようにする
+
 
 ### Future Direction
 
