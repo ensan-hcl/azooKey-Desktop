@@ -1,0 +1,12 @@
+/* 
+  InfoPlist.strings
+  azooKeyMac
+
+  Created by miwa on 2024/03/20.
+  
+*/
+
+CFBundleName = "azooKey";
+
+com.apple.inputmethod.Roman = "azooKey (English)";
+com.apple.inputmethod.Japanese = "azooKey (日本語)";

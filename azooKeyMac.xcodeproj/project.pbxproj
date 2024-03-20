@@ -15,6 +15,9 @@
 		1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64126E74627009B65D7 /* AppDelegate.swift */; };
 		1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */; };
 		1A41E64726E74937009B65D7 /* main.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E64626E74937009B65D7 /* main.tiff */; };
+		556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52F92BAAAF7D00EB343F /* en.tiff */; };
+		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
+		55A27D022BAAADDB00512DCD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 55A27D002BAAADDB00512DCD /* InfoPlist.strings */; };
 		55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 55A9C54A2BA847A1007F6F02 /* main@2x.tiff */; };
 		55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A9C54D2BA84951007F6F02 /* NSRange.swift */; };
 		55E0A5BE2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BD2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary */; };
@@ -52,6 +55,9 @@
 		1A41E64526E7470D009B65D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1A41E64626E74937009B65D7 /* main.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = main.tiff; path = azooKeyMac/main.tiff; sourceTree = SOURCE_ROOT; };
 		1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = azooKeyMac.entitlements; sourceTree = "<group>"; };
+		556C52F92BAAAF7D00EB343F /* en.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = en.tiff; sourceTree = "<group>"; };
+		556C52FA2BAAAF7D00EB343F /* en@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "en@2x.tiff"; sourceTree = "<group>"; };
+		55A27D012BAAADDB00512DCD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		55A9C54A2BA847A1007F6F02 /* main@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "main@2x.tiff"; sourceTree = "<group>"; };
 		55A9C54D2BA84951007F6F02 /* NSRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSRange.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -107,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				1A41E64526E7470D009B65D7 /* Info.plist */,
+				55A27D002BAAADDB00512DCD /* InfoPlist.strings */,
 				1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */,
 				1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */,
 				1A41E64126E74627009B65D7 /* AppDelegate.swift */,
@@ -114,6 +121,8 @@
 				1A41E61B26E745DD009B65D7 /* Assets.xcassets */,
 				1A41E64626E74937009B65D7 /* main.tiff */,
 				55A9C54A2BA847A1007F6F02 /* main@2x.tiff */,
+				556C52F92BAAAF7D00EB343F /* en.tiff */,
+				556C52FA2BAAAF7D00EB343F /* en@2x.tiff */,
 				1A41E61D26E745DD009B65D7 /* Preview Content */,
 			);
 			path = azooKeyMac;
@@ -265,8 +274,11 @@
 			files = (
 				1A41E64726E74937009B65D7 /* main.tiff in Resources */,
 				1A41E61F26E745DD009B65D7 /* Preview Assets.xcassets in Resources */,
+				556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */,
 				55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */,
+				556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */,
 				1A41E61C26E745DD009B65D7 /* Assets.xcassets in Resources */,
+				55A27D022BAAADDB00512DCD /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -328,6 +340,17 @@
 			targetProxy = 1A41E62F26E745DD009B65D7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		55A27D002BAAADDB00512DCD /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				55A27D012BAAADDB00512DCD /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		1A41E63626E745DD009B65D7 /* Debug */ = {

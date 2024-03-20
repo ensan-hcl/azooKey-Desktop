@@ -2,6 +2,67 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>ComponentInputModeDict</key>
+	<dict>
+		<key>tsVisibleInputModeOrderedArrayKey</key>
+		<array>
+			<string>com.apple.inputmethod.Japanese</string>
+			<string>com.apple.inputmethod.Roman</string>
+		</array>
+		<key>tsInputModeListKey</key>
+		<dict>
+			<key>com.apple.inputmethod.Roman</key>
+			<dict>
+				<key>TISInputSourceID</key>
+				<string>dev.ensan.inputmethod.azooKeyMac.Roman</string>
+				<key>tsInputModePrimaryInScriptKey</key>
+				<false/>
+				<key>tsInputModeScriptKey</key>
+				<string>smRoman</string>
+				<key>tsInputModeJISKeyboardShortcutKey</key>
+				<integer>3</integer>
+				<key>tsInputModeDefaultStateKey</key>
+				<true/>
+				<key>tsInputModeIsVisibleKey</key>
+				<true/>
+				<key>tsInputModePaletteIconFileKey</key>
+				<string>en.tiff</string>
+				<key>tsInputModeAlternateMenuIconFileKey</key>
+				<string>en.tiff</string>
+				<key>tsInputModeMenuIconFileKey</key>
+				<string>en.tiff</string>
+				<key>TISIntendedLanguage</key>
+				<string>en</string>
+			</dict>
+			<key>com.apple.inputmethod.Japanese</key>
+			<dict>
+				<key>tsInputModeKeyEquivalentModifiersKey</key>
+				<integer>4608</integer>
+				<key>tsInputModeKeyEquivalentKey</key>
+				<string>J</string>
+				<key>TISInputSourceID</key>
+				<string>dev.ensan.inputmethod.azooKeyMac.Japanese</string>
+				<key>tsInputModePrimaryInScriptKey</key>
+				<true/>
+				<key>tsInputModeScriptKey</key>
+				<string>smJapanese</string>
+				<key>tsInputModeJISKeyboardShortcutKey</key>
+				<integer>1</integer>
+				<key>tsInputModeDefaultStateKey</key>
+				<true/>
+				<key>tsInputModeIsVisibleKey</key>
+				<true/>
+				<key>tsInputModePaletteIconFileKey</key>
+				<string>main.tiff</string>
+				<key>tsInputModeAlternateMenuIconFileKey</key>
+				<string>main.tiff</string>
+				<key>tsInputModeMenuIconFileKey</key>
+				<string>main.tiff</string>
+				<key>TISIntendedLanguage</key>
+				<string>ja</string>
+			</dict>
+		</dict>
+	</dict>
 	<key>TISIntendedLanguage</key>
 	<string>ja</string>
 	<key>NSPrincipalClass</key>
@@ -15,6 +76,8 @@
 	<key>tsInputMethodCharacterRepertoireKey</key>
 	<array>
 		<string>Latn</string>
+		<string>Hira</string>
+		<string>Kana</string>
 	</array>
 	<key>tsInputMethodIconFileKey</key>
 	<string>main.tiff</string>

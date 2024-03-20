@@ -15,6 +15,8 @@ enum UserAction {
     case enter
     case space
     case unknown
+    case 英数
+    case かな
     case navigation(NavigationDirection)
 
     enum NavigationDirection {
@@ -32,6 +34,13 @@ indirect enum ClientAction {
     case submitSelectedCandidate
     case removeLastMarkedText
     case forwardToCandidateWindow(NSEvent)
+    case selectInputMode(InputMode)
+
+    enum InputMode {
+        case roman
+        case japanese
+    }
+
     case sequence([ClientAction])
 }
 
@@ -50,6 +59,10 @@ enum InputState {
             case .input(let string):
                 self = .composing
                 return .appendToMarkedText(string)
+            case .かな:
+                return .selectInputMode(.japanese)
+            case .英数:
+                return .selectInputMode(.roman)
             case .unknown, .navigation, .space, .delete, .enter:
                 return .fallthrough
             }
@@ -65,6 +78,11 @@ enum InputState {
             case .space:
                 self = .selecting
                 return .showCandidateWindow
+            case .かな:
+                return .selectInputMode(.japanese)
+            case .英数:
+                self = .none
+                return .sequence([.commitMarkedText, .selectInputMode(.roman)])
             case .navigation(let direction):
                 if direction == .down {
                     self = .selecting
@@ -113,6 +131,11 @@ enum InputState {
                 )
             case .navigation:
                 return .forwardToCandidateWindow(event)
+            case .かな:
+                return .selectInputMode(.japanese)
+            case .英数:
+                self = .none
+                return .sequence([.submitSelectedCandidate, .selectInputMode(.roman)])
             case .unknown:
                 return .fallthrough
             }
@@ -126,6 +149,7 @@ class azooKeyMacInputController: IMKInputController {
     private var selectedCandidate: String? = nil
     private var inputState: InputState = .none
     private var candidatesWindow: IMKCandidates = IMKCandidates()
+    private var directMode = false
     @MainActor private var kanaKanjiConverter = KanaKanjiConverter()
     @MainActor private var rawCandidates: [Candidate] = []
 
@@ -134,11 +158,25 @@ class azooKeyMacInputController: IMKInputController {
         super.init(server: server, delegate: delegate, client: inputClient)
     }
 
+    override func setValue(_ value: Any!, forTag tag: Int, client sender: Any!) {
+        guard let value = value as? NSString else {
+            return
+        }
+        self.directMode = value == "com.apple.inputmethod.Roman"
+    }
+
     @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
+        // 入力モードの切り替え以外は無視
+        if self.directMode {
+            if event.keyCode != 104 && event.keyCode != 102 {
+                return false
+            }
+        }
         // get client to insert
         guard let client = sender as? IMKTextInput else {
             return false
         }
+        // https://developer.mozilla.org/ja/docs/Web/API/UI_Events/Keyboard_event_code_values#mac_%E3%81%A7%E3%81%AE%E3%82%B3%E3%83%BC%E3%83%89%E5%80%A4
         let clientAction = switch event.keyCode {
         case 36: // Enter
             self.inputState.event(event, userAction: .enter)
@@ -148,10 +186,10 @@ class azooKeyMacInputController: IMKInputController {
             self.inputState.event(event, userAction: .delete)
         case 53: // Escape
             self.inputState.event(event, userAction: .unknown)
-        case 102: // Lang1
-            self.inputState.event(event, userAction: .unknown)
-        case 104: // Lang2
-            self.inputState.event(event, userAction: .unknown)
+        case 102: // Lang2/kVK_JIS_Eisu
+            self.inputState.event(event, userAction: .英数)
+        case 104: // Lang1/kVK_JIS_Kana
+            self.inputState.event(event, userAction: .かな)
         case 123: // Left
             // uF702
             self.inputState.event(event, userAction: .navigation(.left))
@@ -217,6 +255,13 @@ class azooKeyMacInputController: IMKInputController {
             self.showCandidateWindow()
         case .hideCandidateWindow:
             self.candidatesWindow.hide()
+        case .selectInputMode(let mode):
+            switch mode {
+            case .roman: 
+                client.selectMode("dev.ensan.inputmethod.azooKeyMac.Roman")
+            case .japanese:
+                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
+            }
         case .appendToMarkedText(let string):
             self.candidatesWindow.hide()
             self.composingText.insertAtCursorPosition(string, inputStyle: .roman2kana)
