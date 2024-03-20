@@ -30,9 +30,16 @@ indirect enum ClientAction {
     case showCandidateWindow
     case hideCandidateWindow
     case appendToMarkedText(String)
+    case removeLastMarkedText
+    case moveCursorToStart
+    case moveCursor(Int)
+
+    enum DefaultInitialPosition {
+        case end
+    }
+
     case commitMarkedText
     case submitSelectedCandidate
-    case removeLastMarkedText
     case forwardToCandidateWindow(NSEvent)
     case selectInputMode(InputMode)
 
@@ -47,7 +54,8 @@ indirect enum ClientAction {
 enum InputState {
     case none
     case composing
-    case selecting
+    /// 変換範囲をユーザが調整したか
+    case selecting(rangeAdjusted: Bool)
 
     mutating func event(_ event: NSEvent!, userAction: UserAction) -> ClientAction {
         if event.modifierFlags.contains(.command) || event.modifierFlags.contains(.option) {
@@ -76,7 +84,7 @@ enum InputState {
                 self = .none
                 return .commitMarkedText
             case .space:
-                self = .selecting
+                self = .selecting(rangeAdjusted: false)
                 return .showCandidateWindow
             case .かな:
                 return .selectInputMode(.japanese)
@@ -85,8 +93,14 @@ enum InputState {
                 return .sequence([.commitMarkedText, .selectInputMode(.roman)])
             case .navigation(let direction):
                 if direction == .down {
-                    self = .selecting
+                    self = .selecting(rangeAdjusted: false)
                     return .showCandidateWindow
+                } else if direction == .right && event.modifierFlags.contains(.shift) {
+                    self = .selecting(rangeAdjusted: true)
+                    return .sequence([.moveCursorToStart, .moveCursor(1), .showCandidateWindow])
+                } else if direction == .left && event.modifierFlags.contains(.shift) {
+                    self = .selecting(rangeAdjusted: true)
+                    return .sequence([.moveCursor(-1), .showCandidateWindow])
                 } else {
                     // ナビゲーションはハンドルしてしまう
                     return .consume
@@ -94,7 +108,7 @@ enum InputState {
             case .unknown:
                 return .fallthrough
             }
-        case .selecting:
+        case .selecting(let rangeAdjusted):
             switch userAction {
             case .input(let string):
                 self = .composing
@@ -129,8 +143,24 @@ enum InputState {
                         keyCode: keyCode
                     ) ?? event
                 )
-            case .navigation:
-                return .forwardToCandidateWindow(event)
+            case .navigation(let direction):
+                if direction == .right {
+                    if event.modifierFlags.contains(.shift) {
+                        if rangeAdjusted {
+                            return .sequence([.moveCursor(1), .showCandidateWindow])
+                        } else {
+                            self = .selecting(rangeAdjusted: true)
+                            return .sequence([.moveCursorToStart, .moveCursor(1), .showCandidateWindow])
+                        }
+                    } else {
+                        return .submitSelectedCandidate
+                    }
+                } else if direction == .left && event.modifierFlags.contains(.shift) {
+                    self = .selecting(rangeAdjusted: true)
+                    return .sequence([.moveCursor(-1), .showCandidateWindow])
+                } else {
+                    return .forwardToCandidateWindow(event)
+                }
             case .かな:
                 return .selectInputMode(.japanese)
             case .英数:
@@ -182,6 +212,8 @@ class azooKeyMacInputController: IMKInputController {
         let clientAction = switch event.keyCode {
         case 36: // Enter
             self.inputState.event(event, userAction: .enter)
+        case 48: // Tab
+            self.inputState.event(event, userAction: .unknown)
         case 49: // Space
             self.inputState.event(event, userAction: .space)
         case 51: // Delete
@@ -246,7 +278,7 @@ class azooKeyMacInputController: IMKInputController {
         self.candidatesWindow.update()
         self.candidatesWindow.show()
         // MARK: this is required to move the window front of the spotlight panel
-        self.candidatesWindow.perform(Selector(("setWindowLevel:")), with: NSWindow.Level.screenSaver)
+        self.candidatesWindow.perform(Selector(("setWindowLevel:")), with: NSWindow.Level.screenSaver.rawValue)
         self.candidatesWindow.becomeFirstResponder()
     }
 
@@ -275,6 +307,12 @@ class azooKeyMacInputController: IMKInputController {
                 self.composingText.convertTarget
             }
             self.updateMarkedTextInComposingMode(text: text, client: client)
+        case .moveCursor(let value):
+            _ = self.composingText.moveCursorFromCursorPosition(count: value)
+            self.updateRawCandidate()
+        case .moveCursorToStart:
+            _ = self.composingText.moveCursorFromCursorPosition(count: -self.composingText.convertTargetCursorPosition)
+            self.updateRawCandidate()
         case .commitMarkedText:
             client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: .notFound)
             self.composingText.stopComposition()
@@ -292,7 +330,7 @@ class azooKeyMacInputController: IMKInputController {
                 self.composingText.stopComposition()
                 self.candidatesWindow.hide()
             } else {
-                self.inputState = .selecting
+                self.inputState = .selecting(rangeAdjusted: false)
                 client.setMarkedText(
                     NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
                     selectionRange: .notFound,
@@ -326,8 +364,9 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     @MainActor private func updateRawCandidate() {
+        let prefixComposingText = self.composingText.prefixToCursorPosition()
         let options = ConvertRequestOptions.withDefaultDictionary(requireJapanesePrediction: false, requireEnglishPrediction: false, keyboardLanguage: .ja_JP, learningType: .nothing, memoryDirectoryURL: URL(string: "none")!, sharedContainerURL: URL(string: "none")!, metadata: .init(appVersionString: "1.0"))
-        let result = self.kanaKanjiConverter.requestCandidates(composingText, options: options)
+        let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options)
         self.rawCandidates = result
     }
 
