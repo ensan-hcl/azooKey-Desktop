@@ -23,16 +23,15 @@ enum UserAction {
 }
 
 indirect enum ClientAction {
-    case ignore
+    case `consume`
+    case `fallthrough`
     case showCandidateWindow
     case hideCandidateWindow
     case appendToMarkedText(String)
     case commitMarkedText
     case submitSelectedCandidate
-    case insertText(String)
     case removeLastMarkedText
     case forwardToCandidateWindow(NSEvent)
-    case nextCandidate
     case sequence([ClientAction])
 }
 
@@ -42,8 +41,8 @@ enum InputState {
     case selecting
 
     mutating func event(_ event: NSEvent!, userAction: UserAction) -> ClientAction {
-        if event.modifierFlags.contains(.command) {
-            return .ignore
+        if event.modifierFlags.contains(.command) || event.modifierFlags.contains(.option) {
+            return .fallthrough
         }
         switch self {
         case .none:
@@ -52,7 +51,7 @@ enum InputState {
                 self = .composing
                 return .appendToMarkedText(string)
             case .unknown, .navigation, .space, .delete, .enter:
-                return .ignore
+                return .fallthrough
             }
         case .composing:
             switch userAction {
@@ -66,8 +65,16 @@ enum InputState {
             case .space:
                 self = .selecting
                 return .showCandidateWindow
-            case .unknown, .navigation:
-                return .ignore
+            case .navigation(let direction):
+                if direction == .down {
+                    self = .selecting
+                    return .showCandidateWindow
+                } else {
+                    // ナビゲーションはハンドルしてしまう
+                    return .consume
+                }
+            case .unknown:
+                return .fallthrough
             }
         case .selecting:
             switch userAction {
@@ -81,11 +88,33 @@ enum InputState {
                 self = .composing
                 return .removeLastMarkedText
             case .space:
-                return .nextCandidate
+                // Spaceは下矢印キーに、Shift + Spaceは上矢印キーにマップする
+                // 下矢印キー: \u{F701} / 125
+                // 上矢印キー: \u{F700} / 126
+                let (keyCode, characters) = if event.modifierFlags.contains(.shift) {
+                    (126 as UInt16, "\u{F700}")
+                } else {
+                    (125 as UInt16, "\u{F701}")
+                }
+                // 下矢印キーを押した場合と同等のイベントを作って送信する
+                return .forwardToCandidateWindow(
+                    .keyEvent(
+                        with: .keyDown,
+                        location: event.locationInWindow,
+                        modifierFlags: event.modifierFlags.subtracting(.shift),  // シフトは除去する
+                        timestamp: event.timestamp,
+                        windowNumber: event.windowNumber,
+                        context: nil,
+                        characters: characters,
+                        charactersIgnoringModifiers: characters,
+                        isARepeat: event.isARepeat,
+                        keyCode: keyCode
+                    ) ?? event
+                )
             case .navigation:
                 return .forwardToCandidateWindow(event)
             case .unknown:
-                return .ignore
+                return .fallthrough
             }
         }
     }
@@ -117,17 +146,23 @@ class azooKeyMacInputController: IMKInputController {
             self.inputState.event(event, userAction: .space)
         case 51: // Delete
             self.inputState.event(event, userAction: .delete)
+        case 53: // Escape
+            self.inputState.event(event, userAction: .unknown)
         case 102: // Lang1
             self.inputState.event(event, userAction: .unknown)
         case 104: // Lang2
             self.inputState.event(event, userAction: .unknown)
         case 123: // Left
+            // uF702
             self.inputState.event(event, userAction: .navigation(.left))
         case 124: // Right
+            // uF703
             self.inputState.event(event, userAction: .navigation(.right))
         case 125: // Down
+            // uF701
             self.inputState.event(event, userAction: .navigation(.down))
         case 126: // Up
+            // uF700
             self.inputState.event(event, userAction: .navigation(.up))
         default:
             if let text = event.characters {
@@ -148,9 +183,15 @@ class azooKeyMacInputController: IMKInputController {
                 } else if text == ")" {
                     self.inputState.event(event, userAction: .input("）"))
                 } else if text == "[" {
-                    self.inputState.event(event, userAction: .input("「 "))
+                    self.inputState.event(event, userAction: .input("「"))
                 } else if text == "]" {
                     self.inputState.event(event, userAction: .input("」"))
+                } else if text == "{" {
+                    self.inputState.event(event, userAction: .input("『"))
+                } else if text == "}" {
+                    self.inputState.event(event, userAction: .input("』"))
+                } else if text == "/" {
+                    self.inputState.event(event, userAction: .input("・"))
                 } else {
                     self.inputState.event(event, userAction: .input(text))
                 }
@@ -166,6 +207,7 @@ class azooKeyMacInputController: IMKInputController {
         self.candidatesWindow.show()
         // MARK: this is required to move the window front of the spotlight panel
         self.candidatesWindow.perform(Selector(("setWindowLevel:")), with: NSWindow.Level.screenSaver)
+        self.candidatesWindow.becomeFirstResponder()
     }
 
     @MainActor func handleClientAction(_ clientAction: ClientAction, client: IMKTextInput) -> Bool {
@@ -208,8 +250,6 @@ class azooKeyMacInputController: IMKInputController {
                 )
                 self.showCandidateWindow()
             }
-        case .insertText(let string):
-            client.insertText(string, replacementRange: .notFound)
         case .removeLastMarkedText:
             self.candidatesWindow.hide()
             self.composingText.deleteBackwardFromCursorPosition(count: 1)
@@ -221,9 +261,9 @@ class azooKeyMacInputController: IMKInputController {
             if self.composingText.isEmpty {
                 self.inputState = .none
             }
-        case .nextCandidate:
-            self.candidatesWindow.selectCandidate(withIdentifier: self.candidatesWindow.selectedCandidate() + 1)
-        case .ignore:
+        case .consume:
+            return true
+        case .fallthrough:
             return false
         case .forwardToCandidateWindow(let event):
             self.candidatesWindow.interpretKeyEvents([event])
@@ -245,7 +285,7 @@ class azooKeyMacInputController: IMKInputController {
         let options = ConvertRequestOptions.withDefaultDictionary(requireJapanesePrediction: false, requireEnglishPrediction: false, keyboardLanguage: .ja_JP, learningType: .nothing, memoryDirectoryURL: URL(string: "none")!, sharedContainerURL: URL(string: "none")!, metadata: .init(appVersionString: "1.0"))
         let result = self.kanaKanjiConverter.requestCandidates(composingText, options: options)
         self.rawCandidates = result.mainResults
-        return result.mainResults.map { $0.text }
+        return self.rawCandidates.map { $0.text }
     }
 
     @MainActor
@@ -257,8 +297,8 @@ class azooKeyMacInputController: IMKInputController {
         afterComposingText.prefixComplete(correspondingCount: candidate.correspondingCount)
         self.client()?.setMarkedText(
             NSAttributedString(string: candidateString + afterComposingText.convertTarget, attributes: [:]),
-            selectionRange: NSRange(location: self.selectionRange().location, length: candidateString.count),
-            replacementRange: NSRange(location: self.selectionRange().location, length: candidateString.count)
+            selectionRange: NSRange(location: candidateString.count, length: 0),
+            replacementRange: .notFound
         )
      }
 
