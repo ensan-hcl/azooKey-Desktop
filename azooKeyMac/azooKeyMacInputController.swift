@@ -150,8 +150,10 @@ class azooKeyMacInputController: IMKInputController {
     private var inputState: InputState = .none
     private var candidatesWindow: IMKCandidates = IMKCandidates()
     private var directMode = false
+    private var liveConversionEnabled = true
+    private var displayedTextInComposingMode: String? = nil
     @MainActor private var kanaKanjiConverter = KanaKanjiConverter()
-    @MainActor private var rawCandidates: [Candidate] = []
+    private var rawCandidates: ConversionResult? = nil
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleColumnScrollingCandidatePanel)
@@ -265,19 +267,22 @@ class azooKeyMacInputController: IMKInputController {
         case .appendToMarkedText(let string):
             self.candidatesWindow.hide()
             self.composingText.insertAtCursorPosition(string, inputStyle: .roman2kana)
-            client.setMarkedText(
-                NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
-                selectionRange: .notFound,
-                replacementRange: .notFound
-            )
+            self.updateRawCandidate()
+            // Live Conversion
+            let text = if let firstCandidate = self.rawCandidates?.mainResults.first, liveConversionEnabled {
+                firstCandidate.text
+            } else {
+                self.composingText.convertTarget
+            }
+            self.updateMarkedTextInComposingMode(text: text, client: client)
         case .commitMarkedText:
-            client.insertText(self.composingText.convertTarget, replacementRange: .notFound)
+            client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: .notFound)
             self.composingText.stopComposition()
             self.candidatesWindow.hide()
         case .submitSelectedCandidate:
             let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
             client.insertText(candidateString, replacementRange: .notFound)
-            guard let candidate = self.rawCandidates.first(where: {$0.text == candidateString}) else {
+            guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
                 self.composingText.stopComposition()
                 return true
             }
@@ -298,11 +303,7 @@ class azooKeyMacInputController: IMKInputController {
         case .removeLastMarkedText:
             self.candidatesWindow.hide()
             self.composingText.deleteBackwardFromCursorPosition(count: 1)
-            client.setMarkedText(
-                NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
-                selectionRange: .notFound,
-                replacementRange: .notFound
-            )
+            self.updateMarkedTextInComposingMode(text: self.composingText.convertTarget, client: client)
             if self.composingText.isEmpty {
                 self.inputState = .none
             }
@@ -324,18 +325,33 @@ class azooKeyMacInputController: IMKInputController {
         return true
     }
 
+    @MainActor private func updateRawCandidate() {
+        let options = ConvertRequestOptions.withDefaultDictionary(requireJapanesePrediction: false, requireEnglishPrediction: false, keyboardLanguage: .ja_JP, learningType: .nothing, memoryDirectoryURL: URL(string: "none")!, sharedContainerURL: URL(string: "none")!, metadata: .init(appVersionString: "1.0"))
+        let result = self.kanaKanjiConverter.requestCandidates(composingText, options: options)
+        self.rawCandidates = result
+    }
+
     /// function to provide candidates
     /// - returns: `[String]`
     @MainActor override func candidates(_ sender: Any!) -> [Any]! {
-        let options = ConvertRequestOptions.withDefaultDictionary(requireJapanesePrediction: false, requireEnglishPrediction: false, keyboardLanguage: .ja_JP, learningType: .nothing, memoryDirectoryURL: URL(string: "none")!, sharedContainerURL: URL(string: "none")!, metadata: .init(appVersionString: "1.0"))
-        let result = self.kanaKanjiConverter.requestCandidates(composingText, options: options)
-        self.rawCandidates = result.mainResults
-        return self.rawCandidates.map { $0.text }
+        self.updateRawCandidate()
+        return self.rawCandidates?.mainResults.map { $0.text } ?? []
     }
 
+    /// selecting modeの場合はこの関数は使わない
+    func updateMarkedTextInComposingMode(text: String, client: IMKTextInput) {
+        self.displayedTextInComposingMode = text
+        client.setMarkedText(
+            NSAttributedString(string: text, attributes: [:]),
+            selectionRange: .notFound,
+            replacementRange: .notFound
+        )
+    }
+
+    /// selecting modeでのみ利用する
     @MainActor
     func updateMarkedTextWithCandidate(_ candidateString: String) {
-        guard let candidate = self.rawCandidates.first(where: {$0.text == candidateString}) else {
+        guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
             return
         }
         var afterComposingText = self.composingText
