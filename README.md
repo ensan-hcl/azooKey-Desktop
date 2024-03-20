@@ -27,6 +27,8 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 * iOSのキーボードアプリazooKeyと同レベルの日本語入力のサポート
 * 英字入力のサポート
 * 部分変換のサポート
+  * 変換範囲のエディットも可能
+
 * ライブ変換のサポート
 
 ## 開発ガイド
@@ -35,7 +37,6 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 
 ### TODO
 
-* 変換範囲のエディットを可能にする
 * 変換候補ウィンドウが再前面に表示されないことがある問題を修正する
   * 入力中に自動で変換候補ウィンドウを表示する
   * 予測変換を表示する
