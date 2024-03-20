@@ -28,7 +28,6 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 
 ### TODO
 
-* 入力モードの整備（英数キーと仮名キーでモード切り替え可能にする）
 * 変換範囲のエディットを可能にする
 * 変換候補ウィンドウが再前面に表示されないことがある問題を修正する
 * インストーラのCIを実装する
