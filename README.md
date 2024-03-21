@@ -28,8 +28,8 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 * 英字入力のサポート
 * 部分変換のサポート
   * 変換範囲のエディットも可能
-
 * ライブ変換のサポート
+  * 設定メニューでのライブ変換の切り替え
 
 ## 開発ガイド
 
@@ -45,9 +45,6 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
   * CIで自動リリースする
 
 * 学習機能を有効化する
-* 設定メニューを作る
-  * ライブ変換のオンオフを設定できるようにする
-
 
 ### Future Direction
 
