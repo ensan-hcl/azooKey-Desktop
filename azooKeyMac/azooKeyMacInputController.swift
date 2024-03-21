@@ -180,13 +180,26 @@ class azooKeyMacInputController: IMKInputController {
     private var inputState: InputState = .none
     private var candidatesWindow: IMKCandidates = IMKCandidates()
     private var directMode = false
-    private var liveConversionEnabled = true
+    private var liveConversionEnabled: Bool {
+        if let value = UserDefaults.standard.value(forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion") {
+            value as? Bool ?? true
+        } else {
+            true
+        }
+    }
     private var displayedTextInComposingMode: String? = nil
     @MainActor private var kanaKanjiConverter = KanaKanjiConverter()
     private var rawCandidates: ConversionResult? = nil
+    private let appMenu: NSMenu
+    private let liveConversionToggleMenuItem: NSMenuItem
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleColumnScrollingCandidatePanel)
+        // menu
+        self.appMenu = NSMenu(title: "azooKey")
+        self.liveConversionToggleMenuItem = NSMenuItem(title: "ライブ変換をOFF", action: #selector(self.toggleLiveConversion(_:)), keyEquivalent: "")
+        self.appMenu.addItem(self.liveConversionToggleMenuItem)
+        self.appMenu.addItem(NSMenuItem(title: "View on GitHub", action: #selector(self.openGitHubRepository(_:)), keyEquivalent: ""))
         super.init(server: server, delegate: delegate, client: inputClient)
     }
 
@@ -197,7 +210,30 @@ class azooKeyMacInputController: IMKInputController {
         self.directMode = value == "com.apple.inputmethod.Roman"
     }
 
+    override func menu() -> NSMenu! {
+        self.appMenu
+    }
+
+    @objc private func toggleLiveConversion(_ sender: Any) {
+        UserDefaults.standard.set(!self.liveConversionEnabled, forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion")
+        self.liveConversionToggleMenuItem.title = if self.liveConversionEnabled {
+             "ライブ変換をOFF"
+        } else {
+            "ライブ変換をON"
+        }
+    }
+
+    @objc private func openGitHubRepository(_ sender: Any) {
+        guard let url = URL(string: "https://github.com/ensan-hcl/azooKey-Desktop") else {
+            return
+        }
+        NSWorkspace.shared.open(url)
+    }
+
     @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
+        if event.type != .keyDown && event.type != .flagsChanged {
+            return false
+        }
         // 入力モードの切り替え以外は無視
         if self.directMode {
             if event.keyCode != 104 && event.keyCode != 102 {
@@ -301,7 +337,7 @@ class azooKeyMacInputController: IMKInputController {
             self.composingText.insertAtCursorPosition(string, inputStyle: .roman2kana)
             self.updateRawCandidate()
             // Live Conversion
-            let text = if let firstCandidate = self.rawCandidates?.mainResults.first, liveConversionEnabled {
+            let text = if self.liveConversionEnabled, let firstCandidate = self.rawCandidates?.mainResults.first {
                 firstCandidate.text
             } else {
                 self.composingText.convertTarget
@@ -317,6 +353,7 @@ class azooKeyMacInputController: IMKInputController {
             client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: .notFound)
             self.composingText.stopComposition()
             self.candidatesWindow.hide()
+            self.displayedTextInComposingMode = nil
         case .submitSelectedCandidate:
             let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
             client.insertText(candidateString, replacementRange: .notFound)
