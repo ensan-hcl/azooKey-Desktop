@@ -176,7 +176,7 @@ enum InputState {
 @objc(azooKeyMacInputController)
 class azooKeyMacInputController: IMKInputController {
     private var composingText: ComposingText = ComposingText()
-    private var selectedCandidate: String? = nil
+    private var selectedCandidate: String?
     private var inputState: InputState = .none
     private var candidatesWindow: IMKCandidates = IMKCandidates()
     private var directMode = false
@@ -187,9 +187,9 @@ class azooKeyMacInputController: IMKInputController {
             true
         }
     }
-    private var displayedTextInComposingMode: String? = nil
+    private var displayedTextInComposingMode: String?
     @MainActor private var kanaKanjiConverter = KanaKanjiConverter()
-    private var rawCandidates: ConversionResult? = nil
+    private var rawCandidates: ConversionResult?
     private let appMenu: NSMenu
     private let liveConversionToggleMenuItem: NSMenuItem
 
@@ -217,7 +217,7 @@ class azooKeyMacInputController: IMKInputController {
     @objc private func toggleLiveConversion(_ sender: Any) {
         UserDefaults.standard.set(!self.liveConversionEnabled, forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion")
         self.liveConversionToggleMenuItem.title = if self.liveConversionEnabled {
-             "ライブ変換をOFF"
+            "ライブ変換をOFF"
         } else {
             "ライブ変換をON"
         }
@@ -231,14 +231,13 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
-        if event.type != .keyDown && event.type != .flagsChanged {
-            return false
-        }
         // 入力モードの切り替え以外は無視
         if self.directMode {
             if event.keyCode != 104 && event.keyCode != 102 {
                 return false
             }
+        } else if event.type != .keyDown && event.type != .flagsChanged {
+            return false
         }
         // get client to insert
         guard let client = sender as? IMKTextInput else {
@@ -327,7 +326,7 @@ class azooKeyMacInputController: IMKInputController {
             self.candidatesWindow.hide()
         case .selectInputMode(let mode):
             switch mode {
-            case .roman: 
+            case .roman:
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Roman")
             case .japanese:
                  client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
