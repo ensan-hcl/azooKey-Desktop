@@ -8,19 +8,25 @@ iOSのキーボードアプリ「[azooKey](https://github.com/ensan-hcl/azooKey)
 
 macOS 14.3で動作確認しています。古いOSでの動作は検証していません。
 
-## インストール
+## リリース版インストール
 
-現在アルファ版のため、インストーラ等はありません。
+[Releases](https://github.com/ensan-hcl/azooKey-Desktop/releases)から`.pkg`ファイルをダウンロードして、インストールしてください。
 
-以下のコマンドでビルドしてください。
+その後、以下の手順で利用できます。
+
+- macOSからログアウトし、再ログイン
+- 「設定」>「キーボード」>「入力ソース」を編集>「+」ボタン>「日本語」>azooKeyを追加>完了
+- メニューバーアイコンからazooKeyを選択
+
+## 開発版のビルド・デバッグ
+
+以下の最新のコードをビルドし、`.pkg`によるインストールと同等になります。その後、上記の手順を行ってください。
 
 ```bash
-git clone https://github.com/ensan-hcl/azooKey-Desktop
-cd azooKey-Desktop
-xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Release
+./install.sh
 ```
 
-出来上がった`.app`を`/Library/Input\ Methods`に配置して、macOSからログアウトし、再ログインしてください。
+開発中はazooKeyのプロセスをkillすることで最新版を反映することが出来ます。また、必要に応じて入力ソースからazooKeyを削除して再度追加する、macOSからログアウトして再ログインするなど、リセットが必要になる場合があります。
 
 ## 機能
 
@@ -31,6 +37,7 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 * ライブ変換のサポート
   * 設定メニューでのライブ変換の切り替え
 * 学習機能
+* インストーラのサポート
 
 ## 開発ガイド
 
@@ -44,10 +51,11 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 * 変換候補ウィンドウが再前面に表示されないことがある問題を修正する
   * 入力中に自動で変換候補ウィンドウを表示する
   * 予測変換を表示する
-* インストーラを実装する
-  * CIで自動リリースする
-* 学習機能の拡充
-  * デバッグ用に一時無効化などを追加
+* CIを増やす
+  * アルファ版を自動リリースする
+* 機能の拡充
+  * 英語変換のトグルサポート
+  * デバッグ用に学習の一時無効化などを追加
 
 
 ### Future Direction
