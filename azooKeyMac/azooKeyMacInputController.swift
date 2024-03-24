@@ -209,7 +209,7 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
-        self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleColumnScrollingCandidatePanel)
+        self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleColumnScrollingCandidatePanel, styleType: kIMKMain)
         // menu
         self.appMenu = NSMenu(title: "azooKey")
         self.liveConversionToggleMenuItem = NSMenuItem(title: "ライブ変換をOFF", action: #selector(self.toggleLiveConversion(_:)), keyEquivalent: "")
@@ -250,7 +250,17 @@ class azooKeyMacInputController: IMKInputController {
         NSWorkspace.shared.open(url)
     }
 
+    private func isPrintable(_ text: String) -> Bool {
+        let printable: CharacterSet = [.alphanumerics, .symbols, .punctuationCharacters]
+            .reduce(into: CharacterSet()) {
+                $0.formUnion($1)
+            }
+        return CharacterSet(text.unicodeScalars).isSubset(of: printable)
+    }
+
     @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
+        // Check `event` safety
+        guard let event else { return false }
         // 入力モードの切り替え以外は無視
         if self.directMode {
             if event.keyCode != 104 && event.keyCode != 102 {
@@ -292,7 +302,7 @@ class azooKeyMacInputController: IMKInputController {
             // uF700
             self.inputState.event(event, userAction: .navigation(.up))
         default:
-            if let text = event.characters {
+            if let text = event.characters, self.isPrintable(text) {
                 if text == "." {
                     self.inputState.event(event, userAction: .input("。"))
                 } else if text == "," {
@@ -323,7 +333,7 @@ class azooKeyMacInputController: IMKInputController {
                     self.inputState.event(event, userAction: .input(text))
                 }
             } else {
-                self.inputState.event(event, userAction: .input(event.keyCode.description))
+                self.inputState.event(event, userAction: .unknown)
             }
         }
         return self.handleClientAction(clientAction, client: client)
@@ -371,7 +381,7 @@ class azooKeyMacInputController: IMKInputController {
             self.updateRawCandidate()
         case .commitMarkedText:
             let candidateString = self.displayedTextInComposingMode ?? self.composingText.convertTarget
-            client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: .notFound)
+            client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: NSRange(location: NSNotFound, length: 0))
             if let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) {
                 self.update(with: candidate)
             }
@@ -381,7 +391,7 @@ class azooKeyMacInputController: IMKInputController {
             self.displayedTextInComposingMode = nil
         case .submitSelectedCandidate:
             let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
-            client.insertText(candidateString, replacementRange: .notFound)
+            client.insertText(candidateString, replacementRange: NSRange(location: NSNotFound, length: 0))
             guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
                 self.kanaKanjiConverter.stopComposition()
                 self.composingText.stopComposition()
@@ -404,7 +414,7 @@ class azooKeyMacInputController: IMKInputController {
                 client.setMarkedText(
                     NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
                     selectionRange: .notFound,
-                    replacementRange: .notFound
+                    replacementRange: NSRange(location: NSNotFound, length: 0)
                 )
                 self.showCandidateWindow()
             }
@@ -453,7 +463,7 @@ class azooKeyMacInputController: IMKInputController {
         client.setMarkedText(
             NSAttributedString(string: text, attributes: [:]),
             selectionRange: .notFound,
-            replacementRange: .notFound
+            replacementRange: NSRange(location: NSNotFound, length: 0)
         )
     }
 
@@ -465,10 +475,22 @@ class azooKeyMacInputController: IMKInputController {
         }
         var afterComposingText = self.composingText
         afterComposingText.prefixComplete(correspondingCount: candidate.correspondingCount)
+        // これを使うことで文節単位変換の際に変換対象の文節の色が変わる
+        let highlight = self.mark(
+            forStyle: kTSMHiliteSelectedConvertedText,
+            at: NSMakeRange(NSNotFound, 0)
+        ) as? [NSAttributedString.Key: Any]
+        let underline = self.mark(
+            forStyle: kTSMHiliteConvertedText,
+            at: NSMakeRange(NSNotFound, 0)
+        ) as? [NSAttributedString.Key: Any]
+        let text = NSMutableAttributedString(string: "")
+        text.append(NSAttributedString(string: candidateString, attributes: highlight))
+        text.append(NSAttributedString(string: afterComposingText.convertTarget, attributes: underline))
         self.client()?.setMarkedText(
-            NSAttributedString(string: candidateString + afterComposingText.convertTarget, attributes: [:]),
+            text,
             selectionRange: NSRange(location: candidateString.count, length: 0),
-            replacementRange: .notFound
+            replacementRange: NSRange(location: NSNotFound, length: 0)
         )
      }
 
