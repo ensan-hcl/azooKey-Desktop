@@ -190,17 +190,25 @@ class azooKeyMacInputController: IMKInputController {
             true
         }
     }
+    private var englishConversionEnabled: Bool {
+        if let value = UserDefaults.standard.value(forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion") {
+            value as? Bool ?? false
+        } else {
+            false
+        }
+    }
     private var displayedTextInComposingMode: String?
     @MainActor private var kanaKanjiConverter = KanaKanjiConverter()
     private var rawCandidates: ConversionResult?
     private let appMenu: NSMenu
     private let liveConversionToggleMenuItem: NSMenuItem
+    private let englishConversionToggleMenuItem: NSMenuItem
     private var options: ConvertRequestOptions {
         .withDefaultDictionary(
             requireJapanesePrediction: false,
             requireEnglishPrediction: false,
             keyboardLanguage: .ja_JP,
-            englishCandidateInRoman2KanaInput: true,
+            englishCandidateInRoman2KanaInput: self.englishConversionEnabled,
             learningType: .inputAndOutput,
             memoryDirectoryURL: self.azooKeyMemoryDir,
             sharedContainerURL: self.azooKeyMemoryDir,
@@ -213,7 +221,9 @@ class azooKeyMacInputController: IMKInputController {
         // menu
         self.appMenu = NSMenu(title: "azooKey")
         self.liveConversionToggleMenuItem = NSMenuItem(title: "ライブ変換をOFF", action: #selector(self.toggleLiveConversion(_:)), keyEquivalent: "")
+        self.englishConversionToggleMenuItem = NSMenuItem(title: "英単語変換をON", action: #selector(self.toggleEnglishConversion(_:)), keyEquivalent: "")
         self.appMenu.addItem(self.liveConversionToggleMenuItem)
+        self.appMenu.addItem(self.englishConversionToggleMenuItem)
         self.appMenu.addItem(NSMenuItem(title: "View on GitHub", action: #selector(self.openGitHubRepository(_:)), keyEquivalent: ""))
         super.init(server: server, delegate: delegate, client: inputClient)
     }
@@ -231,6 +241,7 @@ class azooKeyMacInputController: IMKInputController {
         // アプリケーションサポートのディレクトリを準備しておく
         self.prepareApplicationSupportDirectory()
         self.updateLiveConversionToggleMenuItem()
+        self.updateEnglishConversionToggleMenuItem()
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
         if let client = sender as? IMKTextInput {
             client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
@@ -279,6 +290,20 @@ class azooKeyMacInputController: IMKInputController {
             "ライブ変換をOFF"
         } else {
             "ライブ変換をON"
+        }
+    }
+
+    @objc private func toggleEnglishConversion(_ sender: Any) {
+        applicationLogger.info("\(#line): toggleEnglishConversion")
+        UserDefaults.standard.set(!self.englishConversionEnabled, forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion")
+        self.updateEnglishConversionToggleMenuItem()
+    }
+
+    private func updateEnglishConversionToggleMenuItem() {
+        self.englishConversionToggleMenuItem.title = if self.englishConversionEnabled {
+            "英単語変換をOFF"
+        } else {
+            "英単語変換をON"
         }
     }
 
