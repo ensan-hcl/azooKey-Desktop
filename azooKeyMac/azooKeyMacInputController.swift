@@ -218,13 +218,40 @@ class azooKeyMacInputController: IMKInputController {
         super.init(server: server, delegate: delegate, client: inputClient)
     }
 
+    @MainActor
     override func activateServer(_ sender: Any!) {
-        guard let client = sender as? IMKTextInput else {
-            return
+        // MARK: this is required to move the window front of the spotlight panel
+        self.candidatesWindow.perform(
+            Selector(("setWindowLevel:")),
+            with: Int(max(
+                CGShieldingWindowLevel(),
+                kCGPopUpMenuWindowLevel
+            ))
+        )
+        // アプリケーションサポートのディレクトリを準備しておく
+        self.prepareApplicationSupportDirectory()
+        self.updateLiveConversionToggleMenuItem()
+        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
+        if let client = sender as? IMKTextInput {
+            client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
         }
-        client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
     }
 
+
+    @MainActor
+    override func deactivateServer(_ sender: Any!) {
+        self.kanaKanjiConverter.stopComposition()
+        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
+        self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+        self.candidatesWindow.hide()
+        self.rawCandidates = nil
+        self.displayedTextInComposingMode = nil
+        self.composingText.stopComposition()
+        if let client = sender as? IMKTextInput {
+            client.insertText("", replacementRange: .notFound)
+        }
+        super.deactivateServer(sender)
+    }
 
     @MainActor override func setValue(_ value: Any!, forTag tag: Int, client sender: Any!) {
         guard let value = value as? NSString else {
@@ -233,7 +260,6 @@ class azooKeyMacInputController: IMKInputController {
         self.client()?.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
         self.directMode = value == "com.apple.inputmethod.Roman"
         if self.directMode {
-            self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
             self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
         }
     }
@@ -245,6 +271,10 @@ class azooKeyMacInputController: IMKInputController {
     @objc private func toggleLiveConversion(_ sender: Any) {
         applicationLogger.info("\(#line): toggleLiveConversion")
         UserDefaults.standard.set(!self.liveConversionEnabled, forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion")
+        self.updateLiveConversionToggleMenuItem()
+    }
+
+    private func updateLiveConversionToggleMenuItem() {
         self.liveConversionToggleMenuItem.title = if self.liveConversionEnabled {
             "ライブ変換をOFF"
         } else {
@@ -351,9 +381,6 @@ class azooKeyMacInputController: IMKInputController {
     func showCandidateWindow() {
         self.candidatesWindow.update()
         self.candidatesWindow.show()
-        // MARK: this is required to move the window front of the spotlight panel
-        self.candidatesWindow.perform(Selector(("setWindowLevel:")), with: NSWindow.Level.popUpMenu.rawValue)
-        self.candidatesWindow.becomeFirstResponder()
     }
 
     @MainActor func handleClientAction(_ clientAction: ClientAction, client: IMKTextInput) -> Bool {
@@ -454,7 +481,6 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     @MainActor private func updateRawCandidate() {
-        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
         let prefixComposingText = self.composingText.prefixToCursorPosition()
         let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options)
         self.rawCandidates = result
@@ -515,11 +541,6 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     @MainActor private func update(with candidate: Candidate) {
-        // アップデートする
-        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
-        // アプリケーションサポートのディレクトリを準備しておく
-        self.prepareApplicationSupportDirectory()
-
         self.kanaKanjiConverter.setCompletedData(candidate)
         self.kanaKanjiConverter.updateLearningData(candidate)
     }
