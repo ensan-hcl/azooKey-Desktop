@@ -218,10 +218,19 @@ class azooKeyMacInputController: IMKInputController {
         super.init(server: server, delegate: delegate, client: inputClient)
     }
 
+    override func activateServer(_ sender: Any!) {
+        guard let client = sender as? IMKTextInput else {
+            return
+        }
+        client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
+    }
+
+
     @MainActor override func setValue(_ value: Any!, forTag tag: Int, client sender: Any!) {
         guard let value = value as? NSString else {
             return
         }
+        self.client()?.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
         self.directMode = value == "com.apple.inputmethod.Roman"
         if self.directMode {
             self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
@@ -261,16 +270,16 @@ class azooKeyMacInputController: IMKInputController {
     @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         // Check `event` safety
         guard let event else { return false }
-        // 入力モードの切り替え以外は無視
-        if self.directMode {
-            if event.keyCode != 104 && event.keyCode != 102 {
-                return false
-            }
-        } else if event.type != .keyDown && event.type != .flagsChanged {
-            return false
-        }
         // get client to insert
         guard let client = sender as? IMKTextInput else {
+            return false
+        }
+        // keyDown以外は無視
+        if event.type != .keyDown {
+            return false
+        }
+        // 入力モードの切り替え以外は無視
+        if self.directMode, event.keyCode != 104 && event.keyCode != 102 {
             return false
         }
         // https://developer.mozilla.org/ja/docs/Web/API/UI_Events/Keyboard_event_code_values#mac_%E3%81%A7%E3%81%AE%E3%82%B3%E3%83%BC%E3%83%89%E5%80%A4
@@ -355,6 +364,7 @@ class azooKeyMacInputController: IMKInputController {
         case .hideCandidateWindow:
             self.candidatesWindow.hide()
         case .selectInputMode(let mode):
+            client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
             switch mode {
             case .roman:
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Roman")
