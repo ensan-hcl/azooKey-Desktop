@@ -1,1 +1,3 @@
-dmgbuild -s dmgbuildsettings.py -D app="/Users/miwa/Library/Developer/Xcode/DerivedData/azooKeyMac-fwhyofwizfzqocehzwmrgbwfzbce/Build/Products/Release/azooKeyMac.app" "azooKey" azooKey.dmg
+set -e
+xcodebuild -workspace azooKeyMac.xcodeproj/project.xcworkspace -scheme azooKeyMac clean archive -archivePath build/archive.xcarchive | xcpretty
+dmgbuild -s dmgbuildsettings.py -D app="build/archive.xcarchive/Products/Applications/azooKeyMac.app" "azooKey" azooKey.dmg
