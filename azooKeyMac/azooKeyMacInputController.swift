@@ -218,11 +218,15 @@ class azooKeyMacInputController: IMKInputController {
         super.init(server: server, delegate: delegate, client: inputClient)
     }
 
-    override func setValue(_ value: Any!, forTag tag: Int, client sender: Any!) {
+    @MainActor override func setValue(_ value: Any!, forTag tag: Int, client sender: Any!) {
         guard let value = value as? NSString else {
             return
         }
         self.directMode = value == "com.apple.inputmethod.Roman"
+        if self.directMode {
+            self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
+            self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+        }
     }
 
     override func menu() -> NSMenu! {
@@ -366,7 +370,11 @@ class azooKeyMacInputController: IMKInputController {
             _ = self.composingText.moveCursorFromCursorPosition(count: -self.composingText.convertTargetCursorPosition)
             self.updateRawCandidate()
         case .commitMarkedText:
+            let candidateString = self.displayedTextInComposingMode ?? self.composingText.convertTarget
             client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: .notFound)
+            if let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) {
+                self.update(with: candidate)
+            }
             self.kanaKanjiConverter.stopComposition()
             self.composingText.stopComposition()
             self.candidatesWindow.hide()
@@ -381,12 +389,9 @@ class azooKeyMacInputController: IMKInputController {
                 return true
             }
             // アプリケーションサポートのディレクトリを準備しておく
-            self.prepareApplicationSupportDirectory()
-            self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
-
+            self.update(with: candidate)
             self.composingText.prefixComplete(correspondingCount: candidate.correspondingCount)
-            self.kanaKanjiConverter.setCompletedData(candidate)
-            self.kanaKanjiConverter.updateLearningData(candidate)
+
             self.selectedCandidate = nil
             if self.composingText.isEmpty {
                 self.rawCandidates = nil
@@ -429,6 +434,7 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     @MainActor private func updateRawCandidate() {
+        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
         let prefixComposingText = self.composingText.prefixToCursorPosition()
         let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options)
         self.rawCandidates = result
@@ -474,6 +480,16 @@ class azooKeyMacInputController: IMKInputController {
     @MainActor override func candidateSelectionChanged(_ candidateString: NSAttributedString!) {
         self.updateMarkedTextWithCandidate(candidateString.string)
         self.selectedCandidate = candidateString.string
+    }
+
+    @MainActor private func update(with candidate: Candidate) {
+        // アップデートする
+        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
+        // アプリケーションサポートのディレクトリを準備しておく
+        self.prepareApplicationSupportDirectory()
+
+        self.kanaKanjiConverter.setCompletedData(candidate)
+        self.kanaKanjiConverter.updateLearningData(candidate)
     }
 
     private var azooKeyMemoryDir: URL {
