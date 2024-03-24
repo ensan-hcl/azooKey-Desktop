@@ -36,12 +36,8 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 
 コントリビュート歓迎です！！
 
-### dmgファイルの作成
-`dmgbuild`によって配布用のdmgファイルを作成できます。`dmgbuild.sh`を参考にコマンドを入力してください。`dmgbuild`は次のコマンドでインストールできます。
-
-```bash
-pip install dmgbuild
-```
+### pkgファイルの作成
+`pkgbuild.sh`によって配布用のdmgファイルを作成できます。`build/azooKeyMac.app` としてDeveloper IDで署名済みの.appを配置してください。
 
 ### TODO
 

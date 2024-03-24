@@ -1,4 +1,5 @@
 *.dmg
+*.pkg
 .DS_Store
 *.swiftmodule
 *.app
