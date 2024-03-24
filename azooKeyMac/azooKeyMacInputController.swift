@@ -5,9 +5,12 @@
 //  Created by ensan on 2021/09/07.
 //
 
+import OSLog
 import Cocoa
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
+
+let applicationLogger: Logger = Logger(subsystem: "dev.ensan.inputmethod.azooKeyMac", category: "main")
 
 enum UserAction {
     case input(String)
@@ -192,6 +195,18 @@ class azooKeyMacInputController: IMKInputController {
     private var rawCandidates: ConversionResult?
     private let appMenu: NSMenu
     private let liveConversionToggleMenuItem: NSMenuItem
+    private var options: ConvertRequestOptions {
+        .withDefaultDictionary(
+            requireJapanesePrediction: false,
+            requireEnglishPrediction: false,
+            keyboardLanguage: .ja_JP,
+            englishCandidateInRoman2KanaInput: true,
+            learningType: .inputAndOutput,
+            memoryDirectoryURL: self.azooKeyMemoryDir,
+            sharedContainerURL: self.azooKeyMemoryDir,
+            metadata: .init(appVersionString: "1.0")
+        )
+    }
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleColumnScrollingCandidatePanel)
@@ -215,6 +230,7 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     @objc private func toggleLiveConversion(_ sender: Any) {
+        applicationLogger.info("\(#line): toggleLiveConversion")
         UserDefaults.standard.set(!self.liveConversionEnabled, forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion")
         self.liveConversionToggleMenuItem.title = if self.liveConversionEnabled {
             "ライブ変換をOFF"
@@ -328,8 +344,9 @@ class azooKeyMacInputController: IMKInputController {
             switch mode {
             case .roman:
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Roman")
-            case .japanese:
-                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
+                self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+            case .japanese: 
+                client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
             }
         case .appendToMarkedText(let string):
             self.candidatesWindow.hide()
@@ -350,6 +367,7 @@ class azooKeyMacInputController: IMKInputController {
             self.updateRawCandidate()
         case .commitMarkedText:
             client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: .notFound)
+            self.kanaKanjiConverter.stopComposition()
             self.composingText.stopComposition()
             self.candidatesWindow.hide()
             self.displayedTextInComposingMode = nil
@@ -357,16 +375,27 @@ class azooKeyMacInputController: IMKInputController {
             let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
             client.insertText(candidateString, replacementRange: .notFound)
             guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
+                self.kanaKanjiConverter.stopComposition()
                 self.composingText.stopComposition()
+                self.rawCandidates = nil
                 return true
             }
+            // アプリケーションサポートのディレクトリを準備しておく
+            self.prepareApplicationSupportDirectory()
+            self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
+
             self.composingText.prefixComplete(correspondingCount: candidate.correspondingCount)
+            self.kanaKanjiConverter.setCompletedData(candidate)
+            self.kanaKanjiConverter.updateLearningData(candidate)
             self.selectedCandidate = nil
             if self.composingText.isEmpty {
+                self.rawCandidates = nil
+                self.kanaKanjiConverter.stopComposition()
                 self.composingText.stopComposition()
                 self.candidatesWindow.hide()
             } else {
                 self.inputState = .selecting(rangeAdjusted: false)
+                self.updateRawCandidate()
                 client.setMarkedText(
                     NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
                     selectionRange: .notFound,
@@ -401,7 +430,6 @@ class azooKeyMacInputController: IMKInputController {
 
     @MainActor private func updateRawCandidate() {
         let prefixComposingText = self.composingText.prefixToCursorPosition()
-        let options = ConvertRequestOptions.withDefaultDictionary(requireJapanesePrediction: false, requireEnglishPrediction: false, keyboardLanguage: .ja_JP, learningType: .nothing, memoryDirectoryURL: URL(string: "none")!, sharedContainerURL: URL(string: "none")!, metadata: .init(appVersionString: "1.0"))
         let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options)
         self.rawCandidates = result
     }
@@ -446,5 +474,27 @@ class azooKeyMacInputController: IMKInputController {
     @MainActor override func candidateSelectionChanged(_ candidateString: NSAttributedString!) {
         self.updateMarkedTextWithCandidate(candidateString.string)
         self.selectedCandidate = candidateString.string
+    }
+
+    private var azooKeyMemoryDir: URL {
+        if #available(macOS 13, *) {
+            URL.applicationSupportDirectory
+                .appending(path: "azooKey", directoryHint: .isDirectory)
+                .appending(path: "memory", directoryHint: .isDirectory)
+        } else {
+            FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+                .appendingPathComponent("azooKey", isDirectory: true)
+                .appendingPathComponent("memory", isDirectory: true)
+        }
+    }
+
+    private func prepareApplicationSupportDirectory() {
+        // create directory
+        do {
+            applicationLogger.info("\(#line, privacy: .public): Applicatiion Support Directory Path: \(self.azooKeyMemoryDir, privacy: .public)")
+            try FileManager.default.createDirectory(at: self.azooKeyMemoryDir, withIntermediateDirectories: true)
+        } catch {
+            applicationLogger.error("\(#line, privacy: .public): \(error.localizedDescription, privacy: .public)")
+        }
     }
 }
