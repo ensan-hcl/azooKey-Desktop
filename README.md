@@ -48,10 +48,8 @@ pip install dmgbuild
 * 変換候補ウィンドウが再前面に表示されないことがある問題を修正する
   * 入力中に自動で変換候補ウィンドウを表示する
   * 予測変換を表示する
-
 * インストーラを実装する
   * CIで自動リリースする
-
 * 学習機能の拡充
   * デバッグ用に一時無効化などを追加
 
@@ -59,6 +57,7 @@ pip install dmgbuild
 ### Future Direction
 
 * WindowsとLinuxもサポートする
+* iOS版のazooKeyと学習や設定を同期する
 
 ## Reference
 
