@@ -30,6 +30,7 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
   * 変換範囲のエディットも可能
 * ライブ変換のサポート
   * 設定メニューでのライブ変換の切り替え
+* 学習機能
 
 ## 開発ガイド
 
@@ -44,7 +45,9 @@ xcodebuild -project azooKeyMac.xcodeproj -scheme azooKeyMac -configuration Relea
 * インストーラを実装する
   * CIで自動リリースする
 
-* 学習機能を有効化する
+* 学習機能の拡充
+  * デバッグ用に一時無効化などを追加
+
 
 ### Future Direction
 
