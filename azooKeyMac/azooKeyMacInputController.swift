@@ -352,7 +352,7 @@ class azooKeyMacInputController: IMKInputController {
         self.candidatesWindow.update()
         self.candidatesWindow.show()
         // MARK: this is required to move the window front of the spotlight panel
-        self.candidatesWindow.perform(Selector(("setWindowLevel:")), with: NSWindow.Level.screenSaver.rawValue)
+        self.candidatesWindow.perform(Selector(("setWindowLevel:")), with: NSWindow.Level.popUpMenu.rawValue)
         self.candidatesWindow.becomeFirstResponder()
     }
 
