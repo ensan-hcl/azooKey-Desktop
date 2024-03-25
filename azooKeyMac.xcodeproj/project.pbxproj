@@ -17,6 +17,8 @@
 		1A41E64726E74937009B65D7 /* main.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E64626E74937009B65D7 /* main.tiff */; };
 		556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52F92BAAAF7D00EB343F /* en.tiff */; };
 		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
+		557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */; };
+		557D35E12BB1C22100877564 /* KeyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557D35E02BB1C22100877564 /* KeyMap.swift */; };
 		55A27D022BAAADDB00512DCD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 55A27D002BAAADDB00512DCD /* InfoPlist.strings */; };
 		55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 55A9C54A2BA847A1007F6F02 /* main@2x.tiff */; };
 		55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A9C54D2BA84951007F6F02 /* NSRange.swift */; };
@@ -57,6 +59,8 @@
 		1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = azooKeyMac.entitlements; sourceTree = "<group>"; };
 		556C52F92BAAAF7D00EB343F /* en.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = en.tiff; sourceTree = "<group>"; };
 		556C52FA2BAAAF7D00EB343F /* en@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "en@2x.tiff"; sourceTree = "<group>"; };
+		557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyMap+hankaku2zenkaku.swift"; sourceTree = "<group>"; };
+		557D35E02BB1C22100877564 /* KeyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMap.swift; sourceTree = "<group>"; };
 		55A27D012BAAADDB00512DCD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		55A9C54A2BA847A1007F6F02 /* main@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "main@2x.tiff"; sourceTree = "<group>"; };
 		55A9C54D2BA84951007F6F02 /* NSRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSRange.swift; sourceTree = "<group>"; };
@@ -117,6 +121,7 @@
 				1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */,
 				1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */,
 				1A41E64126E74627009B65D7 /* AppDelegate.swift */,
+				557D35DD2BB1C1EE00877564 /* KeyMap */,
 				55A9C54C2BA84945007F6F02 /* Extensions */,
 				1A41E61B26E745DD009B65D7 /* Assets.xcassets */,
 				1A41E64626E74937009B65D7 /* main.tiff */,
@@ -151,6 +156,15 @@
 				1A41E63426E745DD009B65D7 /* azooKeyMacUITestsLaunchTests.swift */,
 			);
 			path = azooKeyMacUITests;
+			sourceTree = "<group>";
+		};
+		557D35DD2BB1C1EE00877564 /* KeyMap */ = {
+			isa = PBXGroup;
+			children = (
+				557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */,
+				557D35E02BB1C22100877564 /* KeyMap.swift */,
+			);
+			path = KeyMap;
 			sourceTree = "<group>";
 		};
 		55A9C54C2BA84945007F6F02 /* Extensions */ = {
@@ -303,8 +317,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				557D35E12BB1C22100877564 /* KeyMap.swift in Sources */,
 				1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */,
 				55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */,
+				557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */,
 				1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

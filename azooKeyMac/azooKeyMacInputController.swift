@@ -7,6 +7,7 @@
 
 import OSLog
 import Cocoa
+import CoreGraphics
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
 
@@ -61,8 +62,13 @@ enum InputState {
     case selecting(rangeAdjusted: Bool)
 
     mutating func event(_ event: NSEvent!, userAction: UserAction) -> ClientAction {
-        if event.modifierFlags.contains(.command) || event.modifierFlags.contains(.option) {
+        if event.modifierFlags.contains(.command) {
             return .fallthrough
+        }
+        if event.modifierFlags.contains(.option) {
+            guard case .input = userAction else {
+                return .fallthrough
+            }
         }
         switch self {
         case .none:
@@ -230,6 +236,7 @@ class azooKeyMacInputController: IMKInputController {
 
     @MainActor
     override func activateServer(_ sender: Any!) {
+        super.activateServer(sender)
         // MARK: this is required to move the window front of the spotlight panel
         self.candidatesWindow.perform(
             Selector(("setWindowLevel:")),
@@ -367,35 +374,7 @@ class azooKeyMacInputController: IMKInputController {
             self.inputState.event(event, userAction: .navigation(.up))
         default:
             if let text = event.characters, self.isPrintable(text) {
-                if text == "." {
-                    self.inputState.event(event, userAction: .input("。"))
-                } else if text == "," {
-                    self.inputState.event(event, userAction: .input("、"))
-                } else if text == "!" {
-                    self.inputState.event(event, userAction: .input("！"))
-                } else if text == "?" {
-                    self.inputState.event(event, userAction: .input("？"))
-                } else if text == "~" {
-                    self.inputState.event(event, userAction: .input("〜"))
-                } else if text == "-" {
-                    self.inputState.event(event, userAction: .input("ー"))
-                } else if text == "(" {
-                    self.inputState.event(event, userAction: .input("（"))
-                } else if text == ")" {
-                    self.inputState.event(event, userAction: .input("）"))
-                } else if text == "[" {
-                    self.inputState.event(event, userAction: .input("「"))
-                } else if text == "]" {
-                    self.inputState.event(event, userAction: .input("」"))
-                } else if text == "{" {
-                    self.inputState.event(event, userAction: .input("『"))
-                } else if text == "}" {
-                    self.inputState.event(event, userAction: .input("』"))
-                } else if text == "/" {
-                    self.inputState.event(event, userAction: .input("・"))
-                } else {
-                    self.inputState.event(event, userAction: .input(text))
-                }
+                self.inputState.event(event, userAction: .input(KeyMap.h2zMap(text)))
             } else {
                 self.inputState.event(event, userAction: .unknown)
             }
@@ -592,3 +571,4 @@ class azooKeyMacInputController: IMKInputController {
         }
     }
 }
+
