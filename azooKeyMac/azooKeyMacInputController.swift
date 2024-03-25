@@ -183,7 +183,6 @@ class azooKeyMacInputController: IMKInputController {
     private var composingText: ComposingText = ComposingText()
     private var selectedCandidate: String?
     private var inputState: InputState = .none
-    private var candidatesWindow: IMKCandidates = IMKCandidates()
     private var directMode = false
     private var liveConversionEnabled: Bool {
         if let value = UserDefaults.standard.value(forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion") {
@@ -200,7 +199,16 @@ class azooKeyMacInputController: IMKInputController {
         }
     }
     private var displayedTextInComposingMode: String?
-    @MainActor private var kanaKanjiConverter = KanaKanjiConverter()
+    private var candidatesWindow: IMKCandidates {
+        (
+            NSApplication.shared.delegate as? AppDelegate
+        )!.candidatesWindow
+    }
+    @MainActor private var kanaKanjiConverter: KanaKanjiConverter {
+        (
+            NSApplication.shared.delegate as? AppDelegate
+        )!.kanaKanjiConverter
+    }
     private var rawCandidates: ConversionResult?
     private let appMenu: NSMenu
     private let liveConversionToggleMenuItem: NSMenuItem
@@ -219,7 +227,6 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
-        self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleColumnScrollingCandidatePanel, styleType: kIMKMain)
         // menu
         self.appMenu = NSMenu(title: "azooKey")
         self.liveConversionToggleMenuItem = NSMenuItem(title: "ライブ変換をOFF", action: #selector(self.toggleLiveConversion(_:)), keyEquivalent: "")
@@ -268,14 +275,14 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     @MainActor override func setValue(_ value: Any!, forTag tag: Int, client sender: Any!) {
-        guard let value = value as? NSString else {
-            return
+        if let value = value as? NSString {
+            self.client()?.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
+            self.directMode = value == "com.apple.inputmethod.Roman"
+            if self.directMode {
+                self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+            }
         }
-        self.client()?.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
-        self.directMode = value == "com.apple.inputmethod.Roman"
-        if self.directMode {
-            self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
-        }
+        super.setValue(value, forTag: tag, client: sender)
     }
 
     override func menu() -> NSMenu! {

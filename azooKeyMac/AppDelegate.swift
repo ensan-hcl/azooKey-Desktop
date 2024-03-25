@@ -7,10 +7,11 @@
 
 import Cocoa
 import InputMethodKit
+import KanaKanjiConverterModuleWithDefaultDictionary
 
 // Necessary to launch this app
 class NSManualApplication: NSApplication {
-    private let appDelegate = AppDelegate()
+    let appDelegate = AppDelegate()
 
     override init() {
         super.init()
@@ -27,11 +28,12 @@ class NSManualApplication: NSApplication {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var server = IMKServer()
     var candidatesWindow = IMKCandidates()
+    @MainActor var kanaKanjiConverter = KanaKanjiConverter()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Insert code here to initialize your application
         self.server = IMKServer(name: Bundle.main.infoDictionary?["InputMethodConnectionName"] as? String, bundleIdentifier: Bundle.main.bundleIdentifier)
-        self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleRowSteppingCandidatePanel, styleType: kIMKMain)
+        self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleColumnScrollingCandidatePanel, styleType: kIMKMain)
         NSLog("tried connection")
     }
 
