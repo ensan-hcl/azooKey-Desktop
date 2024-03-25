@@ -7,7 +7,6 @@
 
 import OSLog
 import Cocoa
-import CoreGraphics
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
 
@@ -258,7 +257,6 @@ class azooKeyMacInputController: IMKInputController {
         }
     }
 
-
     @MainActor
     override func deactivateServer(_ sender: Any!) {
         self.kanaKanjiConverter.stopComposition()
@@ -403,7 +401,7 @@ class azooKeyMacInputController: IMKInputController {
             case .roman:
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Roman")
                 self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
-            case .japanese: 
+            case .japanese:
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
             }
         case .appendToMarkedText(let string):
@@ -521,11 +519,11 @@ class azooKeyMacInputController: IMKInputController {
         // これを使うことで文節単位変換の際に変換対象の文節の色が変わる
         let highlight = self.mark(
             forStyle: kTSMHiliteSelectedConvertedText,
-            at: NSMakeRange(NSNotFound, 0)
+            at: NSRange(location: NSNotFound, length: 0)
         ) as? [NSAttributedString.Key: Any]
         let underline = self.mark(
             forStyle: kTSMHiliteConvertedText,
-            at: NSMakeRange(NSNotFound, 0)
+            at: NSRange(location: NSNotFound, length: 0)
         ) as? [NSAttributedString.Key: Any]
         let text = NSMutableAttributedString(string: "")
         text.append(NSAttributedString(string: candidateString, attributes: highlight))
@@ -574,4 +572,3 @@ class azooKeyMacInputController: IMKInputController {
         }
     }
 }
-

@@ -40,7 +40,7 @@ extension KeyMap {
         "]": "」",
         ",": "、",
         ".": "。",
-        "/": "・",
+        "/": "・"
     ]
 
     static func h2zMap(_ text: String) -> String {
