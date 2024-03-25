@@ -38,10 +38,6 @@ indirect enum ClientAction {
     case moveCursorToStart
     case moveCursor(Int)
 
-    enum DefaultInitialPosition {
-        case end
-    }
-
     case commitMarkedText
     case submitSelectedCandidate
     case forwardToCandidateWindow(NSEvent)
