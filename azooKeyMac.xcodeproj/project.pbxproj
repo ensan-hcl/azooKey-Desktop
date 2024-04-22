@@ -24,6 +24,7 @@
 		55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A9C54D2BA84951007F6F02 /* NSRange.swift */; };
 		55E0A5BE2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BD2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary */; };
 		55E0A5C02BA8AE3200FACF50 /* SwiftUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BF2BA8AE3200FACF50 /* SwiftUtils */; };
+		55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,7 @@
 		55A27D012BAAADDB00512DCD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		55A9C54A2BA847A1007F6F02 /* main@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "main@2x.tiff"; sourceTree = "<group>"; };
 		55A9C54D2BA84951007F6F02 /* NSRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSRange.swift; sourceTree = "<group>"; };
+		55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigWindow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,6 +123,7 @@
 				1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */,
 				1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */,
 				1A41E64126E74627009B65D7 /* AppDelegate.swift */,
+				55EA62E02BD6BF890056B5BA /* Windows */,
 				557D35DD2BB1C1EE00877564 /* KeyMap */,
 				55A9C54C2BA84945007F6F02 /* Extensions */,
 				1A41E61B26E745DD009B65D7 /* Assets.xcassets */,
@@ -173,6 +176,14 @@
 				55A9C54D2BA84951007F6F02 /* NSRange.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		55EA62E02BD6BF890056B5BA /* Windows */ = {
+			isa = PBXGroup;
+			children = (
+				55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */,
+			);
+			path = Windows;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -318,6 +329,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				557D35E12BB1C22100877564 /* KeyMap.swift in Sources */,
+				55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */,
 				1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */,
 				55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */,
 				557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */,

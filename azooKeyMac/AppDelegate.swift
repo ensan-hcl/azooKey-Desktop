@@ -6,6 +6,7 @@
 //
 
 import Cocoa
+import SwiftUI
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
 
@@ -28,7 +29,35 @@ class NSManualApplication: NSApplication {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var server = IMKServer()
     var candidatesWindow = IMKCandidates()
+    weak var configWindow: NSWindow?
+    var configWindowController: NSWindowController?
     @MainActor var kanaKanjiConverter = KanaKanjiConverter()
+
+    func openConfigWindow() {
+        if let configWindow {
+            // Show the window
+            configWindow.level = .modalPanel
+            configWindow.makeKeyAndOrderFront(nil)
+        } else {
+            // Create a new window
+            let configWindow = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 400, height: 300),
+                styleMask: [.titled, .closable, .resizable, .borderless],
+                backing: .buffered,
+                defer: false
+            )
+            // Set the window title
+            configWindow.title = "設定"
+            configWindow.contentViewController = NSHostingController(rootView: ConfigWindow())
+            // Keep window with in a controller
+            self.configWindowController = NSWindowController(window: configWindow)
+            // Show the window
+            configWindow.level = .modalPanel
+            configWindow.makeKeyAndOrderFront(nil)
+            // Assign the new window to the property to keep it in memory
+            self.configWindow = configWindow
+        }
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Insert code here to initialize your application

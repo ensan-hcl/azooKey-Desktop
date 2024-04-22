@@ -232,6 +232,7 @@ class azooKeyMacInputController: IMKInputController {
         self.englishConversionToggleMenuItem = NSMenuItem(title: "英単語変換をON", action: #selector(self.toggleEnglishConversion(_:)), keyEquivalent: "")
         self.appMenu.addItem(self.liveConversionToggleMenuItem)
         self.appMenu.addItem(self.englishConversionToggleMenuItem)
+        self.appMenu.addItem(NSMenuItem(title: "詳細設定を開く", action: #selector(self.openConfigWindow(_:)), keyEquivalent: ""))
         self.appMenu.addItem(NSMenuItem(title: "View on GitHub", action: #selector(self.openGitHubRepository(_:)), keyEquivalent: ""))
         super.init(server: server, delegate: delegate, client: inputClient)
     }
@@ -320,6 +321,10 @@ class azooKeyMacInputController: IMKInputController {
             return
         }
         NSWorkspace.shared.open(url)
+    }
+
+    @objc private func openConfigWindow(_ sender: Any) {
+        (NSApplication.shared.delegate as? AppDelegate)!.openConfigWindow()
     }
 
     private func isPrintable(_ text: String) -> Bool {
