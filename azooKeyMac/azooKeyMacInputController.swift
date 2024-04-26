@@ -5,12 +5,13 @@
 //  Created by ensan on 2021/09/07.
 //
 
-import OSLog
 import Cocoa
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
+import OSLog
 
-let applicationLogger: Logger = Logger(subsystem: "dev.ensan.inputmethod.azooKeyMac", category: "main")
+let applicationLogger: Logger = Logger(
+    subsystem: "dev.ensan.inputmethod.azooKeyMac", category: "main")
 
 enum UserAction {
     case input(String)
@@ -127,11 +128,12 @@ enum InputState {
                 // Spaceは下矢印キーに、Shift + Spaceは上矢印キーにマップする
                 // 下矢印キー: \u{F701} / 125
                 // 上矢印キー: \u{F700} / 126
-                let (keyCode, characters) = if event.modifierFlags.contains(.shift) {
-                    (126 as UInt16, "\u{F700}")
-                } else {
-                    (125 as UInt16, "\u{F701}")
-                }
+                let (keyCode, characters) =
+                    if event.modifierFlags.contains(.shift) {
+                        (126 as UInt16, "\u{F700}")
+                    } else {
+                        (125 as UInt16, "\u{F701}")
+                    }
                 // 下矢印キーを押した場合と同等のイベントを作って送信する
                 return .forwardToCandidateWindow(
                     .keyEvent(
@@ -154,7 +156,9 @@ enum InputState {
                             return .sequence([.moveCursor(1), .showCandidateWindow])
                         } else {
                             self = .selecting(rangeAdjusted: true)
-                            return .sequence([.moveCursorToStart, .moveCursor(1), .showCandidateWindow])
+                            return .sequence([
+                                .moveCursorToStart, .moveCursor(1), .showCandidateWindow,
+                            ])
                         }
                     } else {
                         return .submitSelectedCandidate
@@ -184,14 +188,18 @@ class azooKeyMacInputController: IMKInputController {
     private var inputState: InputState = .none
     private var directMode = false
     private var liveConversionEnabled: Bool {
-        if let value = UserDefaults.standard.value(forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion") {
+        if let value = UserDefaults.standard.value(
+            forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion")
+        {
             value as? Bool ?? true
         } else {
             true
         }
     }
     private var englishConversionEnabled: Bool {
-        if let value = UserDefaults.standard.value(forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion") {
+        if let value = UserDefaults.standard.value(
+            forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion")
+        {
             value as? Bool ?? false
         } else {
             false
@@ -199,14 +207,10 @@ class azooKeyMacInputController: IMKInputController {
     }
     private var displayedTextInComposingMode: String?
     private var candidatesWindow: IMKCandidates {
-        (
-            NSApplication.shared.delegate as? AppDelegate
-        )!.candidatesWindow
+        (NSApplication.shared.delegate as? AppDelegate)!.candidatesWindow
     }
     @MainActor private var kanaKanjiConverter: KanaKanjiConverter {
-        (
-            NSApplication.shared.delegate as? AppDelegate
-        )!.kanaKanjiConverter
+        (NSApplication.shared.delegate as? AppDelegate)!.kanaKanjiConverter
     }
     private var rawCandidates: ConversionResult?
     private let appMenu: NSMenu
@@ -228,12 +232,20 @@ class azooKeyMacInputController: IMKInputController {
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         // menu
         self.appMenu = NSMenu(title: "azooKey")
-        self.liveConversionToggleMenuItem = NSMenuItem(title: "ライブ変換をOFF", action: #selector(self.toggleLiveConversion(_:)), keyEquivalent: "")
-        self.englishConversionToggleMenuItem = NSMenuItem(title: "英単語変換をON", action: #selector(self.toggleEnglishConversion(_:)), keyEquivalent: "")
+        self.liveConversionToggleMenuItem = NSMenuItem(
+            title: "ライブ変換をOFF", action: #selector(self.toggleLiveConversion(_:)), keyEquivalent: "")
+        self.englishConversionToggleMenuItem = NSMenuItem(
+            title: "英単語変換をON", action: #selector(self.toggleEnglishConversion(_:)),
+            keyEquivalent: "")
         self.appMenu.addItem(self.liveConversionToggleMenuItem)
         self.appMenu.addItem(self.englishConversionToggleMenuItem)
-        self.appMenu.addItem(NSMenuItem(title: "詳細設定を開く", action: #selector(self.openConfigWindow(_:)), keyEquivalent: ""))
-        self.appMenu.addItem(NSMenuItem(title: "View on GitHub", action: #selector(self.openGitHubRepository(_:)), keyEquivalent: ""))
+        self.appMenu.addItem(
+            NSMenuItem(
+                title: "詳細設定を開く", action: #selector(self.openConfigWindow(_:)), keyEquivalent: ""))
+        self.appMenu.addItem(
+            NSMenuItem(
+                title: "View on GitHub", action: #selector(self.openGitHubRepository(_:)),
+                keyEquivalent: ""))
         super.init(server: server, delegate: delegate, client: inputClient)
     }
 
@@ -243,10 +255,11 @@ class azooKeyMacInputController: IMKInputController {
         // MARK: this is required to move the window front of the spotlight panel
         self.candidatesWindow.perform(
             Selector(("setWindowLevel:")),
-            with: Int(max(
-                CGShieldingWindowLevel(),
-                kCGPopUpMenuWindowLevel
-            ))
+            with: Int(
+                max(
+                    CGShieldingWindowLevel(),
+                    kCGPopUpMenuWindowLevel
+                ))
         )
         // アプリケーションサポートのディレクトリを準備しておく
         self.prepareApplicationSupportDirectory()
@@ -290,30 +303,36 @@ class azooKeyMacInputController: IMKInputController {
 
     @objc private func toggleLiveConversion(_ sender: Any) {
         applicationLogger.info("\(#line): toggleLiveConversion")
-        UserDefaults.standard.set(!self.liveConversionEnabled, forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion")
+        UserDefaults.standard.set(
+            !self.liveConversionEnabled,
+            forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion")
         self.updateLiveConversionToggleMenuItem()
     }
 
     private func updateLiveConversionToggleMenuItem() {
-        self.liveConversionToggleMenuItem.title = if self.liveConversionEnabled {
-            "ライブ変換をOFF"
-        } else {
-            "ライブ変換をON"
-        }
+        self.liveConversionToggleMenuItem.title =
+            if self.liveConversionEnabled {
+                "ライブ変換をOFF"
+            } else {
+                "ライブ変換をON"
+            }
     }
 
     @objc private func toggleEnglishConversion(_ sender: Any) {
         applicationLogger.info("\(#line): toggleEnglishConversion")
-        UserDefaults.standard.set(!self.englishConversionEnabled, forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion")
+        UserDefaults.standard.set(
+            !self.englishConversionEnabled,
+            forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion")
         self.updateEnglishConversionToggleMenuItem()
     }
 
     private func updateEnglishConversionToggleMenuItem() {
-        self.englishConversionToggleMenuItem.title = if self.englishConversionEnabled {
-            "英単語変換をOFF"
-        } else {
-            "英単語変換をON"
-        }
+        self.englishConversionToggleMenuItem.title =
+            if self.englishConversionEnabled {
+                "英単語変換をOFF"
+            } else {
+                "英単語変換をON"
+            }
     }
 
     @objc private func openGitHubRepository(_ sender: Any) {
@@ -351,40 +370,41 @@ class azooKeyMacInputController: IMKInputController {
             return false
         }
         // https://developer.mozilla.org/ja/docs/Web/API/UI_Events/Keyboard_event_code_values#mac_%E3%81%A7%E3%81%AE%E3%82%B3%E3%83%BC%E3%83%89%E5%80%A4
-        let clientAction = switch event.keyCode {
-        case 36: // Enter
-            self.inputState.event(event, userAction: .enter)
-        case 48: // Tab
-            self.inputState.event(event, userAction: .unknown)
-        case 49: // Space
-            self.inputState.event(event, userAction: .space)
-        case 51: // Delete
-            self.inputState.event(event, userAction: .delete)
-        case 53: // Escape
-            self.inputState.event(event, userAction: .unknown)
-        case 102: // Lang2/kVK_JIS_Eisu
-            self.inputState.event(event, userAction: .英数)
-        case 104: // Lang1/kVK_JIS_Kana
-            self.inputState.event(event, userAction: .かな)
-        case 123: // Left
-            // uF702
-            self.inputState.event(event, userAction: .navigation(.left))
-        case 124: // Right
-            // uF703
-            self.inputState.event(event, userAction: .navigation(.right))
-        case 125: // Down
-            // uF701
-            self.inputState.event(event, userAction: .navigation(.down))
-        case 126: // Up
-            // uF700
-            self.inputState.event(event, userAction: .navigation(.up))
-        default:
-            if let text = event.characters, self.isPrintable(text) {
-                self.inputState.event(event, userAction: .input(KeyMap.h2zMap(text)))
-            } else {
+        let clientAction =
+            switch event.keyCode {
+            case 36:  // Enter
+                self.inputState.event(event, userAction: .enter)
+            case 48:  // Tab
                 self.inputState.event(event, userAction: .unknown)
+            case 49:  // Space
+                self.inputState.event(event, userAction: .space)
+            case 51:  // Delete
+                self.inputState.event(event, userAction: .delete)
+            case 53:  // Escape
+                self.inputState.event(event, userAction: .unknown)
+            case 102:  // Lang2/kVK_JIS_Eisu
+                self.inputState.event(event, userAction: .英数)
+            case 104:  // Lang1/kVK_JIS_Kana
+                self.inputState.event(event, userAction: .かな)
+            case 123:  // Left
+                // uF702
+                self.inputState.event(event, userAction: .navigation(.left))
+            case 124:  // Right
+                // uF703
+                self.inputState.event(event, userAction: .navigation(.right))
+            case 125:  // Down
+                // uF701
+                self.inputState.event(event, userAction: .navigation(.down))
+            case 126:  // Up
+                // uF700
+                self.inputState.event(event, userAction: .navigation(.up))
+            default:
+                if let text = event.characters, self.isPrintable(text) {
+                    self.inputState.event(event, userAction: .input(KeyMap.h2zMap(text)))
+                } else {
+                    self.inputState.event(event, userAction: .unknown)
+                }
             }
-        }
         return self.handleClientAction(clientAction, client: client)
     }
 
@@ -414,22 +434,31 @@ class azooKeyMacInputController: IMKInputController {
             self.composingText.insertAtCursorPosition(string, inputStyle: .roman2kana)
             self.updateRawCandidate()
             // Live Conversion
-            let text = if self.liveConversionEnabled, let firstCandidate = self.rawCandidates?.mainResults.first {
-                firstCandidate.text
-            } else {
-                self.composingText.convertTarget
-            }
+            let text =
+                if self.liveConversionEnabled,
+                    let firstCandidate = self.rawCandidates?.mainResults.first
+                {
+                    firstCandidate.text
+                } else {
+                    self.composingText.convertTarget
+                }
             self.updateMarkedTextInComposingMode(text: text, client: client)
         case .moveCursor(let value):
             _ = self.composingText.moveCursorFromCursorPosition(count: value)
             self.updateRawCandidate()
         case .moveCursorToStart:
-            _ = self.composingText.moveCursorFromCursorPosition(count: -self.composingText.convertTargetCursorPosition)
+            _ = self.composingText.moveCursorFromCursorPosition(
+                count: -self.composingText.convertTargetCursorPosition)
             self.updateRawCandidate()
         case .commitMarkedText:
-            let candidateString = self.displayedTextInComposingMode ?? self.composingText.convertTarget
-            client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: NSRange(location: NSNotFound, length: 0))
-            if let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) {
+            let candidateString =
+                self.displayedTextInComposingMode ?? self.composingText.convertTarget
+            client.insertText(
+                self.displayedTextInComposingMode ?? self.composingText.convertTarget,
+                replacementRange: NSRange(location: NSNotFound, length: 0))
+            if let candidate = self.rawCandidates?.mainResults.first(where: {
+                $0.text == candidateString
+            }) {
                 self.update(with: candidate)
             }
             self.kanaKanjiConverter.stopComposition()
@@ -438,8 +467,13 @@ class azooKeyMacInputController: IMKInputController {
             self.displayedTextInComposingMode = nil
         case .submitSelectedCandidate:
             let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
-            client.insertText(candidateString, replacementRange: NSRange(location: NSNotFound, length: 0))
-            guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
+            client.insertText(
+                candidateString, replacementRange: NSRange(location: NSNotFound, length: 0))
+            guard
+                let candidate = self.rawCandidates?.mainResults.first(where: {
+                    $0.text == candidateString
+                })
+            else {
                 self.kanaKanjiConverter.stopComposition()
                 self.composingText.stopComposition()
                 self.rawCandidates = nil
@@ -468,7 +502,8 @@ class azooKeyMacInputController: IMKInputController {
         case .removeLastMarkedText:
             self.candidatesWindow.hide()
             self.composingText.deleteBackwardFromCursorPosition(count: 1)
-            self.updateMarkedTextInComposingMode(text: self.composingText.convertTarget, client: client)
+            self.updateMarkedTextInComposingMode(
+                text: self.composingText.convertTarget, client: client)
             if self.composingText.isEmpty {
                 self.inputState = .none
             }
@@ -492,7 +527,8 @@ class azooKeyMacInputController: IMKInputController {
 
     @MainActor private func updateRawCandidate() {
         let prefixComposingText = self.composingText.prefixToCursorPosition()
-        let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options)
+        let result = self.kanaKanjiConverter.requestCandidates(
+            prefixComposingText, options: options)
         self.rawCandidates = result
     }
 
@@ -516,29 +552,36 @@ class azooKeyMacInputController: IMKInputController {
     /// selecting modeでのみ利用する
     @MainActor
     func updateMarkedTextWithCandidate(_ candidateString: String) {
-        guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
+        guard
+            let candidate = self.rawCandidates?.mainResults.first(where: {
+                $0.text == candidateString
+            })
+        else {
             return
         }
         var afterComposingText = self.composingText
         afterComposingText.prefixComplete(correspondingCount: candidate.correspondingCount)
         // これを使うことで文節単位変換の際に変換対象の文節の色が変わる
-        let highlight = self.mark(
-            forStyle: kTSMHiliteSelectedConvertedText,
-            at: NSRange(location: NSNotFound, length: 0)
-        ) as? [NSAttributedString.Key: Any]
-        let underline = self.mark(
-            forStyle: kTSMHiliteConvertedText,
-            at: NSRange(location: NSNotFound, length: 0)
-        ) as? [NSAttributedString.Key: Any]
+        let highlight =
+            self.mark(
+                forStyle: kTSMHiliteSelectedConvertedText,
+                at: NSRange(location: NSNotFound, length: 0)
+            ) as? [NSAttributedString.Key: Any]
+        let underline =
+            self.mark(
+                forStyle: kTSMHiliteConvertedText,
+                at: NSRange(location: NSNotFound, length: 0)
+            ) as? [NSAttributedString.Key: Any]
         let text = NSMutableAttributedString(string: "")
         text.append(NSAttributedString(string: candidateString, attributes: highlight))
-        text.append(NSAttributedString(string: afterComposingText.convertTarget, attributes: underline))
+        text.append(
+            NSAttributedString(string: afterComposingText.convertTarget, attributes: underline))
         self.client()?.setMarkedText(
             text,
             selectionRange: NSRange(location: candidateString.count, length: 0),
             replacementRange: NSRange(location: NSNotFound, length: 0)
         )
-     }
+    }
 
     @MainActor override func candidateSelected(_ candidateString: NSAttributedString!) {
         self.updateMarkedTextWithCandidate(candidateString.string)
@@ -570,10 +613,14 @@ class azooKeyMacInputController: IMKInputController {
     private func prepareApplicationSupportDirectory() {
         // create directory
         do {
-            applicationLogger.info("\(#line, privacy: .public): Applicatiion Support Directory Path: \(self.azooKeyMemoryDir, privacy: .public)")
-            try FileManager.default.createDirectory(at: self.azooKeyMemoryDir, withIntermediateDirectories: true)
+            applicationLogger.info(
+                "\(#line, privacy: .public): Applicatiion Support Directory Path: \(self.azooKeyMemoryDir, privacy: .public)"
+            )
+            try FileManager.default.createDirectory(
+                at: self.azooKeyMemoryDir, withIntermediateDirectories: true)
         } catch {
-            applicationLogger.error("\(#line, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            applicationLogger.error(
+                "\(#line, privacy: .public): \(error.localizedDescription, privacy: .public)")
         }
     }
 }
