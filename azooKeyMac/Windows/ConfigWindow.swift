@@ -8,19 +8,24 @@
 import SwiftUI
 
 struct ConfigWindow: View {
-    @State private var toggleBool = false
-    @State private var textFieldValue = ""
-    @State private var pickerValue = ""
+    @ConfigState private var liveConversion = Config.LiveConversion()
+    @ConfigState private var englishConversion = Config.EnglishConversion()
+    @ConfigState private var typeBackSlash = Config.TypeBackSlash()
+    @ConfigState private var openAiApiKey = Config.OpenAiApiKey()
+    @ConfigState private var learning = Config.Learning()
+
     var body: some View {
         VStack {
-            Text("Configs")
+            Text("設定")
                 .font(.title)
-            Toggle("特に意味のないトグル", isOn: $toggleBool)
-            TextField("何かを入力するフィールド", text: $textFieldValue)
-            Picker("謎のピッカー", selection: $pickerValue) {
-                Text("選択肢1").tag("選択肢1")
-                Text("選択肢2").tag("選択肢3")
-                Text("選択肢2").tag("選択肢3")
+            Toggle("ライブ変換を有効化", isOn: $liveConversion)
+            Toggle("英単語変換を有効化", isOn: $englishConversion)
+            Toggle("円記号の代わりにバックスラッシュを入力", isOn: $typeBackSlash)
+            TextField("OpenAI API Key", text: $openAiApiKey)
+            Picker("学習", selection: $learning) {
+                Text("学習する").tag(Config.Learning.Value.inputAndOutput)
+                Text("学習を停止").tag(Config.Learning.Value.onlyOutput)
+                Text("学習を無視").tag(Config.Learning.Value.nothing)
             }
         }
             .frame(width: 400, height: 300)
