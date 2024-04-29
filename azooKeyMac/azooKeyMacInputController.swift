@@ -425,7 +425,7 @@ class azooKeyMacInputController: IMKInputController {
             self.composingText.insertAtCursorPosition(string, inputStyle: .roman2kana)
             self.updateRawCandidate()
             // Live Conversion
-            let text = if self.liveConversionEnabled, let firstCandidate = self.rawCandidates?.mainResults.first {
+            let text = if self.liveConversionEnabled, self.composingText.convertTarget.count > 1, let firstCandidate = self.rawCandidates?.mainResults.first {
                 firstCandidate.text
             } else {
                 self.composingText.convertTarget
