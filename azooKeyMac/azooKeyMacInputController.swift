@@ -184,18 +184,10 @@ class azooKeyMacInputController: IMKInputController {
     private var inputState: InputState = .none
     private var directMode = false
     private var liveConversionEnabled: Bool {
-        if let value = UserDefaults.standard.value(forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion") {
-            value as? Bool ?? true
-        } else {
-            true
-        }
+        Config.LiveConversion().value
     }
     private var englishConversionEnabled: Bool {
-        if let value = UserDefaults.standard.value(forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion") {
-            value as? Bool ?? false
-        } else {
-            false
-        }
+        Config.EnglishConversion().value
     }
     private var displayedTextInComposingMode: String?
     private var candidatesWindow: IMKCandidates {
@@ -218,7 +210,7 @@ class azooKeyMacInputController: IMKInputController {
             requireEnglishPrediction: false,
             keyboardLanguage: .ja_JP,
             englishCandidateInRoman2KanaInput: self.englishConversionEnabled,
-            learningType: .inputAndOutput,
+            learningType: Config.Learning().value.learningType,
             memoryDirectoryURL: self.azooKeyMemoryDir,
             sharedContainerURL: self.azooKeyMemoryDir,
             metadata: .init(appVersionString: "1.0")
@@ -250,8 +242,8 @@ class azooKeyMacInputController: IMKInputController {
         )
         // アプリケーションサポートのディレクトリを準備しておく
         self.prepareApplicationSupportDirectory()
-        self.updateLiveConversionToggleMenuItem()
-        self.updateEnglishConversionToggleMenuItem()
+        self.updateLiveConversionToggleMenuItem(newValue: self.liveConversionEnabled)
+        self.updateEnglishConversionToggleMenuItem(newValue: self.englishConversionEnabled)
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
         if let client = sender as? IMKTextInput {
             client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
@@ -290,12 +282,13 @@ class azooKeyMacInputController: IMKInputController {
 
     @objc private func toggleLiveConversion(_ sender: Any) {
         applicationLogger.info("\(#line): toggleLiveConversion")
-        UserDefaults.standard.set(!self.liveConversionEnabled, forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion")
-        self.updateLiveConversionToggleMenuItem()
+        let config = Config.LiveConversion()
+        config.value = !self.liveConversionEnabled
+        self.updateLiveConversionToggleMenuItem(newValue: config.value)
     }
 
-    private func updateLiveConversionToggleMenuItem() {
-        self.liveConversionToggleMenuItem.title = if self.liveConversionEnabled {
+    private func updateLiveConversionToggleMenuItem(newValue: Bool) {
+        self.liveConversionToggleMenuItem.title = if newValue {
             "ライブ変換をOFF"
         } else {
             "ライブ変換をON"
@@ -304,12 +297,13 @@ class azooKeyMacInputController: IMKInputController {
 
     @objc private func toggleEnglishConversion(_ sender: Any) {
         applicationLogger.info("\(#line): toggleEnglishConversion")
-        UserDefaults.standard.set(!self.englishConversionEnabled, forKey: "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion")
-        self.updateEnglishConversionToggleMenuItem()
+        let config = Config.EnglishConversion()
+        config.value = !self.englishConversionEnabled
+        self.updateEnglishConversionToggleMenuItem(newValue: config.value)
     }
 
-    private func updateEnglishConversionToggleMenuItem() {
-        self.englishConversionToggleMenuItem.title = if self.englishConversionEnabled {
+    private func updateEnglishConversionToggleMenuItem(newValue: Bool) {
+        self.englishConversionToggleMenuItem.title = if newValue {
             "英単語変換をOFF"
         } else {
             "英単語変換をON"
@@ -346,8 +340,17 @@ class azooKeyMacInputController: IMKInputController {
         if event.type != .keyDown {
             return false
         }
-        // 入力モードの切り替え以外は無視
-        if self.directMode, event.keyCode != 104 && event.keyCode != 102 {
+        // バックスラッシュは扱う
+        if self.directMode, event.keyCode == 93 {
+            switch (Config.TypeBackSlash().value, event.modifierFlags.contains(.option)) {
+            case (true, false), (false, true):
+                client.insertText("\\", replacementRange: .notFound)
+
+            case (true, true), (false, false):
+                client.insertText("¥", replacementRange: .notFound)
+            }
+            return true
+        } else if self.directMode, event.keyCode != 104 && event.keyCode != 102 {
             return false
         }
         // https://developer.mozilla.org/ja/docs/Web/API/UI_Events/Keyboard_event_code_values#mac_%E3%81%A7%E3%81%AE%E3%82%B3%E3%83%BC%E3%83%89%E5%80%A4
@@ -362,6 +365,14 @@ class azooKeyMacInputController: IMKInputController {
             self.inputState.event(event, userAction: .delete)
         case 53: // Escape
             self.inputState.event(event, userAction: .unknown)
+        case 93: // Yen
+            switch (Config.TypeBackSlash().value, event.modifierFlags.contains(.option)) {
+            case (true, false), (false, true):
+                self.inputState.event(event, userAction: .input(KeyMap.h2zMap("\\")))
+
+            case (true, true), (false, false):
+                self.inputState.event(event, userAction: .input(KeyMap.h2zMap("¥")))
+            }
         case 102: // Lang2/kVK_JIS_Eisu
             self.inputState.event(event, userAction: .英数)
         case 104: // Lang1/kVK_JIS_Kana

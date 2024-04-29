@@ -15,6 +15,10 @@
 		1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64126E74627009B65D7 /* AppDelegate.swift */; };
 		1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */; };
 		1A41E64726E74937009B65D7 /* main.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E64626E74937009B65D7 /* main.tiff */; };
+		551398D72BDD376800F1DB82 /* ConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398D62BDD376800F1DB82 /* ConfigItem.swift */; };
+		551398D92BDD38B700F1DB82 /* BoolConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */; };
+		551398DB2BDD39B700F1DB82 /* StringConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */; };
+		551398DD2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */; };
 		556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52F92BAAAF7D00EB343F /* en.tiff */; };
 		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
 		557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */; };
@@ -58,6 +62,10 @@
 		1A41E64526E7470D009B65D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1A41E64626E74937009B65D7 /* main.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = main.tiff; path = azooKeyMac/main.tiff; sourceTree = SOURCE_ROOT; };
 		1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = azooKeyMac.entitlements; sourceTree = "<group>"; };
+		551398D62BDD376800F1DB82 /* ConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigItem.swift; sourceTree = "<group>"; };
+		551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoolConfigItem.swift; sourceTree = "<group>"; };
+		551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringConfigItem.swift; sourceTree = "<group>"; };
+		551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCodableConfigItem.swift; sourceTree = "<group>"; };
 		556C52F92BAAAF7D00EB343F /* en.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = en.tiff; sourceTree = "<group>"; };
 		556C52FA2BAAAF7D00EB343F /* en@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "en@2x.tiff"; sourceTree = "<group>"; };
 		557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyMap+hankaku2zenkaku.swift"; sourceTree = "<group>"; };
@@ -123,6 +131,7 @@
 				1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */,
 				1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */,
 				1A41E64126E74627009B65D7 /* AppDelegate.swift */,
+				551398D52BDD375700F1DB82 /* Configs */,
 				55EA62E02BD6BF890056B5BA /* Windows */,
 				557D35DD2BB1C1EE00877564 /* KeyMap */,
 				55A9C54C2BA84945007F6F02 /* Extensions */,
@@ -159,6 +168,17 @@
 				1A41E63426E745DD009B65D7 /* azooKeyMacUITestsLaunchTests.swift */,
 			);
 			path = azooKeyMacUITests;
+			sourceTree = "<group>";
+		};
+		551398D52BDD375700F1DB82 /* Configs */ = {
+			isa = PBXGroup;
+			children = (
+				551398D62BDD376800F1DB82 /* ConfigItem.swift */,
+				551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */,
+				551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */,
+				551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */,
+			);
+			path = Configs;
 			sourceTree = "<group>";
 		};
 		557D35DD2BB1C1EE00877564 /* KeyMap */ = {
@@ -328,12 +348,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				551398D92BDD38B700F1DB82 /* BoolConfigItem.swift in Sources */,
 				557D35E12BB1C22100877564 /* KeyMap.swift in Sources */,
 				55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */,
+				551398DD2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift in Sources */,
 				1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */,
 				55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */,
 				557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */,
+				551398D72BDD376800F1DB82 /* ConfigItem.swift in Sources */,
 				1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */,
+				551398DB2BDD39B700F1DB82 /* StringConfigItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
