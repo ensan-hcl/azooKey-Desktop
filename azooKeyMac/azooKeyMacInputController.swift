@@ -341,7 +341,7 @@ class azooKeyMacInputController: IMKInputController {
             return false
         }
         // バックスラッシュは扱う
-        if self.directMode, event.keyCode == 93 {
+        if self.directMode, event.keyCode == 93, !event.modifierFlags.contains(.shift) {
             switch (Config.TypeBackSlash().value, event.modifierFlags.contains(.option)) {
             case (true, false), (false, true):
                 client.insertText("\\", replacementRange: .notFound)
@@ -366,11 +366,12 @@ class azooKeyMacInputController: IMKInputController {
         case 53: // Escape
             self.inputState.event(event, userAction: .unknown)
         case 93: // Yen
-            switch (Config.TypeBackSlash().value, event.modifierFlags.contains(.option)) {
-            case (true, false), (false, true):
+            switch (Config.TypeBackSlash().value, event.modifierFlags.contains(.shift), event.modifierFlags.contains(.option)) {
+            case (_, true, _):
+                self.inputState.event(event, userAction: .input(KeyMap.h2zMap("|")))
+            case (true, false, false), (false, false, true):
                 self.inputState.event(event, userAction: .input(KeyMap.h2zMap("\\")))
-
-            case (true, true), (false, false):
+            case (true, false, true), (false, false, false):
                 self.inputState.event(event, userAction: .input(KeyMap.h2zMap("¥")))
             }
         case 102: // Lang2/kVK_JIS_Eisu
