@@ -20,6 +20,7 @@ enum UserAction {
     case unknown
     case 英数
     case かな
+    case digit(String)
     case navigation(NavigationDirection)
 
     enum NavigationDirection {
@@ -68,7 +69,7 @@ enum InputState {
         switch self {
         case .none:
             switch userAction {
-            case .input(let string):
+            case .input(let string), .digit(let string):
                 self = .composing
                 return .appendToMarkedText(string)
             case .かな:
@@ -80,7 +81,7 @@ enum InputState {
             }
         case .composing:
             switch userAction {
-            case .input(let string):
+            case .input(let string), .digit(let string):
                 return .appendToMarkedText(string)
             case .delete:
                 return .removeLastMarkedText
@@ -114,7 +115,7 @@ enum InputState {
             }
         case .selecting(let rangeAdjusted):
             switch userAction {
-            case .input(let string):
+            case .input(let string), .digit(let string):
                 self = .composing
                 return .sequence([.submitSelectedCandidate, .appendToMarkedText(string)])
             case .enter:
@@ -355,6 +356,13 @@ class azooKeyMacInputController: IMKInputController {
         }
         // https://developer.mozilla.org/ja/docs/Web/API/UI_Events/Keyboard_event_code_values#mac_%E3%81%A7%E3%81%AE%E3%82%B3%E3%83%BC%E3%83%89%E5%80%A4
         let clientAction = switch event.keyCode {
+        case 18, 19, 20, 21, 23, 22, 26, 28, 25, 29:
+            // 1, 2, 3, 4, 5, 6, 7, 8, 9, 0
+            if event.modifierFlags.contains(.shift) || event.modifierFlags.contains(.option) {
+                self.inputState.event(event, userAction: .input(KeyMap.h2zMap(event.characters!)))
+            } else {
+                self.inputState.event(event, userAction: .digit(event.characters!))
+            }
         case 36: // Enter
             self.inputState.event(event, userAction: .enter)
         case 48: // Tab
