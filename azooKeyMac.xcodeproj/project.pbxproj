@@ -25,6 +25,14 @@
 		55E0A5BE2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BD2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary */; };
 		55E0A5C02BA8AE3200FACF50 /* SwiftUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BF2BA8AE3200FACF50 /* SwiftUtils */; };
 		55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */; };
+		E92D1FE42BF07C8300753120 /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92D1FE32BF07C8300753120 /* UserAction.swift */; };
+		E92D1FE62BF07C8D00753120 /* ClientAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92D1FE52BF07C8D00753120 /* ClientAction.swift */; };
+		E92D1FE82BF07C9800753120 /* InputState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92D1FE72BF07C9800753120 /* InputState.swift */; };
+		E92D1FEA2BF07CA500753120 /* MenuHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92D1FE92BF07CA500753120 /* MenuHandler.swift */; };
+		E92D1FEC2BF07CC900753120 /* InputMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92D1FEB2BF07CC900753120 /* InputMode.swift */; };
+		E92D1FEE2BF07CD500753120 /* DirectInputMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92D1FED2BF07CD500753120 /* DirectInputMode.swift */; };
+		E92D1FF12BF07CE900753120 /* JapaneseInputMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92D1FF02BF07CE900753120 /* JapaneseInputMode.swift */; };
+		E92D1FF32BF07D0200753120 /* azooKeyMacInputControllerExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92D1FF22BF07D0200753120 /* azooKeyMacInputControllerExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +74,14 @@
 		55A9C54A2BA847A1007F6F02 /* main@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "main@2x.tiff"; sourceTree = "<group>"; };
 		55A9C54D2BA84951007F6F02 /* NSRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSRange.swift; sourceTree = "<group>"; };
 		55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigWindow.swift; sourceTree = "<group>"; };
+		E92D1FE32BF07C8300753120 /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
+		E92D1FE52BF07C8D00753120 /* ClientAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientAction.swift; sourceTree = "<group>"; };
+		E92D1FE72BF07C9800753120 /* InputState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputState.swift; sourceTree = "<group>"; };
+		E92D1FE92BF07CA500753120 /* MenuHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuHandler.swift; sourceTree = "<group>"; };
+		E92D1FEB2BF07CC900753120 /* InputMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputMode.swift; sourceTree = "<group>"; };
+		E92D1FED2BF07CD500753120 /* DirectInputMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectInputMode.swift; sourceTree = "<group>"; };
+		E92D1FF02BF07CE900753120 /* JapaneseInputMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JapaneseInputMode.swift; sourceTree = "<group>"; };
+		E92D1FF22BF07D0200753120 /* azooKeyMacInputControllerExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = azooKeyMacInputControllerExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,10 +134,10 @@
 		1A41E61626E745D9009B65D7 /* azooKeyMac */ = {
 			isa = PBXGroup;
 			children = (
+				E92D1FE12BF07C5A00753120 /* InputController */,
 				1A41E64526E7470D009B65D7 /* Info.plist */,
 				55A27D002BAAADDB00512DCD /* InfoPlist.strings */,
 				1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */,
-				1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */,
 				1A41E64126E74627009B65D7 /* AppDelegate.swift */,
 				55EA62E02BD6BF890056B5BA /* Windows */,
 				557D35DD2BB1C1EE00877564 /* KeyMap */,
@@ -184,6 +200,38 @@
 				55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */,
 			);
 			path = Windows;
+			sourceTree = "<group>";
+		};
+		E92D1FE12BF07C5A00753120 /* InputController */ = {
+			isa = PBXGroup;
+			children = (
+				E92D1FEF2BF07CDD00753120 /* InputMode */,
+				E92D1FE22BF07C6C00753120 /* Action */,
+				1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */,
+				E92D1FE72BF07C9800753120 /* InputState.swift */,
+				E92D1FE92BF07CA500753120 /* MenuHandler.swift */,
+				E92D1FF22BF07D0200753120 /* azooKeyMacInputControllerExtension.swift */,
+			);
+			path = InputController;
+			sourceTree = "<group>";
+		};
+		E92D1FE22BF07C6C00753120 /* Action */ = {
+			isa = PBXGroup;
+			children = (
+				E92D1FE32BF07C8300753120 /* UserAction.swift */,
+				E92D1FE52BF07C8D00753120 /* ClientAction.swift */,
+			);
+			path = Action;
+			sourceTree = "<group>";
+		};
+		E92D1FEF2BF07CDD00753120 /* InputMode */ = {
+			isa = PBXGroup;
+			children = (
+				E92D1FEB2BF07CC900753120 /* InputMode.swift */,
+				E92D1FED2BF07CD500753120 /* DirectInputMode.swift */,
+				E92D1FF02BF07CE900753120 /* JapaneseInputMode.swift */,
+			);
+			path = InputMode;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -329,11 +377,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				557D35E12BB1C22100877564 /* KeyMap.swift in Sources */,
+				E92D1FE82BF07C9800753120 /* InputState.swift in Sources */,
+				E92D1FEC2BF07CC900753120 /* InputMode.swift in Sources */,
 				55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */,
+				E92D1FEE2BF07CD500753120 /* DirectInputMode.swift in Sources */,
+				E92D1FF32BF07D0200753120 /* azooKeyMacInputControllerExtension.swift in Sources */,
+				E92D1FF12BF07CE900753120 /* JapaneseInputMode.swift in Sources */,
+				E92D1FE62BF07C8D00753120 /* ClientAction.swift in Sources */,
 				1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */,
 				55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */,
 				557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */,
+				E92D1FE42BF07C8300753120 /* UserAction.swift in Sources */,
 				1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */,
+				E92D1FEA2BF07CA500753120 /* MenuHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,7 +571,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"azooKeyMac/Preview Content\"";
-				DEVELOPMENT_TEAM = 9S3UXHYP65;
+				DEVELOPMENT_TEAM = CW97U5J24N;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -547,7 +603,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"azooKeyMac/Preview Content\"";
-				DEVELOPMENT_TEAM = 9S3UXHYP65;
+				DEVELOPMENT_TEAM = CW97U5J24N;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
