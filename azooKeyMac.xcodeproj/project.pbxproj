@@ -19,6 +19,8 @@
 		551398D92BDD38B700F1DB82 /* BoolConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */; };
 		551398DB2BDD39B700F1DB82 /* StringConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */; };
 		551398DD2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */; };
+		5523B1A42BF116CC0051DAA8 /* IntConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523B1A32BF116CB0051DAA8 /* IntConfigItem.swift */; };
+		5557C42C2BF3C9140048F976 /* ggml-model-Q8_0.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 5557C42B2BF3C9130048F976 /* ggml-model-Q8_0.gguf */; };
 		556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52F92BAAAF7D00EB343F /* en.tiff */; };
 		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
 		557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */; };
@@ -66,6 +68,8 @@
 		551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoolConfigItem.swift; sourceTree = "<group>"; };
 		551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringConfigItem.swift; sourceTree = "<group>"; };
 		551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCodableConfigItem.swift; sourceTree = "<group>"; };
+		5523B1A32BF116CB0051DAA8 /* IntConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntConfigItem.swift; sourceTree = "<group>"; };
+		5557C42B2BF3C9130048F976 /* ggml-model-Q8_0.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "ggml-model-Q8_0.gguf"; path = "zenz-v1/ggml-model-Q8_0.gguf"; sourceTree = "<group>"; };
 		556C52F92BAAAF7D00EB343F /* en.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = en.tiff; sourceTree = "<group>"; };
 		556C52FA2BAAAF7D00EB343F /* en@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "en@2x.tiff"; sourceTree = "<group>"; };
 		557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyMap+hankaku2zenkaku.swift"; sourceTree = "<group>"; };
@@ -135,6 +139,7 @@
 				55EA62E02BD6BF890056B5BA /* Windows */,
 				557D35DD2BB1C1EE00877564 /* KeyMap */,
 				55A9C54C2BA84945007F6F02 /* Extensions */,
+				55E1E7412BEF63AE0084A069 /* Resources */,
 				1A41E61B26E745DD009B65D7 /* Assets.xcassets */,
 				1A41E64626E74937009B65D7 /* main.tiff */,
 				55A9C54A2BA847A1007F6F02 /* main@2x.tiff */,
@@ -174,6 +179,7 @@
 			isa = PBXGroup;
 			children = (
 				551398D62BDD376800F1DB82 /* ConfigItem.swift */,
+				5523B1A32BF116CB0051DAA8 /* IntConfigItem.swift */,
 				551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */,
 				551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */,
 				551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */,
@@ -196,6 +202,14 @@
 				55A9C54D2BA84951007F6F02 /* NSRange.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		55E1E7412BEF63AE0084A069 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				5557C42B2BF3C9130048F976 /* ggml-model-Q8_0.gguf */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		55EA62E02BD6BF890056B5BA /* Windows */ = {
@@ -322,6 +336,7 @@
 				556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */,
 				55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */,
 				556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */,
+				5557C42C2BF3C9140048F976 /* ggml-model-Q8_0.gguf in Resources */,
 				1A41E61C26E745DD009B65D7 /* Assets.xcassets in Resources */,
 				55A27D022BAAADDB00512DCD /* InfoPlist.strings in Resources */,
 			);
@@ -351,6 +366,7 @@
 				551398D92BDD38B700F1DB82 /* BoolConfigItem.swift in Sources */,
 				557D35E12BB1C22100877564 /* KeyMap.swift in Sources */,
 				55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */,
+				5523B1A42BF116CC0051DAA8 /* IntConfigItem.swift in Sources */,
 				551398DD2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift in Sources */,
 				1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */,
 				55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */,
@@ -551,7 +567,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				LLVM_LTO = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.ensan.inputmethod.azooKeyMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -576,6 +593,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
+				GCC_OPTIMIZATION_LEVEL = fast;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = azooKeyMac/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -583,7 +601,8 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				LLVM_LTO = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.ensan.inputmethod.azooKeyMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -734,8 +753,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ensan-hcl/AzooKeyKanaKanjiConverter";
 			requirement = {
-				kind = upToNextMinorVersion;
-				minimumVersion = 0.7.0;
+				branch = "experimental/gpt2-integration";
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

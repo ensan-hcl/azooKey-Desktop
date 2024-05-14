@@ -1,0 +1,3 @@
+[submodule "azooKeyMac/Resources/zenz-v1"]
+	path = azooKeyMac/Resources/zenz-v1
+	url = https://huggingface.co/Miwa-Keita/zenz-v1
