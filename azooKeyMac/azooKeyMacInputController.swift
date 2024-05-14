@@ -209,7 +209,10 @@ class azooKeyMacInputController: IMKInputController {
     private let liveConversionToggleMenuItem: NSMenuItem
     private let englishConversionToggleMenuItem: NSMenuItem
     private var zenzaiMode: ConvertRequestOptions.ZenzaiMode {
-        self.zenzaiEnabled ? .on(weight: Bundle.main.bundleURL.appending(path: "Contents/Resources/ggml-model-Q8_0.gguf", directoryHint: .notDirectory), inferenceLimit: Config.ZenzaiInferenceLimit().value) : .off
+        self.zenzaiEnabled ? .on(
+            weight: Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/ggml-model-Q8_0.gguf", isDirectory: false),
+            inferenceLimit: Config.ZenzaiInferenceLimit().value
+        ) : .off
     }
     private var options: ConvertRequestOptions {
         .withDefaultDictionary(
