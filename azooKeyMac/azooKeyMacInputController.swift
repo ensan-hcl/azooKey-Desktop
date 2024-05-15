@@ -12,44 +12,6 @@ import KanaKanjiConverterModuleWithDefaultDictionary
 
 let applicationLogger: Logger = Logger(subsystem: "dev.ensan.inputmethod.azooKeyMac", category: "main")
 
-enum UserAction {
-    case input(String)
-    case delete
-    case enter
-    case space
-    case unknown
-    case 英数
-    case かな
-    case navigation(NavigationDirection)
-
-    enum NavigationDirection {
-        case up, down, right, left
-    }
-}
-
-indirect enum ClientAction {
-    case `consume`
-    case `fallthrough`
-    case showCandidateWindow
-    case hideCandidateWindow
-    case appendToMarkedText(String)
-    case removeLastMarkedText
-    case moveCursorToStart
-    case moveCursor(Int)
-
-    case commitMarkedText
-    case submitSelectedCandidate
-    case forwardToCandidateWindow(NSEvent)
-    case selectInputMode(InputMode)
-
-    enum InputMode {
-        case roman
-        case japanese
-    }
-
-    case sequence([ClientAction])
-}
-
 enum InputState {
     case none
     case composing
