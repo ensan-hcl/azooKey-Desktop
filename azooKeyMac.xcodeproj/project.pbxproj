@@ -30,6 +30,7 @@
 		55E0A5C02BA8AE3200FACF50 /* SwiftUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BF2BA8AE3200FACF50 /* SwiftUtils */; };
 		55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */; };
 		E96A5BC72BF4B28400AEAB72 /* InputState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96A5BC62BF4B28400AEAB72 /* InputState.swift */; };
+		E96A5BD12BF4B76100AEAB72 /* MenuHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96A5BD02BF4B76100AEAB72 /* MenuHandler.swift */; };
 		E989B4562BF4B1130085AF6D /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4552BF4B1130085AF6D /* UserAction.swift */; };
 		E989B4582BF4B1550085AF6D /* ClientAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4572BF4B1550085AF6D /* ClientAction.swift */; };
 /* End PBXBuildFile section */
@@ -78,6 +79,7 @@
 		55A9C54D2BA84951007F6F02 /* NSRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSRange.swift; sourceTree = "<group>"; };
 		55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigWindow.swift; sourceTree = "<group>"; };
 		E96A5BC62BF4B28400AEAB72 /* InputState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputState.swift; sourceTree = "<group>"; };
+		E96A5BD02BF4B76100AEAB72 /* MenuHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuHandler.swift; sourceTree = "<group>"; };
 		E989B4552BF4B1130085AF6D /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
 		E989B4572BF4B1550085AF6D /* ClientAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientAction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -218,6 +220,7 @@
 			children = (
 				E989B4542BF4B0920085AF6D /* Actions */,
 				E96A5BC62BF4B28400AEAB72 /* InputState.swift */,
+				E96A5BD02BF4B76100AEAB72 /* MenuHandler.swift */,
 			);
 			path = InputController;
 			sourceTree = "<group>";
@@ -380,6 +383,7 @@
 				551398DD2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift in Sources */,
 				1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */,
 				55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */,
+				E96A5BD12BF4B76100AEAB72 /* MenuHandler.swift in Sources */,
 				557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */,
 				E989B4562BF4B1130085AF6D /* UserAction.swift in Sources */,
 				551398D72BDD376800F1DB82 /* ConfigItem.swift in Sources */,
