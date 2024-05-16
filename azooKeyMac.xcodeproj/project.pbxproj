@@ -138,7 +138,6 @@
 				1A41E64526E7470D009B65D7 /* Info.plist */,
 				55A27D002BAAADDB00512DCD /* InfoPlist.strings */,
 				1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */,
-				1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */,
 				1A41E64126E74627009B65D7 /* AppDelegate.swift */,
 				551398D52BDD375700F1DB82 /* Configs */,
 				55EA62E02BD6BF890056B5BA /* Windows */,
@@ -218,6 +217,7 @@
 		E989B4532BF4B0890085AF6D /* InputController */ = {
 			isa = PBXGroup;
 			children = (
+				1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */,
 				E989B4542BF4B0920085AF6D /* Actions */,
 				E96A5BC62BF4B28400AEAB72 /* InputState.swift */,
 				E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */,
