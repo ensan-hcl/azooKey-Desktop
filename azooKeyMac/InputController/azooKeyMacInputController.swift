@@ -27,9 +27,9 @@ class azooKeyMacInputController: IMKInputController {
         Config.EnglishConversion().value
     }
 
-    let appMenu: NSMenu
-    let liveConversionToggleMenuItem: NSMenuItem
-    let englishConversionToggleMenuItem: NSMenuItem
+    var appMenu: NSMenu
+    var liveConversionToggleMenuItem: NSMenuItem
+    var englishConversionToggleMenuItem: NSMenuItem
 
     private var displayedTextInComposingMode: String?
     private var candidatesWindow: IMKCandidates {
@@ -57,15 +57,11 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
-        // menu
         self.appMenu = NSMenu(title: "azooKey")
-        self.liveConversionToggleMenuItem = NSMenuItem(title: "ライブ変換をOFF", action: #selector(self.toggleLiveConversion(_:)), keyEquivalent: "")
-        self.englishConversionToggleMenuItem = NSMenuItem(title: "英単語変換をON", action: #selector(self.toggleEnglishConversion(_:)), keyEquivalent: "")
-        self.appMenu.addItem(self.liveConversionToggleMenuItem)
-        self.appMenu.addItem(self.englishConversionToggleMenuItem)
-        self.appMenu.addItem(NSMenuItem(title: "詳細設定を開く", action: #selector(self.openConfigWindow(_:)), keyEquivalent: ""))
-        self.appMenu.addItem(NSMenuItem(title: "View on GitHub", action: #selector(self.openGitHubRepository(_:)), keyEquivalent: ""))
+        self.liveConversionToggleMenuItem = NSMenuItem()
+        self.englishConversionToggleMenuItem = NSMenuItem()
         super.init(server: server, delegate: delegate, client: inputClient)
+        self.setupMenu()
     }
 
     @MainActor
