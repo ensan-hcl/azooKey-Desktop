@@ -18,12 +18,19 @@ class azooKeyMacInputController: IMKInputController {
     private var selectedCandidate: String?
     private var inputState: InputState = .none
     private var directMode = false
-    private var liveConversionEnabled: Bool {
+
+    var liveConversionEnabled: Bool {
         Config.LiveConversion().value
     }
-    private var englishConversionEnabled: Bool {
+
+    var englishConversionEnabled: Bool {
         Config.EnglishConversion().value
     }
+
+    let appMenu: NSMenu
+    let liveConversionToggleMenuItem: NSMenuItem
+    let englishConversionToggleMenuItem: NSMenuItem
+
     private var displayedTextInComposingMode: String?
     private var candidatesWindow: IMKCandidates {
         (
@@ -36,9 +43,6 @@ class azooKeyMacInputController: IMKInputController {
         )!.kanaKanjiConverter
     }
     private var rawCandidates: ConversionResult?
-    private let appMenu: NSMenu
-    private let liveConversionToggleMenuItem: NSMenuItem
-    private let englishConversionToggleMenuItem: NSMenuItem
     private var options: ConvertRequestOptions {
         .withDefaultDictionary(
             requireJapanesePrediction: false,
@@ -113,47 +117,6 @@ class azooKeyMacInputController: IMKInputController {
 
     override func menu() -> NSMenu! {
         self.appMenu
-    }
-
-    @objc private func toggleLiveConversion(_ sender: Any) {
-        applicationLogger.info("\(#line): toggleLiveConversion")
-        let config = Config.LiveConversion()
-        config.value = !self.liveConversionEnabled
-        self.updateLiveConversionToggleMenuItem(newValue: config.value)
-    }
-
-    private func updateLiveConversionToggleMenuItem(newValue: Bool) {
-        self.liveConversionToggleMenuItem.title = if newValue {
-            "ライブ変換をOFF"
-        } else {
-            "ライブ変換をON"
-        }
-    }
-
-    @objc private func toggleEnglishConversion(_ sender: Any) {
-        applicationLogger.info("\(#line): toggleEnglishConversion")
-        let config = Config.EnglishConversion()
-        config.value = !self.englishConversionEnabled
-        self.updateEnglishConversionToggleMenuItem(newValue: config.value)
-    }
-
-    private func updateEnglishConversionToggleMenuItem(newValue: Bool) {
-        self.englishConversionToggleMenuItem.title = if newValue {
-            "英単語変換をOFF"
-        } else {
-            "英単語変換をON"
-        }
-    }
-
-    @objc private func openGitHubRepository(_ sender: Any) {
-        guard let url = URL(string: "https://github.com/ensan-hcl/azooKey-Desktop") else {
-            return
-        }
-        NSWorkspace.shared.open(url)
-    }
-
-    @objc private func openConfigWindow(_ sender: Any) {
-        (NSApplication.shared.delegate as? AppDelegate)!.openConfigWindow()
     }
 
     private func isPrintable(_ text: String) -> Bool {
@@ -360,27 +323,5 @@ class azooKeyMacInputController: IMKInputController {
     @MainActor private func update(with candidate: Candidate) {
         self.kanaKanjiConverter.setCompletedData(candidate)
         self.kanaKanjiConverter.updateLearningData(candidate)
-    }
-
-    private var azooKeyMemoryDir: URL {
-        if #available(macOS 13, *) {
-            URL.applicationSupportDirectory
-                .appending(path: "azooKey", directoryHint: .isDirectory)
-                .appending(path: "memory", directoryHint: .isDirectory)
-        } else {
-            FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-                .appendingPathComponent("azooKey", isDirectory: true)
-                .appendingPathComponent("memory", isDirectory: true)
-        }
-    }
-
-    private func prepareApplicationSupportDirectory() {
-        // create directory
-        do {
-            applicationLogger.info("\(#line, privacy: .public): Applicatiion Support Directory Path: \(self.azooKeyMemoryDir, privacy: .public)")
-            try FileManager.default.createDirectory(at: self.azooKeyMemoryDir, withIntermediateDirectories: true)
-        } catch {
-            applicationLogger.error("\(#line, privacy: .public): \(error.localizedDescription, privacy: .public)")
-        }
     }
 }
