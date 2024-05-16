@@ -32,6 +32,7 @@
 		E96A5BC72BF4B28400AEAB72 /* InputState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96A5BC62BF4B28400AEAB72 /* InputState.swift */; };
 		E989B4562BF4B1130085AF6D /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4552BF4B1130085AF6D /* UserAction.swift */; };
 		E989B4582BF4B1550085AF6D /* ClientAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4572BF4B1550085AF6D /* ClientAction.swift */; };
+		E9C0C6F32BF5E8AE00E0EA50 /* InputMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +81,7 @@
 		E96A5BC62BF4B28400AEAB72 /* InputState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputState.swift; sourceTree = "<group>"; };
 		E989B4552BF4B1130085AF6D /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
 		E989B4572BF4B1550085AF6D /* ClientAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientAction.swift; sourceTree = "<group>"; };
+		E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputMode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +220,7 @@
 			children = (
 				E989B4542BF4B0920085AF6D /* Actions */,
 				E96A5BC62BF4B28400AEAB72 /* InputState.swift */,
+				E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */,
 			);
 			path = InputController;
 			sourceTree = "<group>";
@@ -384,6 +387,7 @@
 				E989B4562BF4B1130085AF6D /* UserAction.swift in Sources */,
 				551398D72BDD376800F1DB82 /* ConfigItem.swift in Sources */,
 				1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */,
+				E9C0C6F32BF5E8AE00E0EA50 /* InputMode.swift in Sources */,
 				E989B4582BF4B1550085AF6D /* ClientAction.swift in Sources */,
 				551398DB2BDD39B700F1DB82 /* StringConfigItem.swift in Sources */,
 			);

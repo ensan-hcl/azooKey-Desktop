@@ -165,22 +165,26 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
-        // Check `event` safety
-        guard let event else { return false }
-        // get client to insert
-        guard let client = sender as? IMKTextInput else {
-            return false
-        }
-        // keyDown以外は無視
+        guard let event, let client = sender as? IMKTextInput else { return false }
+
         if event.type != .keyDown {
             return false
         }
-        // バックスラッシュは扱う
+
+        if handleDirectMode(event, client: client) {
+            return true
+        }
+
+        let userAction = InputMode.getUserAction(event: event)
+        let clientAction = inputState.event(event, userAction: userAction)
+        return handleClientAction(clientAction, client: client)
+    }
+
+    private func handleDirectMode(_ event: NSEvent, client: IMKTextInput) -> Bool {
         if self.directMode, event.keyCode == 93, !event.modifierFlags.contains(.shift) {
             switch (Config.TypeBackSlash().value, event.modifierFlags.contains(.option)) {
             case (true, false), (false, true):
                 client.insertText("\\", replacementRange: .notFound)
-
             case (true, true), (false, false):
                 client.insertText("¥", replacementRange: .notFound)
             }
@@ -188,51 +192,7 @@ class azooKeyMacInputController: IMKInputController {
         } else if self.directMode, event.keyCode != 104 && event.keyCode != 102 {
             return false
         }
-        // https://developer.mozilla.org/ja/docs/Web/API/UI_Events/Keyboard_event_code_values#mac_%E3%81%A7%E3%81%AE%E3%82%B3%E3%83%BC%E3%83%89%E5%80%A4
-        let clientAction = switch event.keyCode {
-        case 36: // Enter
-            self.inputState.event(event, userAction: .enter)
-        case 48: // Tab
-            self.inputState.event(event, userAction: .unknown)
-        case 49: // Space
-            self.inputState.event(event, userAction: .space)
-        case 51: // Delete
-            self.inputState.event(event, userAction: .delete)
-        case 53: // Escape
-            self.inputState.event(event, userAction: .unknown)
-        case 93: // Yen
-            switch (Config.TypeBackSlash().value, event.modifierFlags.contains(.shift), event.modifierFlags.contains(.option)) {
-            case (_, true, _):
-                self.inputState.event(event, userAction: .input(KeyMap.h2zMap("|")))
-            case (true, false, false), (false, false, true):
-                self.inputState.event(event, userAction: .input(KeyMap.h2zMap("\\")))
-            case (true, false, true), (false, false, false):
-                self.inputState.event(event, userAction: .input(KeyMap.h2zMap("¥")))
-            }
-        case 102: // Lang2/kVK_JIS_Eisu
-            self.inputState.event(event, userAction: .英数)
-        case 104: // Lang1/kVK_JIS_Kana
-            self.inputState.event(event, userAction: .かな)
-        case 123: // Left
-            // uF702
-            self.inputState.event(event, userAction: .navigation(.left))
-        case 124: // Right
-            // uF703
-            self.inputState.event(event, userAction: .navigation(.right))
-        case 125: // Down
-            // uF701
-            self.inputState.event(event, userAction: .navigation(.down))
-        case 126: // Up
-            // uF700
-            self.inputState.event(event, userAction: .navigation(.up))
-        default:
-            if let text = event.characters, self.isPrintable(text) {
-                self.inputState.event(event, userAction: .input(KeyMap.h2zMap(text)))
-            } else {
-                self.inputState.event(event, userAction: .unknown)
-            }
-        }
-        return self.handleClientAction(clientAction, client: client)
+        return false
     }
 
     func showCandidateWindow() {
@@ -385,7 +345,7 @@ class azooKeyMacInputController: IMKInputController {
             selectionRange: NSRange(location: candidateString.count, length: 0),
             replacementRange: NSRange(location: NSNotFound, length: 0)
         )
-     }
+    }
 
     @MainActor override func candidateSelected(_ candidateString: NSAttributedString!) {
         self.updateMarkedTextWithCandidate(candidateString.string)
