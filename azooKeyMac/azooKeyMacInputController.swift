@@ -156,6 +156,14 @@ class azooKeyMacInputController: IMKInputController {
         (NSApplication.shared.delegate as? AppDelegate)!.openConfigWindow()
     }
 
+    private func isPrintable(_ text: String) -> Bool {
+        let printable: CharacterSet = [.alphanumerics, .symbols, .punctuationCharacters]
+            .reduce(into: CharacterSet()) {
+                $0.formUnion($1)
+            }
+        return CharacterSet(text.unicodeScalars).isSubset(of: printable)
+    }
+
     @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         // Check `event` safety
         guard let event else { return false }
