@@ -1,9 +1,3 @@
-//
-//  UserAction.swift
-//  azooKeyMac
-//
-//  Created by 高橋直希 on 2024/05/15.
-//
 
 enum UserAction {
     case input(String)

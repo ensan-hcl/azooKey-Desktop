@@ -1,9 +1,4 @@
-//
-//  InputMode.swift
-//  azooKeyMac
-//
-//  Created by 高橋直希 on 2024/05/16.
-//
+
 import Cocoa
 
 enum InputMode {
