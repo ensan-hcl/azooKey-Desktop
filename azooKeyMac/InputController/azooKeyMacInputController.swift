@@ -18,16 +18,18 @@ class azooKeyMacInputController: IMKInputController {
     private var selectedCandidate: String?
     private var inputState: InputState = .none
     private var directMode = false
-
+    var zenzaiEnabled: Bool {
+        Config.ZenzaiIntegration().value
+    }
     var liveConversionEnabled: Bool {
         Config.LiveConversion().value
     }
-
     var englishConversionEnabled: Bool {
         Config.EnglishConversion().value
     }
 
     var appMenu: NSMenu
+    var zenzaiToggleMenuItem: NSMenuItem
     var liveConversionToggleMenuItem: NSMenuItem
     var englishConversionToggleMenuItem: NSMenuItem
 
@@ -43,21 +45,30 @@ class azooKeyMacInputController: IMKInputController {
         )!.kanaKanjiConverter
     }
     private var rawCandidates: ConversionResult?
+    private var zenzaiMode: ConvertRequestOptions.ZenzaiMode {
+        self.zenzaiEnabled ? .on(
+            weight: Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/ggml-model-Q8_0.gguf", isDirectory: false),
+            inferenceLimit: Config.ZenzaiInferenceLimit().value
+        ) : .off
+    }
+
     private var options: ConvertRequestOptions {
         .withDefaultDictionary(
             requireJapanesePrediction: false,
             requireEnglishPrediction: false,
             keyboardLanguage: .ja_JP,
             englishCandidateInRoman2KanaInput: self.englishConversionEnabled,
-            learningType: Config.Learning().value.learningType,
+            learningType: self.zenzaiEnabled ? .nothing : Config.Learning().value.learningType,
             memoryDirectoryURL: self.azooKeyMemoryDir,
             sharedContainerURL: self.azooKeyMemoryDir,
-            metadata: .init(appVersionString: "1.0")
+            zenzaiMode: self.zenzaiMode,
+            metadata: .init(versionString: "azooKey on macOS / α version")
         )
     }
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.appMenu = NSMenu(title: "azooKey")
+        self.zenzaiToggleMenuItem = NSMenuItem()
         self.liveConversionToggleMenuItem = NSMenuItem()
         self.englishConversionToggleMenuItem = NSMenuItem()
         super.init(server: server, delegate: delegate, client: inputClient)
@@ -77,6 +88,7 @@ class azooKeyMacInputController: IMKInputController {
         )
         // アプリケーションサポートのディレクトリを準備しておく
         self.prepareApplicationSupportDirectory()
+        self.updateZenzaiToggleMenuItem(newValue: self.zenzaiEnabled)
         self.updateLiveConversionToggleMenuItem(newValue: self.liveConversionEnabled)
         self.updateEnglishConversionToggleMenuItem(newValue: self.englishConversionEnabled)
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))

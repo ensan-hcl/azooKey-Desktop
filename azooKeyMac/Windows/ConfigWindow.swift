@@ -13,6 +13,7 @@ struct ConfigWindow: View {
     @ConfigState private var typeBackSlash = Config.TypeBackSlash()
     @ConfigState private var openAiApiKey = Config.OpenAiApiKey()
     @ConfigState private var learning = Config.Learning()
+    @ConfigState private var inferenceLimit = Config.ZenzaiInferenceLimit()
 
     var body: some View {
         VStack {
@@ -22,6 +23,7 @@ struct ConfigWindow: View {
             Toggle("英単語変換を有効化", isOn: $englishConversion)
             Toggle("円記号の代わりにバックスラッシュを入力", isOn: $typeBackSlash)
             TextField("OpenAI API Key", text: $openAiApiKey)
+            Stepper("Zenzaiの推論上限: \(inferenceLimit.value)", value: $inferenceLimit, in: 0 ... 50)
             Picker("学習", selection: $learning) {
                 Text("学習する").tag(Config.Learning.Value.inputAndOutput)
                 Text("学習を停止").tag(Config.Learning.Value.onlyOutput)

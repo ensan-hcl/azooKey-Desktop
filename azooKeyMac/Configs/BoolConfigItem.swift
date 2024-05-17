@@ -42,4 +42,10 @@ extension Config {
         static let `default` = false
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.typeBackSlash"
     }
+    /// Zenzaiを利用する設定
+    /// - warning: この設定がオンになっているとき、現在は学習をオフにしている
+    struct ZenzaiIntegration: BoolConfigItem {
+        static let `default` = true
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzai"
+    }
 }

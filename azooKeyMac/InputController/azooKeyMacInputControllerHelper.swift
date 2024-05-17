@@ -6,14 +6,31 @@ extension azooKeyMacInputController {
     // MARK: - Settings and Menu Items
     
     func setupMenu() {
+        self.zenzaiToggleMenuItem = NSMenuItem(title: "ZenzaiをOFF", action: #selector(self.toggleZenzai(_:)), keyEquivalent: "")
         self.liveConversionToggleMenuItem = NSMenuItem(title: "ライブ変換をOFF", action: #selector(self.toggleLiveConversion(_:)), keyEquivalent: "")
         self.englishConversionToggleMenuItem = NSMenuItem(title: "英単語変換をON", action: #selector(self.toggleEnglishConversion(_:)), keyEquivalent: "")
+        self.appMenu.addItem(self.zenzaiToggleMenuItem)
         self.appMenu.addItem(self.liveConversionToggleMenuItem)
         self.appMenu.addItem(self.englishConversionToggleMenuItem)
         self.appMenu.addItem(NSMenuItem(title: "詳細設定を開く", action: #selector(self.openConfigWindow(_:)), keyEquivalent: ""))
         self.appMenu.addItem(NSMenuItem(title: "View on GitHub", action: #selector(self.openGitHubRepository(_:)), keyEquivalent: ""))
     }
     
+    @objc private func toggleZenzai(_ sender: Any) {
+        applicationLogger.info("\(#line): toggleZenzai")
+        let config = Config.ZenzaiIntegration()
+        config.value = !self.zenzaiEnabled
+        self.updateZenzaiToggleMenuItem(newValue: config.value)
+    }
+
+    func updateZenzaiToggleMenuItem(newValue: Bool) {
+        self.zenzaiToggleMenuItem.title = if newValue {
+            "ZenzaiをOFF"
+        } else {
+            "ZenzaiをON"
+        }
+    }
+
     @objc func toggleLiveConversion(_ sender: Any) {
         applicationLogger.info("\(#line): toggleLiveConversion")
         let config = Config.LiveConversion()

@@ -7,6 +7,7 @@
 
 import Foundation
 import enum KanaKanjiConverterModuleWithDefaultDictionary.LearningType
+import struct KanaKanjiConverterModuleWithDefaultDictionary.ConvertRequestOptions
 
 protocol CustomCodableConfigItem: ConfigItem {
     static var `default`: Value { get }
