@@ -26,7 +26,7 @@ enum InputState {
                 return .selectInputMode(.japanese)
             case .英数:
                 return .selectInputMode(.roman)
-            case .unknown, .navigation, .space, .delete, .enter:
+            case .unknown, .navigation, .space, .delete, .enter, .escape:
                 return .fallthrough
             }
         case .composing:
@@ -38,6 +38,8 @@ enum InputState {
             case .enter:
                 self = .none
                 return .commitMarkedText
+            case .escape:
+                return .stopComposition
             case .space:
                 self = .selecting(rangeAdjusted: false)
                 return .showCandidateWindow
@@ -74,6 +76,9 @@ enum InputState {
             case .delete:
                 self = .composing
                 return .removeLastMarkedText
+            case .escape:
+                self = .composing
+                return .hideCandidateWindow
             case .space:
                 // Spaceは下矢印キーに、Shift + Spaceは上矢印キーにマップする
                 // 下矢印キー: \u{F701} / 125
