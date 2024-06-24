@@ -26,14 +26,14 @@ enum InputState {
                 return .selectInputMode(.japanese)
             case .英数:
                 return .selectInputMode(.roman)
-            case .unknown, .navigation, .space, .delete, .enter, .escape:
+            case .unknown, .navigation, .space, .backspace, .enter, .escape:
                 return .fallthrough
             }
         case .composing:
             switch userAction {
             case .input(let string):
                 return .appendToMarkedText(string)
-            case .delete:
+            case .backspace:
                 return .removeLastMarkedText
             case .enter:
                 self = .none
@@ -73,7 +73,7 @@ enum InputState {
             case .enter:
                 self = .none
                 return .submitSelectedCandidate
-            case .delete:
+            case .backspace:
                 self = .composing
                 return .removeLastMarkedText
             case .escape:

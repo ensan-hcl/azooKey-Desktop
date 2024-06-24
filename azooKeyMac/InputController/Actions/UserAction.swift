@@ -1,7 +1,7 @@
 
 enum UserAction {
     case input(String)
-    case delete
+    case backspace
     case enter
     case space
     case escape
