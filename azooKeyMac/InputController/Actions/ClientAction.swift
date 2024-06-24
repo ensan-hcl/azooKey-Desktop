@@ -16,6 +16,8 @@ indirect enum ClientAction {
     case forwardToCandidateWindow(NSEvent)
     case selectInputMode(InputMode)
 
+    case stopComposition
+
     enum InputMode {
         case roman
         case japanese

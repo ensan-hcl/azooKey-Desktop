@@ -23,7 +23,7 @@ enum InputMode {
         case 51: // Delete
             return .backspace
         case 53: // Escape
-            return .unknown
+            return .escape
         case 93: // Yen
             switch (Config.TypeBackSlash().value, event.modifierFlags.contains(.shift), event.modifierFlags.contains(.option)) {
             case (_, true, _):

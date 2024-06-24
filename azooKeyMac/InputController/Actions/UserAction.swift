@@ -4,6 +4,7 @@ enum UserAction {
     case backspace
     case enter
     case space
+    case escape
     case unknown
     case 英数
     case かな

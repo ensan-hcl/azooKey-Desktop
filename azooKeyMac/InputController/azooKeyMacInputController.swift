@@ -256,6 +256,12 @@ class azooKeyMacInputController: IMKInputController {
             return false
         case .forwardToCandidateWindow(let event):
             self.candidatesWindow.interpretKeyEvents([event])
+        case .stopComposition:
+            self.updateMarkedTextInComposingMode(text: "", client: client)
+            self.composingText.stopComposition()
+            self.kanaKanjiConverter.stopComposition()
+            self.candidatesWindow.hide()
+            self.displayedTextInComposingMode = nil
         case .sequence(let actions):
             var found = false
             for action in actions {
