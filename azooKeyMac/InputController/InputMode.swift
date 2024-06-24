@@ -3,7 +3,17 @@ import Cocoa
 
 enum InputMode {
     static func getUserAction(event: NSEvent) -> UserAction {
+        // see: https://developer.mozilla.org/ja/docs/Web/API/UI_Events/Keyboard_event_code_values#mac_%E3%81%A7%E3%81%AE%E3%82%B3%E3%83%BC%E3%83%89%E5%80%A4
         switch event.keyCode {
+        case 0x04: // 'H'
+            // Ctrl + H is binding for backspace
+            if event.modifierFlags.contains(.control) {
+                return .backspace
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
         case 36: // Enter
             return .enter
         case 48: // Tab
@@ -11,7 +21,7 @@ enum InputMode {
         case 49: // Space
             return .space
         case 51: // Delete
-            return .delete
+            return .backspace
         case 53: // Escape
             return .unknown
         case 93: // Yen
