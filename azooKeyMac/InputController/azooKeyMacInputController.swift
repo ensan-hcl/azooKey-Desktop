@@ -58,7 +58,7 @@ class azooKeyMacInputController: IMKInputController {
             requireEnglishPrediction: false,
             keyboardLanguage: .ja_JP,
             englishCandidateInRoman2KanaInput: self.englishConversionEnabled,
-            learningType: self.zenzaiEnabled ? .nothing : Config.Learning().value.learningType,
+            learningType: Config.Learning().value.learningType,
             memoryDirectoryURL: self.azooKeyMemoryDir,
             sharedContainerURL: self.azooKeyMemoryDir,
             zenzaiMode: self.zenzaiMode,
