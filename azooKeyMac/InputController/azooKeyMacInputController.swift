@@ -142,8 +142,13 @@ class azooKeyMacInputController: IMKInputController {
             return false
         }
 
-        if handleDirectMode(event, client: client) {
+        switch self.handleDirectMode(event, client: client) {
+        case .done:
             return true
+        case .break:
+            return false
+        case .continue:
+            break
         }
 
         let userAction = InputMode.getUserAction(event: event)
@@ -151,7 +156,18 @@ class azooKeyMacInputController: IMKInputController {
         return handleClientAction(clientAction, client: client)
     }
 
-    private func handleDirectMode(_ event: NSEvent, client: IMKTextInput) -> Bool {
+    enum HandleDirectModeRequest {
+        /// azooKey on macOS内部で入力をハンドルした場合
+        case done
+
+        /// azooKey on macOS内部で入力をハンドルしない場合
+        case `break`
+
+        /// directModeではなかった場合
+        case `continue`
+    }
+
+    private func handleDirectMode(_ event: NSEvent, client: IMKTextInput) -> HandleDirectModeRequest {
         if self.directMode, event.keyCode == 93, !event.modifierFlags.contains(.shift) {
             switch (Config.TypeBackSlash().value, event.modifierFlags.contains(.option)) {
             case (true, false), (false, true):
@@ -159,11 +175,11 @@ class azooKeyMacInputController: IMKInputController {
             case (true, true), (false, false):
                 client.insertText("¥", replacementRange: .notFound)
             }
-            return true
+            return .done
         } else if self.directMode, event.keyCode != 104 && event.keyCode != 102 {
-            return false
+            return .break
         }
-        return false
+        return .continue
     }
 
     func showCandidateWindow() {
