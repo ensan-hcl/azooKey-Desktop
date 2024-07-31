@@ -20,7 +20,7 @@
 		551398DB2BDD39B700F1DB82 /* StringConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */; };
 		551398DD2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */; };
 		5523B1A42BF116CC0051DAA8 /* IntConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523B1A32BF116CB0051DAA8 /* IntConfigItem.swift */; };
-		5557C42C2BF3C9140048F976 /* ggml-model-Q8_0.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 5557C42B2BF3C9130048F976 /* ggml-model-Q8_0.gguf */; };
+		5557C42C2BF3C9140048F976 /* zenz-v2-Q5_K_M.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */; };
 		556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52F92BAAAF7D00EB343F /* en.tiff */; };
 		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
 		557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */; };
@@ -74,7 +74,7 @@
 		551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringConfigItem.swift; sourceTree = "<group>"; };
 		551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCodableConfigItem.swift; sourceTree = "<group>"; };
 		5523B1A32BF116CB0051DAA8 /* IntConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntConfigItem.swift; sourceTree = "<group>"; };
-		5557C42B2BF3C9130048F976 /* ggml-model-Q8_0.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "ggml-model-Q8_0.gguf"; path = "zenz-v1/ggml-model-Q8_0.gguf"; sourceTree = "<group>"; };
+		5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "zenz-v2-Q5_K_M.gguf"; path = "zenz-v2-gguf/zenz-v2-Q5_K_M.gguf"; sourceTree = "<group>"; };
 		556C52F92BAAAF7D00EB343F /* en.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = en.tiff; sourceTree = "<group>"; };
 		556C52FA2BAAAF7D00EB343F /* en@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "en@2x.tiff"; sourceTree = "<group>"; };
 		557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyMap+hankaku2zenkaku.swift"; sourceTree = "<group>"; };
@@ -217,7 +217,7 @@
 		55E1E7412BEF63AE0084A069 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				5557C42B2BF3C9130048F976 /* ggml-model-Q8_0.gguf */,
+				5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -367,7 +367,7 @@
 				556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */,
 				55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */,
 				556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */,
-				5557C42C2BF3C9140048F976 /* ggml-model-Q8_0.gguf in Resources */,
+				5557C42C2BF3C9140048F976 /* zenz-v2-Q5_K_M.gguf in Resources */,
 				1A41E61C26E745DD009B65D7 /* Assets.xcassets in Resources */,
 				55A27D022BAAADDB00512DCD /* InfoPlist.strings in Resources */,
 			);
@@ -790,7 +790,7 @@
 			repositoryURL = "https://github.com/ensan-hcl/AzooKeyKanaKanjiConverter";
 			requirement = {
 				kind = revision;
-				revision = 596e4701f8d35f4dd3d38a3a40165e619e0502c2;
+				revision = 60e4578045a54a1d80511447aa3d67f56a95731b;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

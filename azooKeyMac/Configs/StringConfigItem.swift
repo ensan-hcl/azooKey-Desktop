@@ -25,3 +25,9 @@ extension Config {
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.OpenAiApiKey"
     }
 }
+
+extension Config {
+    struct ZenzaiProfile: StringConfigItem {
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.ZenzaiProfile"
+    }
+}
