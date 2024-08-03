@@ -34,11 +34,9 @@ class azooKeyMacInputController: IMKInputController {
     var englishConversionToggleMenuItem: NSMenuItem
 
     private var displayedTextInComposingMode: String?
-    private var candidatesWindow: IMKCandidates {
-        (
-            NSApplication.shared.delegate as? AppDelegate
-        )!.candidatesWindow
-    }
+    private var candidatesWindow: NSWindow
+    private var candidatesViewController: CandidatesViewController
+
     @MainActor private var kanaKanjiConverter: KanaKanjiConverter {
         (
             NSApplication.shared.delegate as? AppDelegate
@@ -81,6 +79,12 @@ class azooKeyMacInputController: IMKInputController {
         self.zenzaiToggleMenuItem = NSMenuItem()
         self.liveConversionToggleMenuItem = NSMenuItem()
         self.englishConversionToggleMenuItem = NSMenuItem()
+
+        // Initialize the candidates window
+        self.candidatesViewController = CandidatesViewController()
+        self.candidatesWindow = NSWindow(contentViewController: self.candidatesViewController)
+        self.candidatesWindow.level = .popUpMenu
+
         super.init(server: server, delegate: delegate, client: inputClient)
         self.setupMenu()
     }
@@ -89,13 +93,9 @@ class azooKeyMacInputController: IMKInputController {
     override func activateServer(_ sender: Any!) {
         super.activateServer(sender)
         // MARK: this is required to move the window front of the spotlight panel
-        self.candidatesWindow.perform(
-            Selector(("setWindowLevel:")),
-            with: Int(max(
-                CGShieldingWindowLevel(),
-                kCGPopUpMenuWindowLevel
-            ))
-        )
+        self.candidatesWindow.level = .popUpMenu
+        self.candidatesWindow.orderFront(nil)
+
         // アプリケーションサポートのディレクトリを準備しておく
         self.prepareApplicationSupportDirectory()
         self.updateZenzaiToggleMenuItem(newValue: self.zenzaiEnabled)
@@ -112,7 +112,7 @@ class azooKeyMacInputController: IMKInputController {
         self.kanaKanjiConverter.stopComposition()
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
-        self.candidatesWindow.hide()
+        self.candidatesWindow.orderOut(nil)
         self.rawCandidates = nil
         self.displayedTextInComposingMode = nil
         self.composingText.stopComposition()
@@ -193,8 +193,12 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     func showCandidateWindow() {
-        self.candidatesWindow.update()
-        self.candidatesWindow.show()
+        self.candidatesViewController.updateCandidates(self.rawCandidates?.mainResults.map { $0.text } ?? [])
+        self.candidatesWindow.orderFront(nil)
+    }
+
+    func hideCandidateWindow() {
+        self.candidatesWindow.orderOut(nil)
     }
 
     @MainActor func handleClientAction(_ clientAction: ClientAction, client: IMKTextInput) -> Bool {
@@ -203,7 +207,7 @@ class azooKeyMacInputController: IMKInputController {
         case .showCandidateWindow:
             self.showCandidateWindow()
         case .hideCandidateWindow:
-            self.candidatesWindow.hide()
+            self.hideCandidateWindow()
         case .selectInputMode(let mode):
             client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
             switch mode {
@@ -214,7 +218,7 @@ class azooKeyMacInputController: IMKInputController {
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
             }
         case .appendToMarkedText(let string):
-            self.candidatesWindow.hide()
+            self.hideCandidateWindow()
             self.composingText.insertAtCursorPosition(string, inputStyle: .roman2kana)
             self.updateRawCandidate()
             // Live Conversion
@@ -238,7 +242,7 @@ class azooKeyMacInputController: IMKInputController {
             }
             self.kanaKanjiConverter.stopComposition()
             self.composingText.stopComposition()
-            self.candidatesWindow.hide()
+            self.hideCandidateWindow()
             self.displayedTextInComposingMode = nil
         case .submitSelectedCandidate:
             let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
@@ -258,7 +262,7 @@ class azooKeyMacInputController: IMKInputController {
                 self.rawCandidates = nil
                 self.kanaKanjiConverter.stopComposition()
                 self.composingText.stopComposition()
-                self.candidatesWindow.hide()
+                self.hideCandidateWindow()
             } else {
                 self.inputState = .selecting(rangeAdjusted: false)
                 self.updateRawCandidate()
@@ -270,7 +274,7 @@ class azooKeyMacInputController: IMKInputController {
                 self.showCandidateWindow()
             }
         case .removeLastMarkedText:
-            self.candidatesWindow.hide()
+            self.hideCandidateWindow()
             self.composingText.deleteBackwardFromCursorPosition(count: 1)
             self.updateMarkedTextInComposingMode(text: self.composingText.convertTarget, client: client)
             if self.composingText.isEmpty {
@@ -281,12 +285,12 @@ class azooKeyMacInputController: IMKInputController {
         case .fallthrough:
             return false
         case .forwardToCandidateWindow(let event):
-            self.candidatesWindow.interpretKeyEvents([event])
+            self.candidatesViewController.interpretKeyEvents([event])
         case .stopComposition:
             self.updateMarkedTextInComposingMode(text: "", client: client)
             self.composingText.stopComposition()
             self.kanaKanjiConverter.stopComposition()
-            self.candidatesWindow.hide()
+            self.hideCandidateWindow()
             self.displayedTextInComposingMode = nil
         case .sequence(let actions):
             var found = false
