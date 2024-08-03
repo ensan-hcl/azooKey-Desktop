@@ -40,4 +40,3 @@ struct ConfigState<Item: ConfigItem>: DynamicProperty {
         )
     }
 }
-

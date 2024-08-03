@@ -45,14 +45,24 @@ class azooKeyMacInputController: IMKInputController {
         )!.kanaKanjiConverter
     }
     private var rawCandidates: ConversionResult?
-    private var zenzaiMode: ConvertRequestOptions.ZenzaiMode {
-        self.zenzaiEnabled ? .on(
-            weight: Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/ggml-model-Q8_0.gguf", isDirectory: false),
-            inferenceLimit: Config.ZenzaiInferenceLimit().value
-        ) : .off
+    private func zenzaiMode(leftSideContext: String?) -> ConvertRequestOptions.ZenzaiMode {
+        if self.zenzaiEnabled {
+            return .on(
+                weight: Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/zenz-v2-Q5_K_M.gguf", isDirectory: false),
+                inferenceLimit: Config.ZenzaiInferenceLimit().value,
+                versionDependentMode: .v2(
+                    .init(
+                        profile: Config.ZenzaiProfile().value,
+                        leftSideContext: leftSideContext
+                    )
+                )
+            )
+        } else {
+            return .off
+        }
     }
 
-    private var options: ConvertRequestOptions {
+    private func options(leftSideContext: String? = nil) -> ConvertRequestOptions {
         .withDefaultDictionary(
             requireJapanesePrediction: false,
             requireEnglishPrediction: false,
@@ -61,7 +71,7 @@ class azooKeyMacInputController: IMKInputController {
             learningType: Config.Learning().value.learningType,
             memoryDirectoryURL: self.azooKeyMemoryDir,
             sharedContainerURL: self.azooKeyMemoryDir,
-            zenzaiMode: self.zenzaiMode,
+            zenzaiMode: self.zenzaiMode(leftSideContext: leftSideContext),
             metadata: .init(versionString: "azooKey on macOS / α version")
         )
     }
@@ -91,7 +101,7 @@ class azooKeyMacInputController: IMKInputController {
         self.updateZenzaiToggleMenuItem(newValue: self.zenzaiEnabled)
         self.updateLiveConversionToggleMenuItem(newValue: self.liveConversionEnabled)
         self.updateEnglishConversionToggleMenuItem(newValue: self.englishConversionEnabled)
-        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
+        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
         if let client = sender as? IMKTextInput {
             client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
         }
@@ -100,7 +110,7 @@ class azooKeyMacInputController: IMKInputController {
     @MainActor
     override func deactivateServer(_ sender: Any!) {
         self.kanaKanjiConverter.stopComposition()
-        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
+        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
         self.candidatesWindow.hide()
         self.rawCandidates = nil
@@ -292,8 +302,25 @@ class azooKeyMacInputController: IMKInputController {
 
     @MainActor private func updateRawCandidate() {
         let prefixComposingText = self.composingText.prefixToCursorPosition()
-        let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options)
+        let endIndex = client().markedRange().location
+        // 取得する範囲をかなり狭く絞った
+        let leftRange = NSRange(location: max(endIndex - 30, 0), length: min(endIndex, 30))
+        var actual = NSRange()
+        // 同じ行の文字のみコンテキストに含める
+        let leftSideContext = self.client().string(from: leftRange, actualRange: &actual).map {
+            var last = $0.split(separator: "\n", omittingEmptySubsequences: false).last ?? $0[...]
+            // 空白を削除する
+            while last.first?.isWhitespace ?? false {
+                last = last.dropFirst()
+            }
+            while last.last?.isWhitespace ?? false {
+                last = last.dropLast()
+            }
+            return String(last)
+        }
+        let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options(leftSideContext: leftSideContext))
         self.rawCandidates = result
+//        self.rawCandidates?.mainResults.append(Candidate(text: String((leftSideContext ?? "No Context").suffix(20)), value: .zero, correspondingCount: 0, lastMid: 0, data: []))
     }
 
     /// function to provide candidates
