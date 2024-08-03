@@ -35,6 +35,12 @@ class CandidatesViewController: NSViewController {
         self.tableView.dataSource = self
     }
 
+    func updateCandidates(_ candidates: [String], cursorLocation: CGPoint) {
+        self.candidates = candidates
+        self.tableView.reloadData()
+        self.resizeWindowToFitContent(cursorLocation: cursorLocation)
+    }
+
     func updateComposingText(_ text: String) {
         self.composingTextField.stringValue = text
     }
@@ -43,14 +49,7 @@ class CandidatesViewController: NSViewController {
         // Implement key event handling to navigate and select candidates
     }
 
-    func updateCandidates(_ candidates: [String]) {
-        self.candidates = candidates
-        self.tableView.reloadData()
-        self.resizeWindowToFitContent()
-    }
-
-
-    private func resizeWindowToFitContent() {
+    private func resizeWindowToFitContent(cursorLocation: CGPoint) {
         guard let window = self.view.window else { return }
 
         // Calculate the height needed for the table view content
@@ -65,16 +64,20 @@ class CandidatesViewController: NSViewController {
         let totalHeight = composingTextFieldHeight + stackViewSpacing + tableViewHeight
 
         // Set the new window size
+        // cursorLocationはカーソル位置
+        // window.frame.originはウィンドウの左下の位置になる
+        // cursorLocationは左上になってほしいので、window.frame.originをheightの分引いてあげる
         var newWindowFrame = window.frame
+        newWindowFrame.origin = cursorLocation
         if numberOfRows != 0 {
             newWindowFrame.size.width = min(newWindowFrame.size.width, 400)
         }
         let contentRect = window.contentRect(forFrameRect: newWindowFrame)
         let heightAdjustment = totalHeight - contentRect.height
         newWindowFrame.size.height += heightAdjustment
-        newWindowFrame.origin.y -= heightAdjustment
+        newWindowFrame.origin.y -= newWindowFrame.size.height
 
-        window.setFrame(newWindowFrame, display: true, animate: true)
+        window.setFrame(newWindowFrame, display: true, animate: false)
     }
 }
 
