@@ -35,17 +35,46 @@ class CandidatesViewController: NSViewController {
         self.tableView.dataSource = self
     }
 
-    func updateCandidates(_ candidates: [String]) {
-        self.candidates = candidates
-        self.tableView.reloadData()
-    }
-
     func updateComposingText(_ text: String) {
         self.composingTextField.stringValue = text
     }
 
     override func interpretKeyEvents(_ events: [NSEvent]) {
         // Implement key event handling to navigate and select candidates
+    }
+
+    func updateCandidates(_ candidates: [String]) {
+        self.candidates = candidates
+        self.tableView.reloadData()
+        self.resizeWindowToFitContent()
+    }
+
+
+    private func resizeWindowToFitContent() {
+        guard let window = self.view.window else { return }
+
+        // Calculate the height needed for the table view content
+        let numberOfRows = min(10, self.tableView.numberOfRows)
+        let rowHeight = self.tableView.rowHeight
+        let intercellSpacing = self.tableView.intercellSpacing.height
+        let tableViewHeight = CGFloat(numberOfRows) * (rowHeight + intercellSpacing)
+
+        // Calculate the total height of the stack view (composing text field + table view)
+        let composingTextFieldHeight = self.composingTextField.intrinsicContentSize.height
+        let stackViewSpacing = (self.view as! NSStackView).spacing
+        let totalHeight = composingTextFieldHeight + stackViewSpacing + tableViewHeight
+
+        // Set the new window size
+        var newWindowFrame = window.frame
+        if numberOfRows != 0 {
+            newWindowFrame.size.width = min(newWindowFrame.size.width, 400)
+        }
+        let contentRect = window.contentRect(forFrameRect: newWindowFrame)
+        let heightAdjustment = totalHeight - contentRect.height
+        newWindowFrame.size.height += heightAdjustment
+        newWindowFrame.origin.y -= heightAdjustment
+
+        window.setFrame(newWindowFrame, display: true, animate: true)
     }
 }
 
