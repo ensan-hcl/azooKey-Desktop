@@ -60,8 +60,12 @@
 				<string>main.tiff</string>
 				<key>tsInputModeMenuIconFileKey</key>
 				<string>main.tiff</string>
+				<key>tsInputMethodAlternateIconFileKey</key>
+				<string>main.tiff</string>
 				<key>TISIntendedLanguage</key>
 				<string>ja</string>
+				<key>TISIconIsTemplate</key>
+				<true/>
 			</dict>
 		</dict>
 	</dict>
