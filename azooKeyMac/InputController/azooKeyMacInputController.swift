@@ -83,7 +83,9 @@ class azooKeyMacInputController: IMKInputController {
         // Initialize the candidates window
         self.candidatesViewController = CandidatesViewController()
         self.candidatesWindow = NSWindow(contentViewController: self.candidatesViewController)
+        self.candidatesWindow.styleMask = [.borderless, .resizable]
         self.candidatesWindow.level = .popUpMenu
+        self.candidatesWindow.setFrame(NSRect(x: 0, y: 0, width: 400, height: 200), display: true)
 
         super.init(server: server, delegate: delegate, client: inputClient)
         self.setupMenu()
@@ -95,6 +97,8 @@ class azooKeyMacInputController: IMKInputController {
         // MARK: this is required to move the window front of the spotlight panel
         self.candidatesWindow.level = .popUpMenu
         self.candidatesWindow.orderFront(nil)
+        self.candidatesWindow.setFrame(NSRect(x: 0, y: 0, width: 400, height: 200), display: true)
+        self.candidatesViewController.updateCandidates([])
 
         // アプリケーションサポートのディレクトリを準備しておく
         self.prepareApplicationSupportDirectory()
@@ -113,6 +117,7 @@ class azooKeyMacInputController: IMKInputController {
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
         self.candidatesWindow.orderOut(nil)
+        self.candidatesViewController.updateCandidates([])
         self.rawCandidates = nil
         self.displayedTextInComposingMode = nil
         self.composingText.stopComposition()
