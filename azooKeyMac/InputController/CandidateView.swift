@@ -11,7 +11,6 @@ import Cocoa
 class CandidatesViewController: NSViewController {
     private var candidates: [String] = []
     private var tableView: NSTableView!
-    private var composingTextField: NSTextField!
     weak var delegate: (any CandidatesViewControllerDelegate)?
 
     override func loadView() {
@@ -23,10 +22,7 @@ class CandidatesViewController: NSViewController {
         // グリッドスタイルを設定してセル間に水平線を表示
         self.tableView.gridStyleMask = .solidHorizontalGridLineMask
 
-        self.composingTextField = NSTextField(labelWithString: "")
-        self.composingTextField.font = NSFont.systemFont(ofSize: 16)
-
-        let stackView = NSStackView(views: [self.composingTextField, scrollView])
+        let stackView = NSStackView(views: [scrollView])
         stackView.orientation = .vertical
         stackView.spacing = 10
         self.view = stackView
@@ -50,7 +46,7 @@ class CandidatesViewController: NSViewController {
     }
 
     func updateComposingText(_ text: String) {
-        self.composingTextField.stringValue = text
+        // pass
     }
 
     private func resizeWindowToFitContent(cursorLocation: CGPoint) {
@@ -61,9 +57,8 @@ class CandidatesViewController: NSViewController {
         let intercellSpacing = self.tableView.intercellSpacing.height
         let tableViewHeight = CGFloat(numberOfRows) * (rowHeight + intercellSpacing)
 
-        let composingTextFieldHeight = self.composingTextField.intrinsicContentSize.height
         let stackViewSpacing = (self.view as! NSStackView).spacing
-        let totalHeight = composingTextFieldHeight + stackViewSpacing + tableViewHeight
+        let totalHeight = stackViewSpacing + tableViewHeight
 
         var newWindowFrame = window.frame
         newWindowFrame.origin = cursorLocation
