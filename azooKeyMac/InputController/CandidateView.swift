@@ -15,7 +15,7 @@ class CandidatesViewController: NSViewController {
 
     override func loadView() {
         let scrollView = NSScrollView()
-        self.tableView = NSTableView()
+        self.tableView = NonClickableTableView()
         scrollView.documentView = self.tableView
         scrollView.hasVerticalScroller = true
 
@@ -156,6 +156,21 @@ extension CandidatesViewController: NSTableViewDelegate, NSTableViewDataSource {
         return cell
     }
 }
+
+class NonClickableTableView: NSTableView {
+    override func rightMouseDown(with event: NSEvent) {
+        // 右クリックイベントを無視
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        // 左クリックイベントも無視する場合はこのメソッド内を空に
+    }
+
+    override func otherMouseDown(with event: NSEvent) {
+        // 中クリックなどその他のマウスボタンのクリックも無視
+    }
+}
+
 
 class CandidateTableCellView: NSTableCellView {
     let candidateTextField: NSTextField
