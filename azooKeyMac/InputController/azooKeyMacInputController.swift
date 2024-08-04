@@ -286,6 +286,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
                 self.rawCandidates = nil
                 self.kanaKanjiConverter.stopComposition()
                 self.composingText.stopComposition()
+                self.candidatesViewController.clearCandidates()
                 self.hideCandidateWindow()
             } else {
                 self.inputState = .selecting(rangeAdjusted: false)
@@ -348,7 +349,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         }
         let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options(leftSideContext: leftSideContext))
         self.rawCandidates = result
-//        self.rawCandidates?.mainResults.append(Candidate(text: String((leftSideContext ?? "No Context").suffix(20)), value: .zero, correspondingCount: 0, lastMid: 0, data: []))
+        //        self.rawCandidates?.mainResults.append(Candidate(text: String((leftSideContext ?? "No Context").suffix(20)), value: .zero, correspondingCount: 0, lastMid: 0, data: []))
     }
 
     /// function to provide candidates
@@ -395,28 +396,21 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         )
     }
 
-    @MainActor override func candidateSelected(_ candidateString: NSAttributedString!) {
-        self.updateMarkedTextWithCandidate(candidateString.string)
-        self.selectedCandidate = candidateString.string
-    }
-
-    @MainActor override func candidateSelectionChanged(_ candidateString: NSAttributedString!) {
-        self.updateMarkedTextWithCandidate(candidateString.string)
-        self.selectedCandidate = candidateString.string
-    }
-
     @MainActor private func update(with candidate: Candidate) {
         self.kanaKanjiConverter.setCompletedData(candidate)
         self.kanaKanjiConverter.updateLearningData(candidate)
     }
 
-    func candidateSelected(_ candidate: String) {
-        Task { @MainActor in
-            self.selectedCandidate = candidate
-            self.inputState = .composing
-            if let client = self.client() {
-                _ = self.handleClientAction(.submitSelectedCandidate, client: client)
-            }
+    @MainActor func candidateSelected(_ candidate: String) {
+        self.selectedCandidate = candidate
+        self.inputState = .none
+        if let client = self.client() {
+            _ = self.handleClientAction(.submitSelectedCandidate, client: client)
         }
+    }
+
+    @MainActor func candidateSelectionChanged(_ candidateString: String) {
+        self.updateMarkedTextWithCandidate(candidateString)
+        self.selectedCandidate = candidateString
     }
 }

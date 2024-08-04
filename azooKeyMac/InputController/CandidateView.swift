@@ -41,6 +41,11 @@ class CandidatesViewController: NSViewController {
         self.resizeWindowToFitContent(cursorLocation: cursorLocation)
     }
 
+    func clearCandidates() {
+        self.candidates = []
+        self.tableView.reloadData()
+    }
+
     func updateComposingText(_ text: String) {
         self.composingTextField.stringValue = text
     }
@@ -95,9 +100,14 @@ class CandidatesViewController: NSViewController {
 
     private func selectCandidate(at offset: Int) {
         let selectedRow = self.tableView.selectedRow
+        if selectedRow + offset < 0 {
+            return
+        }
         let nextRow = (selectedRow + offset) % self.candidates.count
         self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
         self.tableView.scrollRowToVisible(nextRow)
+        let selectedCandidate = self.candidates[nextRow]
+        self.delegate?.candidateSelectionChanged(selectedCandidate)
     }
 
     private func confirmCandidateSelection() {
@@ -151,4 +161,5 @@ class CandidateTableCellView: NSTableCellView {
 
 protocol CandidatesViewControllerDelegate: AnyObject {
     func candidateSelected(_ candidate: String)
+    func candidateSelectionChanged(_ candidateString: String)
 }
