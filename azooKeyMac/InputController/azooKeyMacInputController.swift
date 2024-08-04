@@ -217,6 +217,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         var rect: NSRect = .zero
         self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
         self.candidatesViewController.updateCandidates(self.rawCandidates?.mainResults.map { $0.text } ?? [], cursorLocation: rect.origin)
+        self.candidatesViewController.selectFirstCandidate()
         self.candidatesWindow.orderFront(nil)
     }
 
@@ -269,35 +270,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             self.hideCandidateWindow()
             self.displayedTextInComposingMode = nil
         case .submitSelectedCandidate:
-            let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
-            client.insertText(candidateString, replacementRange: NSRange(location: NSNotFound, length: 0))
-            guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
-                self.kanaKanjiConverter.stopComposition()
-                self.composingText.stopComposition()
-                self.rawCandidates = nil
-                return true
-            }
-            // アプリケーションサポートのディレクトリを準備しておく
-            self.update(with: candidate)
-            self.composingText.prefixComplete(correspondingCount: candidate.correspondingCount)
-
-            self.selectedCandidate = nil
-            if self.composingText.isEmpty {
-                self.rawCandidates = nil
-                self.kanaKanjiConverter.stopComposition()
-                self.composingText.stopComposition()
-                self.candidatesViewController.clearCandidates()
-                self.hideCandidateWindow()
-            } else {
-                self.inputState = .selecting(rangeAdjusted: false)
-                self.updateRawCandidate()
-                client.setMarkedText(
-                    NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
-                    selectionRange: .notFound,
-                    replacementRange: NSRange(location: NSNotFound, length: 0)
-                )
-                self.showCandidateWindow()
-            }
+            self.candidatesViewController.confirmCandidateSelection()
         case .removeLastMarkedText:
             self.hideCandidateWindow()
             self.composingText.deleteBackwardFromCursorPosition(count: 1)
@@ -309,8 +282,10 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             return true
         case .fallthrough:
             return false
-        case .forwardToCandidateWindow(let event):
-            self.candidatesViewController.interpretKeyEvents([event])
+        case .selectPrevCandidate:
+            self.candidatesViewController.selectCandidate(offset: -1)
+        case .selectNextCandidate:
+            self.candidatesViewController.selectCandidate(offset: 1)
         case .stopComposition:
             self.updateMarkedTextInComposingMode(text: "", client: client)
             self.composingText.stopComposition()
@@ -405,7 +380,35 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         self.selectedCandidate = candidate
         self.inputState = .none
         if let client = self.client() {
-            _ = self.handleClientAction(.submitSelectedCandidate, client: client)
+            let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
+            client.insertText(candidateString, replacementRange: NSRange(location: NSNotFound, length: 0))
+            guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
+                self.kanaKanjiConverter.stopComposition()
+                self.composingText.stopComposition()
+                self.rawCandidates = nil
+                return
+            }
+            // アプリケーションサポートのディレクトリを準備しておく
+            self.update(with: candidate)
+            self.composingText.prefixComplete(correspondingCount: candidate.correspondingCount)
+
+            self.selectedCandidate = nil
+            if self.composingText.isEmpty {
+                self.rawCandidates = nil
+                self.kanaKanjiConverter.stopComposition()
+                self.composingText.stopComposition()
+                self.candidatesViewController.clearCandidates()
+                self.hideCandidateWindow()
+            } else {
+                self.inputState = .selecting(rangeAdjusted: false)
+                self.updateRawCandidate()
+                client.setMarkedText(
+                    NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
+                    selectionRange: .notFound,
+                    replacementRange: NSRange(location: NSNotFound, length: 0)
+                )
+                self.showCandidateWindow()
+            }
         }
     }
 

@@ -12,8 +12,11 @@ indirect enum ClientAction {
     case moveCursor(Int)
 
     case commitMarkedText
+    
     case submitSelectedCandidate
-    case forwardToCandidateWindow(NSEvent)
+    case selectNextCandidate
+    case selectPrevCandidate
+
     case selectInputMode(InputMode)
 
     case stopComposition

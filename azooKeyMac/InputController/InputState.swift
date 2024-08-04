@@ -72,21 +72,7 @@ enum InputState {
                 return .sequence([.submitSelectedCandidate, .appendToMarkedText(string)])
             case .enter:
                 self = .none
-                return .forwardToCandidateWindow(
-                    .keyEvent(
-                        with: .keyDown,
-                        location: event.locationInWindow,
-                        modifierFlags: event.modifierFlags,
-                        timestamp: event.timestamp,
-                        windowNumber: event.windowNumber,
-                        context: nil,
-                        characters: " ",
-                        charactersIgnoringModifiers: " ",
-                        isARepeat: event.isARepeat,
-                        keyCode: 36
-                    ) ?? event
-
-                )
+                return .submitSelectedCandidate
             case .backspace:
                 self = .composing
                 return .removeLastMarkedText
@@ -94,20 +80,7 @@ enum InputState {
                 self = .composing
                 return .hideCandidateWindow
             case .space:
-                return .forwardToCandidateWindow(
-                    .keyEvent(
-                        with: .keyDown,
-                        location: event.locationInWindow,
-                        modifierFlags: event.modifierFlags,
-                        timestamp: event.timestamp,
-                        windowNumber: event.windowNumber,
-                        context: nil,
-                        characters: " ",
-                        charactersIgnoringModifiers: " ",
-                        isARepeat: event.isARepeat,
-                        keyCode: 49
-                    ) ?? event
-                )
+                return .selectNextCandidate
             case .navigation(let direction):
                 if direction == .right {
                     if event.modifierFlags.contains(.shift) {
@@ -123,8 +96,12 @@ enum InputState {
                 } else if direction == .left && event.modifierFlags.contains(.shift) {
                     self = .selecting(rangeAdjusted: true)
                     return .sequence([.moveCursor(-1), .showCandidateWindow])
+                } else if direction == .down {
+                    return .selectNextCandidate
+                } else if direction == .up {
+                    return .selectPrevCandidate
                 } else {
-                    return .forwardToCandidateWindow(event)
+                    return .consume
                 }
             case .かな:
                 return .selectInputMode(.japanese)

@@ -50,29 +50,6 @@ class CandidatesViewController: NSViewController {
         self.composingTextField.stringValue = text
     }
 
-    override func interpretKeyEvents(_ events: [NSEvent]) {
-        for event in events {
-            if event.type == .keyDown {
-                switch event.keyCode {
-                case 49: // Space key = Next Candidate
-                    self.selectCandidate(at: 1)
-                case 36: // Enter key
-                    self.confirmCandidateSelection()
-                case 123: // Left = Do nothing
-                    break
-                case 124: // Right = Submit
-                    self.confirmCandidateSelection()
-                case 125: // Down = Next Candidate
-                    self.selectCandidate(at: 1)
-                case 126: // Up = Previous Candidate
-                    self.selectCandidate(at: -1)
-                default:
-                    break
-                }
-            }
-        }
-    }
-
     private func resizeWindowToFitContent(cursorLocation: CGPoint) {
         guard let window = self.view.window else { return }
 
@@ -98,7 +75,7 @@ class CandidatesViewController: NSViewController {
         window.setFrame(newWindowFrame, display: true, animate: false)
     }
 
-    private func selectCandidate(at offset: Int) {
+    func selectCandidate(offset: Int) {
         let selectedRow = self.tableView.selectedRow
         if selectedRow + offset < 0 {
             return
@@ -110,7 +87,18 @@ class CandidatesViewController: NSViewController {
         self.delegate?.candidateSelectionChanged(selectedCandidate)
     }
 
-    private func confirmCandidateSelection() {
+    func selectFirstCandidate() {
+        guard !self.candidates.isEmpty else {
+            return
+        }
+        let nextRow = 0
+        self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
+        self.tableView.scrollRowToVisible(nextRow)
+        let selectedCandidate = self.candidates[nextRow]
+        self.delegate?.candidateSelectionChanged(selectedCandidate)
+    }
+
+    func confirmCandidateSelection() {
         let selectedRow = self.tableView.selectedRow
         if selectedRow >= 0 && selectedRow < self.candidates.count {
             let selectedCandidate = self.candidates[selectedRow]
