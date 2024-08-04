@@ -20,6 +20,9 @@ class CandidatesViewController: NSViewController {
         scrollView.documentView = self.tableView
         scrollView.hasVerticalScroller = true
 
+        // グリッドスタイルを設定してセル間に水平線を表示
+        self.tableView.gridStyleMask = .solidHorizontalGridLineMask
+
         self.composingTextField = NSTextField(labelWithString: "")
         self.composingTextField.font = NSFont.systemFont(ofSize: 16)
 
