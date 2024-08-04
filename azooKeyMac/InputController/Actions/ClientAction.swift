@@ -27,4 +27,6 @@ indirect enum ClientAction {
     }
 
     case sequence([ClientAction])
+
+    case selectNumberCandidate(Int)
 }

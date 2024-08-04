@@ -286,6 +286,9 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             self.candidatesViewController.selectCandidate(offset: -1)
         case .selectNextCandidate:
             self.candidatesViewController.selectCandidate(offset: 1)
+        case .selectNumberCandidate(let num):
+            self.candidatesViewController.selectCandidate(offset: num - 1)
+            self.candidatesViewController.confirmCandidateSelection()
         case .stopComposition:
             self.updateMarkedTextInComposingMode(text: "", client: client)
             self.composingText.stopComposition()
