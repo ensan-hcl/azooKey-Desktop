@@ -21,7 +21,7 @@ class CandidatesViewController: NSViewController {
         scrollView.hasVerticalScroller = true
 
         self.composingTextField = NSTextField(labelWithString: "")
-        self.composingTextField.font = NSFont.systemFont(ofSize: 14)
+        self.composingTextField.font = NSFont.systemFont(ofSize: 16)
 
         let stackView = NSStackView(views: [self.composingTextField, scrollView])
         stackView.orientation = .vertical
