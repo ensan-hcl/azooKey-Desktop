@@ -92,6 +92,9 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         }
         rect.size = .init(width: 400, height: 200)
         self.candidatesWindow.setFrame(rect, display: true)
+        // init直後はこれを表示しない
+        self.candidatesWindow.setIsVisible(false)
+        self.candidatesWindow.orderOut(nil)
         super.init(server: server, delegate: delegate, client: inputClient)
 
         // デリゲートの設定を super.init の後に移動
@@ -120,6 +123,8 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         } else {
             self.candidatesViewController.updateCandidates([], cursorLocation: .zero)
         }
+        // activate直後はwindowをhideする
+        self.hideCandidateWindow()
     }
 
     @MainActor
@@ -216,6 +221,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
     }
 
     func hideCandidateWindow() {
+        self.candidatesWindow.setIsVisible(false)
         self.candidatesWindow.orderOut(nil)
     }
 
