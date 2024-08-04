@@ -29,7 +29,7 @@ class CandidatesViewController: NSViewController {
         self.view = stackView
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("CandidatesColumn"))
-        column.title = "Candidates"
+        self.tableView.headerView = nil
         self.tableView.addTableColumn(column)
         self.tableView.delegate = self
         self.tableView.dataSource = self
