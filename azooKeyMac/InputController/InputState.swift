@@ -72,7 +72,21 @@ enum InputState {
                 return .sequence([.submitSelectedCandidate, .appendToMarkedText(string)])
             case .enter:
                 self = .none
-                return .submitSelectedCandidate
+                return .forwardToCandidateWindow(
+                    .keyEvent(
+                        with: .keyDown,
+                        location: event.locationInWindow,
+                        modifierFlags: event.modifierFlags,
+                        timestamp: event.timestamp,
+                        windowNumber: event.windowNumber,
+                        context: nil,
+                        characters: " ",
+                        charactersIgnoringModifiers: " ",
+                        isARepeat: event.isARepeat,
+                        keyCode: 36
+                    ) ?? event
+
+                )
             case .backspace:
                 self = .composing
                 return .removeLastMarkedText
