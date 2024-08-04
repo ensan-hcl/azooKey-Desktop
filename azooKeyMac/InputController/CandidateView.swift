@@ -12,6 +12,7 @@ class CandidatesViewController: NSViewController {
     private var candidates: [String] = []
     private var tableView: NSTableView!
     weak var delegate: (any CandidatesViewControllerDelegate)?
+    private var currentSelectedRow: Int = -1
 
     override func loadView() {
         let scrollView = NSScrollView()
@@ -71,8 +72,32 @@ class CandidatesViewController: NSViewController {
 
     func updateCandidates(_ candidates: [String], cursorLocation: CGPoint) {
         self.candidates = candidates
+        self.currentSelectedRow = -1  // 選択をリセット
         self.tableView.reloadData()
         self.resizeWindowToFitContent(cursorLocation: cursorLocation)
+        self.selectFirstCandidate()  // 最初の候補を選択
+    }
+
+    private func updateVisibleRows() {
+        let visibleRows = self.tableView.rows(in: self.tableView.visibleRect)
+        for row in visibleRows.lowerBound..<visibleRows.upperBound {
+            if let cellView = self.tableView.view(atColumn: 0, row: row, makeIfNecessary: false) as? CandidateTableCellView {
+                self.updateCellView(cellView, forRow: row)
+            }
+        }
+    }
+
+    private func updateCellView(_ cellView: CandidateTableCellView, forRow row: Int) {
+        let adjustedIndex = (row - self.currentSelectedRow + self.candidates.count) % self.candidates.count
+        var displayText = ""
+        if adjustedIndex == 0 {
+            displayText = "1. \(self.candidates[row])"
+        } else if adjustedIndex + 1 > 9 {
+            displayText = "    \(self.candidates[row])"
+        } else {
+            displayText = "\(adjustedIndex + 1). \(self.candidates[row])"
+        }
+        cellView.candidateTextField.stringValue = displayText
     }
 
     func clearCandidates() {
@@ -113,11 +138,17 @@ class CandidatesViewController: NSViewController {
         if selectedRow + offset < 0 {
             return
         }
-        let nextRow = (selectedRow + offset) % self.candidates.count
+        let nextRow = (selectedRow + offset + self.candidates.count) % self.candidates.count
         self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
         self.tableView.scrollRowToVisible(nextRow)
         let selectedCandidate = self.candidates[nextRow]
         self.delegate?.candidateSelectionChanged(selectedCandidate)
+
+        // 新しい選択行を設定
+        self.currentSelectedRow = nextRow
+
+        // 表示を更新
+        self.updateVisibleRows()
     }
 
     func selectFirstCandidate() {
@@ -129,6 +160,12 @@ class CandidatesViewController: NSViewController {
         self.tableView.scrollRowToVisible(nextRow)
         let selectedCandidate = self.candidates[nextRow]
         self.delegate?.candidateSelectionChanged(selectedCandidate)
+
+        // 新しい選択行を設定
+        self.currentSelectedRow = nextRow
+
+        // 表示を更新
+        self.updateVisibleRows()
     }
 
     func confirmCandidateSelection() {
@@ -152,7 +189,11 @@ extension CandidatesViewController: NSTableViewDelegate, NSTableViewDataSource {
             cell = CandidateTableCellView()
             cell?.identifier = cellIdentifier
         }
-        cell?.candidateTextField.stringValue = candidates[row]
+
+        if let cell = cell {
+            self.updateCellView(cell, forRow: row)
+        }
+
         return cell
     }
 }
