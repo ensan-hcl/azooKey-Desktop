@@ -26,7 +26,7 @@ enum InputState {
                 return .selectInputMode(.japanese)
             case .英数:
                 return .selectInputMode(.roman)
-            case .unknown, .navigation, .space, .backspace, .enter, .escape:
+            case .unknown, .navigation, .space, .backspace, .enter, .escape, .number(_):
                 return .fallthrough
             }
         case .composing:
@@ -62,7 +62,7 @@ enum InputState {
                     // ナビゲーションはハンドルしてしまう
                     return .consume
                 }
-            case .unknown:
+            case .unknown, .number(_):
                 return .fallthrough
             }
         case .selecting(let rangeAdjusted):
@@ -102,6 +102,29 @@ enum InputState {
                     return .selectPrevCandidate
                 } else {
                     return .consume
+                }
+            case .number(let num):
+                switch num{
+                case .one:
+                    return .selectNumberCandidate(1)
+                case .two:
+                    return .selectNumberCandidate(2)
+                case .three:
+                    return .selectNumberCandidate(3)
+                case .four:
+                    return .selectNumberCandidate(4)
+                case .five:
+                    return .selectNumberCandidate(5)
+                case .six:
+                    return .selectNumberCandidate(6)
+                case .seven:
+                    return .selectNumberCandidate(7)
+                case .eight:
+                    return .selectNumberCandidate(8)
+                case .nine:
+                    return .selectNumberCandidate(9)
+                default:
+                    return .fallthrough
                 }
             case .かな:
                 return .selectInputMode(.japanese)

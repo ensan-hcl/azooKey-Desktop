@@ -45,6 +45,26 @@ enum InputMode {
             return .navigation(.down)
         case 126: // Up
             return .navigation(.up)
+        case 18:
+            return .number(.one)
+        case 19:
+            return .number(.two)
+        case 20:
+            return .number(.three)
+        case 21:
+            return .number(.four)
+        case 23:
+            return .number(.five)
+        case 22:
+            return .number(.six)
+        case 26:
+            return .number(.seven)
+        case 28:
+            return .number(.eight)
+        case 25:
+            return .number(.nine)
+        case 29:
+            return .number(.zero)
         default:
             if let text = event.characters, isPrintable(text) {
                 return .input(KeyMap.h2zMap(text))
