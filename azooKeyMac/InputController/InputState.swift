@@ -80,27 +80,18 @@ enum InputState {
                 self = .composing
                 return .hideCandidateWindow
             case .space:
-                // Spaceは下矢印キーに、Shift + Spaceは上矢印キーにマップする
-                // 下矢印キー: \u{F701} / 125
-                // 上矢印キー: \u{F700} / 126
-                let (keyCode, characters) = if event.modifierFlags.contains(.shift) {
-                    (126 as UInt16, "\u{F700}")
-                } else {
-                    (125 as UInt16, "\u{F701}")
-                }
-                // 下矢印キーを押した場合と同等のイベントを作って送信する
                 return .forwardToCandidateWindow(
                     .keyEvent(
                         with: .keyDown,
                         location: event.locationInWindow,
-                        modifierFlags: event.modifierFlags.subtracting(.shift),  // シフトは除去する
+                        modifierFlags: event.modifierFlags,
                         timestamp: event.timestamp,
                         windowNumber: event.windowNumber,
                         context: nil,
-                        characters: characters,
-                        charactersIgnoringModifiers: characters,
+                        characters: " ",
+                        charactersIgnoringModifiers: " ",
                         isARepeat: event.isARepeat,
-                        keyCode: keyCode
+                        keyCode: 49
                     ) ?? event
                 )
             case .navigation(let direction):

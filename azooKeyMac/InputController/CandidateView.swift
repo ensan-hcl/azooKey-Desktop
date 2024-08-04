@@ -12,6 +12,7 @@ class CandidatesViewController: NSViewController {
     private var candidates: [String] = []
     private var tableView: NSTableView!
     private var composingTextField: NSTextField!
+    weak var delegate: (any CandidatesViewControllerDelegate)?
 
     override func loadView() {
         let scrollView = NSScrollView()
@@ -19,7 +20,6 @@ class CandidatesViewController: NSViewController {
         scrollView.documentView = self.tableView
         scrollView.hasVerticalScroller = true
 
-        // Set up the composing text field
         self.composingTextField = NSTextField(labelWithString: "")
         self.composingTextField.font = NSFont.systemFont(ofSize: 14)
 
@@ -46,27 +46,32 @@ class CandidatesViewController: NSViewController {
     }
 
     override func interpretKeyEvents(_ events: [NSEvent]) {
-        // Implement key event handling to navigate and select candidates
+        for event in events {
+            if event.type == .keyDown {
+                switch event.keyCode {
+                case 49: // Space key
+                    self.selectNextCandidate()
+                case 36: // Enter key
+                    self.confirmCandidateSelection()
+                default:
+                    break
+                }
+            }
+        }
     }
 
     private func resizeWindowToFitContent(cursorLocation: CGPoint) {
         guard let window = self.view.window else { return }
 
-        // Calculate the height needed for the table view content
         let numberOfRows = min(10, self.tableView.numberOfRows)
         let rowHeight = self.tableView.rowHeight
         let intercellSpacing = self.tableView.intercellSpacing.height
         let tableViewHeight = CGFloat(numberOfRows) * (rowHeight + intercellSpacing)
 
-        // Calculate the total height of the stack view (composing text field + table view)
         let composingTextFieldHeight = self.composingTextField.intrinsicContentSize.height
         let stackViewSpacing = (self.view as! NSStackView).spacing
         let totalHeight = composingTextFieldHeight + stackViewSpacing + tableViewHeight
 
-        // Set the new window size
-        // cursorLocationはカーソル位置
-        // window.frame.originはウィンドウの左下の位置になる
-        // cursorLocationは左上になってほしいので、window.frame.originをheightの分引いてあげる
         var newWindowFrame = window.frame
         newWindowFrame.origin = cursorLocation
         if numberOfRows != 0 {
@@ -78,6 +83,21 @@ class CandidatesViewController: NSViewController {
         newWindowFrame.origin.y -= newWindowFrame.size.height
 
         window.setFrame(newWindowFrame, display: true, animate: false)
+    }
+
+    private func selectNextCandidate() {
+        let selectedRow = self.tableView.selectedRow
+        let nextRow = (selectedRow + 1) % self.candidates.count
+        self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
+        self.tableView.scrollRowToVisible(nextRow)
+    }
+
+    private func confirmCandidateSelection() {
+        let selectedRow = self.tableView.selectedRow
+        if selectedRow >= 0 && selectedRow < self.candidates.count {
+            let selectedCandidate = self.candidates[selectedRow]
+            delegate?.candidateSelected(selectedCandidate)
+        }
     }
 }
 
@@ -98,7 +118,6 @@ extension CandidatesViewController: NSTableViewDelegate, NSTableViewDataSource {
     }
 }
 
-
 class CandidateTableCellView: NSTableCellView {
     let candidateTextField: NSTextField
 
@@ -107,7 +126,6 @@ class CandidateTableCellView: NSTableCellView {
         super.init(frame: frameRect)
         self.addSubview(self.candidateTextField)
 
-        // Configure the text field layout if necessary
         self.candidateTextField.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             self.candidateTextField.leadingAnchor.constraint(equalTo: self.leadingAnchor),
@@ -122,3 +140,7 @@ class CandidateTableCellView: NSTableCellView {
     }
 }
 
+
+protocol CandidatesViewControllerDelegate: AnyObject {
+    func candidateSelected(_ candidate: String)
+}

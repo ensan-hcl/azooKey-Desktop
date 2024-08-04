@@ -13,7 +13,7 @@ import KanaKanjiConverterModuleWithDefaultDictionary
 let applicationLogger: Logger = Logger(subsystem: "dev.ensan.inputmethod.azooKeyMac", category: "main")
 
 @objc(azooKeyMacInputController)
-class azooKeyMacInputController: IMKInputController {
+class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDelegate {
     private var composingText: ComposingText = ComposingText()
     private var selectedCandidate: String?
     private var inputState: InputState = .none
@@ -93,6 +93,9 @@ class azooKeyMacInputController: IMKInputController {
         rect.size = .init(width: 400, height: 200)
         self.candidatesWindow.setFrame(rect, display: true)
         super.init(server: server, delegate: delegate, client: inputClient)
+
+        // デリゲートの設定を super.init の後に移動
+        self.candidatesViewController.delegate = self
         self.setupMenu()
     }
 
@@ -399,5 +402,15 @@ class azooKeyMacInputController: IMKInputController {
     @MainActor private func update(with candidate: Candidate) {
         self.kanaKanjiConverter.setCompletedData(candidate)
         self.kanaKanjiConverter.updateLearningData(candidate)
+    }
+
+    func candidateSelected(_ candidate: String) {
+        Task { @MainActor in
+            self.selectedCandidate = candidate
+            self.inputState = .composing
+            if let client = self.client() {
+                _ = self.handleClientAction(.submitSelectedCandidate, client: client)
+            }
+        }
     }
 }
