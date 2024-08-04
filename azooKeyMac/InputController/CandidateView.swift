@@ -34,6 +34,41 @@ class CandidatesViewController: NSViewController {
         self.tableView.dataSource = self
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // 角丸のためのウィンドウ設定
+        configureWindowForRoundedCorners()
+    }
+
+    private func configureWindowForRoundedCorners() {
+        guard let window = self.view.window else { return }
+
+        // ウィンドウとそのコンテンツビューがレイヤーバックされるように設定
+        window.contentView?.wantsLayer = true
+        window.contentView?.layer?.masksToBounds = true
+
+        // ウィンドウをボーダーレスに設定
+        window.styleMask = [.borderless, .resizable, .closable, .titled]
+        window.isMovable = true
+        window.hasShadow = true
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+
+        // 角丸を適用
+        window.contentView?.layer?.cornerRadius = 10
+        window.backgroundColor = .clear
+
+        // 重要：黒い背景が角に見えないようにする
+        window.isOpaque = false
+    }
+
+    override func viewDidAppear() {
+        super.viewDidAppear()
+        configureWindowForRoundedCorners()
+    }
+
+
     func updateCandidates(_ candidates: [String], cursorLocation: CGPoint) {
         self.candidates = candidates
         self.tableView.reloadData()
