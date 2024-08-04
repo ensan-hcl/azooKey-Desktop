@@ -49,10 +49,18 @@ class CandidatesViewController: NSViewController {
         for event in events {
             if event.type == .keyDown {
                 switch event.keyCode {
-                case 49: // Space key
-                    self.selectNextCandidate()
+                case 49: // Space key = Next Candidate
+                    self.selectCandidate(at: 1)
                 case 36: // Enter key
                     self.confirmCandidateSelection()
+                case 123: // Left = Do nothing
+                    break
+                case 124: // Right = Submit
+                    self.confirmCandidateSelection()
+                case 125: // Down = Next Candidate
+                    self.selectCandidate(at: 1)
+                case 126: // Up = Previous Candidate
+                    self.selectCandidate(at: -1)
                 default:
                     break
                 }
@@ -85,9 +93,9 @@ class CandidatesViewController: NSViewController {
         window.setFrame(newWindowFrame, display: true, animate: false)
     }
 
-    private func selectNextCandidate() {
+    private func selectCandidate(at offset: Int) {
         let selectedRow = self.tableView.selectedRow
-        let nextRow = (selectedRow + 1) % self.candidates.count
+        let nextRow = (selectedRow + offset) % self.candidates.count
         self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
         self.tableView.scrollRowToVisible(nextRow)
     }
