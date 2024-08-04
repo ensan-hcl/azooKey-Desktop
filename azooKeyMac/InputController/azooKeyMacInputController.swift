@@ -150,7 +150,7 @@ class azooKeyMacInputController: IMKInputController {
         self.appMenu
     }
 
-    private func isPrintable(_ text: String) -> Bool {こんな感じ
+    private func isPrintable(_ text: String) -> Bool {
         let printable: CharacterSet = [.alphanumerics, .symbols, .punctuationCharacters]
             .reduce(into: CharacterSet()) {
                 $0.formUnion($1)
