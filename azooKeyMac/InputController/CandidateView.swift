@@ -129,6 +129,8 @@ class CandidateTableCellView: NSTableCellView {
 
     override init(frame frameRect: NSRect) {
         self.candidateTextField = NSTextField(labelWithString: "")
+        // font size
+        self.candidateTextField.font = NSFont.systemFont(ofSize: 16)
         super.init(frame: frameRect)
         self.addSubview(self.candidateTextField)
 
