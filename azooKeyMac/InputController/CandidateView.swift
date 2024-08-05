@@ -119,8 +119,18 @@ class CandidatesViewController: NSViewController {
         let stackViewSpacing = (self.view as! NSStackView).spacing
         let totalHeight = stackViewSpacing + tableViewHeight
 
+        // 候補の最大幅を計算
+        let maxWidth = candidates.reduce(0) { maxWidth, candidate in
+            let attributedString = NSAttributedString(string: candidate, attributes: [.font: NSFont.systemFont(ofSize: 16)])
+            let width = attributedString.size().width
+            return max(maxWidth, width)
+        }
+
+        // ウィンドウの幅を設定（番号とパディングのための追加幅を考慮）
+        let windowWidth = min(max(maxWidth + 50, 50), 400) // 最小200px、最大400px
+
         var newWindowFrame = window.frame
-        newWindowFrame.size.width = min(newWindowFrame.size.width, 400)
+        newWindowFrame.size.width = windowWidth
         newWindowFrame.size.height = totalHeight
 
         // 画面のサイズを取得
