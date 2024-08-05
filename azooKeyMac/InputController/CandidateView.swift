@@ -123,19 +123,23 @@ class CandidatesViewController: NSViewController {
         newWindowFrame.size.width = min(newWindowFrame.size.width, 400)
         newWindowFrame.size.height = totalHeight
 
-        // カーソルの位置に応じてウィンドウを上または下に表示
+        // 画面のサイズを取得
         let screenRect = screen.visibleFrame
         let cursorY = cursorLocation.y
 
         // カーソルの高さを考慮してウィンドウ位置を調整
-        let cursorHeight = 16 // カーソルの高さを16ピクセルと仮定
+        let cursorHeight: CGFloat = 16 // カーソルの高さを16ピクセルと仮定
 
+        // ウィンドウをカーソルの下に表示
         if cursorY - totalHeight < screenRect.origin.y {
-            // カーソルの上にウィンドウを表示
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + CGFloat(cursorHeight))
+            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + cursorHeight)
         } else {
-            // カーソルの下にウィンドウを表示
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - totalHeight - CGFloat(cursorHeight))
+            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - totalHeight - cursorHeight)
+        }
+
+        // 右端でウィンドウが画面外に出る場合は左にシフト
+        if newWindowFrame.maxX > screenRect.maxX {
+            newWindowFrame.origin.x = screenRect.maxX - newWindowFrame.width
         }
 
         window.setFrame(newWindowFrame, display: true, animate: false)
