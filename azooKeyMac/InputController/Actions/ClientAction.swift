@@ -15,6 +15,7 @@ indirect enum ClientAction {
     case submitSelectedCandidate
     case selectNextCandidate
     case selectPrevCandidate
+    case selectNumberCandidate(Int)
 
     case selectInputMode(InputMode)
 
@@ -26,6 +27,4 @@ indirect enum ClientAction {
     }
 
     case sequence([ClientAction])
-
-    case selectNumberCandidate(Int)
 }
