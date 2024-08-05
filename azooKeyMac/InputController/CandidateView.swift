@@ -163,7 +163,13 @@ class CandidatesViewController: NSViewController {
         }
         let nextRow = (selectedRow + offset + self.candidates.count) % self.candidates.count
         self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
-        self.tableView.scrollRowToVisible(nextRow)
+
+        // 表示範囲
+        if offset > 0{
+            self.tableView.scrollRowToVisible((selectedRow + offset + 9 + self.candidates.count) % self.candidates.count)
+        }else{
+            self.tableView.scrollRowToVisible((selectedRow + offset + self.candidates.count) % self.candidates.count)
+        }
         let selectedCandidate = self.candidates[nextRow]
         self.delegate?.candidateSelectionChanged(selectedCandidate)
 
