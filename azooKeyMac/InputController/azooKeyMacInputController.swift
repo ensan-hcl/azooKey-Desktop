@@ -112,9 +112,6 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         self.updateEnglishConversionToggleMenuItem(newValue: self.englishConversionEnabled)
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
 
-        // MARK: this is required to move the window front of the spotlight panel
-        self.candidatesWindow.level = .popUpMenu
-        self.candidatesWindow.orderFront(nil)
         if let client = sender as? IMKTextInput {
             client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
             var rect: NSRect = .zero
