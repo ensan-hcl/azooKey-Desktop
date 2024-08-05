@@ -21,17 +21,22 @@ enum InputState {
             case .input(let string):
                 self = .composing
                 return .appendToMarkedText(string)
+            case .number(let number):
+                self = .composing
+                return .appendToMarkedText(number.inputString)
             case .かな:
                 return .selectInputMode(.japanese)
             case .英数:
                 return .selectInputMode(.roman)
-            case .unknown, .navigation, .space, .backspace, .enter, .escape, .number:
+            case .unknown, .navigation, .space, .backspace, .enter, .escape:
                 return .fallthrough
             }
         case .composing:
             switch userAction {
             case .input(let string):
                 return .appendToMarkedText(string)
+            case .number(let number):
+                return .appendToMarkedText(number.inputString)
             case .backspace:
                 return .removeLastMarkedText
             case .enter:
@@ -61,7 +66,7 @@ enum InputState {
                     // ナビゲーションはハンドルしてしまう
                     return .consume
                 }
-            case .unknown, .number:
+            case .unknown:
                 return .fallthrough
             }
         case .selecting(let rangeAdjusted):
