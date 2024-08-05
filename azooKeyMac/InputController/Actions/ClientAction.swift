@@ -1,4 +1,3 @@
-
 import InputMethodKit
 
 indirect enum ClientAction {
@@ -12,8 +11,12 @@ indirect enum ClientAction {
     case moveCursor(Int)
 
     case commitMarkedText
+
     case submitSelectedCandidate
-    case forwardToCandidateWindow(NSEvent)
+    case selectNextCandidate
+    case selectPrevCandidate
+    case selectNumberCandidate(Int)
+
     case selectInputMode(InputMode)
 
     case stopComposition

@@ -28,7 +28,6 @@ class NSManualApplication: NSApplication {
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     var server = IMKServer()
-    var candidatesWindow = IMKCandidates()
     weak var configWindow: NSWindow?
     var configWindowController: NSWindowController?
     @MainActor var kanaKanjiConverter = KanaKanjiConverter()
@@ -62,7 +61,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Insert code here to initialize your application
         self.server = IMKServer(name: Bundle.main.infoDictionary?["InputMethodConnectionName"] as? String, bundleIdentifier: Bundle.main.bundleIdentifier)
-        self.candidatesWindow = IMKCandidates(server: server, panelType: kIMKSingleColumnScrollingCandidatePanel, styleType: kIMKMain)
         NSLog("tried connection")
     }
 
