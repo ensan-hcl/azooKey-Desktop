@@ -103,10 +103,6 @@ class CandidatesViewController: NSViewController {
         self.tableView.reloadData()
     }
 
-    func updateComposingText(_ text: String) {
-        // pass
-    }
-
     private func resizeWindowToFitContent(cursorLocation: CGPoint) {
         guard let window = self.view.window, let screen = window.screen else { return }
 
