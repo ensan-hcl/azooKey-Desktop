@@ -84,7 +84,12 @@ enum InputState {
                 self = .composing
                 return .hideCandidateWindow
             case .space:
-                return .selectNextCandidate
+                // シフトが入っている場合は上に移動する
+                if event.modifierFlags.contains(.shift) {
+                    return .selectPrevCandidate
+                } else {
+                    return .selectNextCandidate
+                }
             case .navigation(let direction):
                 if direction == .right {
                     if event.modifierFlags.contains(.shift) {
