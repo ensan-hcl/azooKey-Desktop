@@ -12,6 +12,7 @@ class CandidatesViewController: NSViewController {
     private var tableView: NSTableView!
     weak var delegate: (any CandidatesViewControllerDelegate)?
     private var currentSelectedRow: Int = -1
+    private var showedRows: ClosedRange = 0...8
 
     override func loadView() {
         let scrollView = NSScrollView()
@@ -86,17 +87,23 @@ class CandidatesViewController: NSViewController {
     }
 
     private func updateCellView(_ cellView: CandidateTableCellView, forRow row: Int) {
-        let adjustedIndex = (row - self.currentSelectedRow + self.candidates.count) % self.candidates.count
-        var displayText = ""
-        if adjustedIndex == 0 {
-            displayText = "1. \(self.candidates[row])"
-        } else if adjustedIndex + 1 > 9 {
-            displayText = "    \(self.candidates[row])"
+        let isWithinShowedRows = showedRows.contains(row)
+        let displayIndex = row - showedRows.lowerBound + 1 // showedRowsの下限からの相対的な位置
+        let displayText: String
+
+        if isWithinShowedRows {
+            if displayIndex > 9 {
+                displayText = " \(self.candidates[row])" // 行番号が10以上の場合、インデントを調整
+            } else {
+                displayText = "\(displayIndex). \(self.candidates[row])"
+            }
         } else {
-            displayText = "\(adjustedIndex + 1). \(self.candidates[row])"
+            displayText = self.candidates[row] // showedRowsの範囲外では番号を付けない
         }
+
         cellView.candidateTextField.stringValue = displayText
     }
+
 
     func clearCandidates() {
         self.candidates = []
@@ -153,10 +160,18 @@ class CandidatesViewController: NSViewController {
         if selectedRow + offset < 0 {
             return
         }
-        let nextRow = (selectedRow + offset + self.candidates.count) % self.candidates.count
+        let nextRow: Int = (selectedRow + offset + self.candidates.count) % self.candidates.count
         self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
 
         // 表示範囲
+        if !showedRows.contains(nextRow){
+            // showedRowよりnextROwが小さい場合
+            if nextRow < showedRows.lowerBound {
+                showedRows = nextRow...(nextRow + 8)
+            } else {
+                showedRows = (nextRow - 8)...nextRow
+            }
+        }
         self.tableView.scrollRowToVisible((selectedRow + offset + self.candidates.count) % self.candidates.count)
         let selectedCandidate = self.candidates[nextRow]
         self.delegate?.candidateSelectionChanged(selectedCandidate)
