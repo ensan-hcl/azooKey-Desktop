@@ -122,9 +122,8 @@ enum InputState {
                     return .selectNumberCandidate(8)
                 case .nine:
                     return .selectNumberCandidate(9)
-                default:
-                    return .fallthrough
-                }
+                case .zero:
+                    return .appendToMarkedText("0")                }
             case .かな:
                 return .selectInputMode(.japanese)
             case .英数:
