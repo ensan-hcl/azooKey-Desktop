@@ -112,10 +112,9 @@ class CandidatesViewController: NSViewController {
     private func resizeWindowToFitContent(cursorLocation: CGPoint) {
         guard let window = self.view.window, let screen = window.screen else { return }
 
-        let numberOfRows = min(10, self.tableView.numberOfRows)
+        let numberOfRows = min(9, self.tableView.numberOfRows)
         let rowHeight = self.tableView.rowHeight
-        let intercellSpacing = self.tableView.intercellSpacing.height
-        let tableViewHeight = CGFloat(numberOfRows) * (rowHeight + intercellSpacing)
+        let tableViewHeight = CGFloat(numberOfRows) * rowHeight
         let stackViewSpacing = (self.view as! NSStackView).spacing
         let totalHeight = stackViewSpacing + tableViewHeight
 
@@ -166,7 +165,7 @@ class CandidatesViewController: NSViewController {
 
         // 表示範囲
         if offset > 0{
-            self.tableView.scrollRowToVisible((selectedRow + offset + 9 + self.candidates.count) % self.candidates.count)
+            self.tableView.scrollRowToVisible((selectedRow + offset + 8 + self.candidates.count) % self.candidates.count)
         }else{
             self.tableView.scrollRowToVisible((selectedRow + offset + self.candidates.count) % self.candidates.count)
         }
