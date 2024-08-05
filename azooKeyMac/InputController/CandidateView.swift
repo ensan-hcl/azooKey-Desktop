@@ -126,16 +126,21 @@ class CandidatesViewController: NSViewController {
         // カーソルの位置に応じてウィンドウを上または下に表示
         let screenRect = screen.visibleFrame
         let cursorY = cursorLocation.y
+
+        // カーソルの高さを考慮してウィンドウ位置を調整
+        let cursorHeight = 16 // カーソルの高さを16ピクセルと仮定
+
         if cursorY - totalHeight < screenRect.origin.y {
-            // ウィンドウをカーソルの上に表示
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + 16) // 16 = カーソルの高さを仮置き
+            // カーソルの上にウィンドウを表示
+            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + CGFloat(cursorHeight))
         } else {
-            // ウィンドウをカーソルの下に表示
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - totalHeight)
+            // カーソルの下にウィンドウを表示
+            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - totalHeight - CGFloat(cursorHeight))
         }
 
         window.setFrame(newWindowFrame, display: true, animate: false)
     }
+
 
     func selectCandidate(offset: Int) {
         let selectedRow = self.tableView.selectedRow
