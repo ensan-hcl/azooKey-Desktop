@@ -50,7 +50,7 @@ class CandidatesViewController: NSViewController {
         window.contentView?.layer?.masksToBounds = true
 
         // ウィンドウをボーダーレスに設定
-        window.styleMask = [.borderless, .resizable, .closable, .titled]
+        window.styleMask = [.borderless, .resizable]
         window.isMovable = true
         window.hasShadow = true
         window.titlebarAppearsTransparent = true
