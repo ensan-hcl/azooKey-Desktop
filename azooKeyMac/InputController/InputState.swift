@@ -1,4 +1,3 @@
-
 import InputMethodKit
 
 enum InputState {
@@ -26,7 +25,7 @@ enum InputState {
                 return .selectInputMode(.japanese)
             case .英数:
                 return .selectInputMode(.roman)
-            case .unknown, .navigation, .space, .backspace, .enter, .escape, .number(_):
+            case .unknown, .navigation, .space, .backspace, .enter, .escape, .number:
                 return .fallthrough
             }
         case .composing:
@@ -62,7 +61,7 @@ enum InputState {
                     // ナビゲーションはハンドルしてしまう
                     return .consume
                 }
-            case .unknown, .number(_):
+            case .unknown, .number:
                 return .fallthrough
             }
         case .selecting(let rangeAdjusted):
@@ -104,7 +103,7 @@ enum InputState {
                     return .consume
                 }
             case .number(let num):
-                switch num{
+                switch num {
                 case .one:
                     return .selectNumberCandidate(1)
                 case .two:

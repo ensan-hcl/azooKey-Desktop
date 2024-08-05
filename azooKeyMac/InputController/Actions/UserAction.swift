@@ -1,4 +1,3 @@
-
 enum UserAction {
     case input(String)
     case backspace
@@ -15,7 +14,7 @@ enum UserAction {
         case up, down, right, left
     }
 
-    enum Number{
+    enum Number {
         case one, two, three, four, five, six, seven, eight, nine, zero
     }
 }

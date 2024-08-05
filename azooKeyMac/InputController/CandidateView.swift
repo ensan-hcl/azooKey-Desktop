@@ -5,7 +5,6 @@
 //  Created by 高橋直希 on 2024/08/03.
 //
 
-
 import Cocoa
 
 class CandidatesViewController: NSViewController {
@@ -68,7 +67,6 @@ class CandidatesViewController: NSViewController {
         super.viewDidAppear()
         configureWindowForRoundedCorners()
     }
-
 
     func updateCandidates(_ candidates: [String], cursorLocation: CGPoint) {
         self.candidates = candidates
@@ -154,7 +152,6 @@ class CandidatesViewController: NSViewController {
         window.setFrame(newWindowFrame, display: true, animate: false)
     }
 
-
     func selectCandidate(offset: Int) {
         let selectedRow = self.tableView.selectedRow
         if selectedRow + offset < 0 {
@@ -164,9 +161,9 @@ class CandidatesViewController: NSViewController {
         self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
 
         // 表示範囲
-        if offset > 0{
+        if offset > 0 {
             self.tableView.scrollRowToVisible((selectedRow + offset + 8 + self.candidates.count) % self.candidates.count)
-        }else{
+        } else {
             self.tableView.scrollRowToVisible((selectedRow + offset + self.candidates.count) % self.candidates.count)
         }
         let selectedCandidate = self.candidates[nextRow]
@@ -240,7 +237,6 @@ class NonClickableTableView: NSTableView {
     }
 }
 
-
 class CandidateTableCellView: NSTableCellView {
     let candidateTextField: NSTextField
 
@@ -264,7 +260,6 @@ class CandidateTableCellView: NSTableCellView {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
 
 protocol CandidatesViewControllerDelegate: AnyObject {
     func candidateSelected(_ candidate: String)

@@ -1,4 +1,3 @@
-
 import InputMethodKit
 
 indirect enum ClientAction {
@@ -12,7 +11,7 @@ indirect enum ClientAction {
     case moveCursor(Int)
 
     case commitMarkedText
-    
+
     case submitSelectedCandidate
     case selectNextCandidate
     case selectPrevCandidate
