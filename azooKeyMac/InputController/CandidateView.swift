@@ -183,6 +183,21 @@ class CandidatesViewController: NSViewController {
         self.updateVisibleRows()
     }
 
+    func selectNumberCandidate(num: Int){
+        let nextRow: Int = showedRows.lowerBound + num - 1
+        self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
+
+        self.tableView.scrollRowToVisible(nextRow)
+        let selectedCandidate = self.candidates[nextRow]
+        self.delegate?.candidateSelectionChanged(selectedCandidate)
+
+        // 新しい選択行を設定
+        self.currentSelectedRow = nextRow
+
+        // 表示を更新
+        self.updateVisibleRows()
+    }
+
     func selectFirstCandidate() {
         guard !self.candidates.isEmpty else {
             return
