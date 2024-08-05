@@ -110,25 +110,29 @@ class CandidatesViewController: NSViewController {
     }
 
     private func resizeWindowToFitContent(cursorLocation: CGPoint) {
-        guard let window = self.view.window else { return }
+        guard let window = self.view.window, let screen = window.screen else { return }
 
         let numberOfRows = min(10, self.tableView.numberOfRows)
         let rowHeight = self.tableView.rowHeight
         let intercellSpacing = self.tableView.intercellSpacing.height
         let tableViewHeight = CGFloat(numberOfRows) * (rowHeight + intercellSpacing)
-
         let stackViewSpacing = (self.view as! NSStackView).spacing
         let totalHeight = stackViewSpacing + tableViewHeight
 
         var newWindowFrame = window.frame
-        newWindowFrame.origin = cursorLocation
-        if numberOfRows != 0 {
-            newWindowFrame.size.width = min(newWindowFrame.size.width, 400)
+        newWindowFrame.size.width = min(newWindowFrame.size.width, 400)
+        newWindowFrame.size.height = totalHeight
+
+        // カーソルの位置に応じてウィンドウを上または下に表示
+        let screenRect = screen.visibleFrame
+        let cursorY = cursorLocation.y
+        if cursorY - totalHeight < screenRect.origin.y {
+            // ウィンドウをカーソルの上に表示
+            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + 16) // 16 = カーソルの高さを仮置き
+        } else {
+            // ウィンドウをカーソルの下に表示
+            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - totalHeight)
         }
-        let contentRect = window.contentRect(forFrameRect: newWindowFrame)
-        let heightAdjustment = totalHeight - contentRect.height
-        newWindowFrame.size.height += heightAdjustment
-        newWindowFrame.origin.y -= newWindowFrame.size.height
 
         window.setFrame(newWindowFrame, display: true, animate: false)
     }
