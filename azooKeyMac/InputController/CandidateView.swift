@@ -285,8 +285,7 @@ class CandidateTableCellView: NSTableCellView {
         NSLayoutConstraint.activate([
             self.candidateTextField.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             self.candidateTextField.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            self.candidateTextField.topAnchor.constraint(equalTo: self.topAnchor),
-            self.candidateTextField.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            self.candidateTextField.centerYAnchor.constraint(equalTo: self.centerYAnchor) // 縦方向の中央配置
         ])
     }
 
