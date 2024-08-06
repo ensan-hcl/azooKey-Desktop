@@ -12,6 +12,7 @@ class CandidatesViewController: NSViewController {
     private var tableView: NSTableView!
     weak var delegate: (any CandidatesViewControllerDelegate)?
     private var currentSelectedRow: Int = -1
+    private var showedRows: ClosedRange = 0...8
 
     override func loadView() {
         let scrollView = NSScrollView()
@@ -69,6 +70,7 @@ class CandidatesViewController: NSViewController {
     }
 
     func updateCandidates(_ candidates: [String], cursorLocation: CGPoint) {
+        showedRows = 0...8
         self.candidates = candidates
         self.currentSelectedRow = -1  // 選択をリセット
         self.tableView.reloadData()
@@ -86,16 +88,32 @@ class CandidatesViewController: NSViewController {
     }
 
     private func updateCellView(_ cellView: CandidateTableCellView, forRow row: Int) {
-        let adjustedIndex = (row - self.currentSelectedRow + self.candidates.count) % self.candidates.count
-        var displayText = ""
-        if adjustedIndex == 0 {
-            displayText = "1. \(self.candidates[row])"
-        } else if adjustedIndex + 1 > 9 {
-            displayText = "    \(self.candidates[row])"
+        let isWithinShowedRows = showedRows.contains(row)
+        let displayIndex = row - showedRows.lowerBound + 1 // showedRowsの下限からの相対的な位置
+        let displayText: String
+
+        if isWithinShowedRows {
+            if displayIndex > 9 {
+                displayText = " \(self.candidates[row])" // 行番号が10以上の場合、インデントを調整
+            } else {
+                displayText = "\(displayIndex). \(self.candidates[row])"
+            }
         } else {
-            displayText = "\(adjustedIndex + 1). \(self.candidates[row])"
+            displayText = self.candidates[row] // showedRowsの範囲外では番号を付けない
         }
-        cellView.candidateTextField.stringValue = displayText
+
+        // 数字部分と候補部分を別々に設定
+        let attributedString = NSMutableAttributedString(string: displayText)
+        let numberRange = (displayText as NSString).range(of: "\(displayIndex).")
+
+        if numberRange.location != NSNotFound {
+            attributedString.addAttributes([
+                .font: NSFont.systemFont(ofSize: 8),
+                .foregroundColor: NSColor.gray
+            ], range: numberRange)
+        }
+
+        cellView.candidateTextField.attributedStringValue = attributedString
     }
 
     func clearCandidates() {
@@ -148,28 +166,43 @@ class CandidatesViewController: NSViewController {
         window.setFrame(newWindowFrame, display: true, animate: false)
     }
 
-    func selectCandidate(offset: Int) {
-        let selectedRow = self.tableView.selectedRow
-        if selectedRow + offset < 0 {
-            return
-        }
-        let nextRow = (selectedRow + offset + self.candidates.count) % self.candidates.count
-        self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
-
-        // 表示範囲
-        if offset > 0 {
-            self.tableView.scrollRowToVisible((selectedRow + offset + 8 + self.candidates.count) % self.candidates.count)
-        } else {
-            self.tableView.scrollRowToVisible((selectedRow + offset + self.candidates.count) % self.candidates.count)
-        }
-        let selectedCandidate = self.candidates[nextRow]
+    // 選択行の移動
+    func updateSelection(to row: Int) {
+        self.tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+        self.tableView.scrollRowToVisible(row)
+        let selectedCandidate = self.candidates[row]
         self.delegate?.candidateSelectionChanged(selectedCandidate)
 
         // 新しい選択行を設定
-        self.currentSelectedRow = nextRow
+        self.currentSelectedRow = row
+
+        // 表示範囲
+        if !showedRows.contains(row) {
+            if row < showedRows.lowerBound {
+                showedRows = row...(row + 8)
+            } else {
+                showedRows = (row - 8)...row
+            }
+        }
 
         // 表示を更新
         self.updateVisibleRows()
+    }
+
+    // offsetで移動
+    func selectCandidate(offset: Int) {
+        let selectedRow = self.tableView.selectedRow
+        if selectedRow + offset < 0 || selectedRow + offset >= self.candidates.count {
+            return
+        }
+        let nextRow = (selectedRow + offset + self.candidates.count) % self.candidates.count
+        self.updateSelection(to: nextRow)
+    }
+
+    // 表示されているナンバリング出の移動
+    func selectNumberCandidate(num: Int) {
+        let nextRow = showedRows.lowerBound + num - 1
+        self.updateSelection(to: nextRow)
     }
 
     func selectFirstCandidate() {
@@ -247,8 +280,7 @@ class CandidateTableCellView: NSTableCellView {
         NSLayoutConstraint.activate([
             self.candidateTextField.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             self.candidateTextField.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            self.candidateTextField.topAnchor.constraint(equalTo: self.topAnchor),
-            self.candidateTextField.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            self.candidateTextField.centerYAnchor.constraint(equalTo: self.centerYAnchor) // 縦方向の中央配置
         ])
     }
 
