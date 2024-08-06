@@ -158,7 +158,7 @@ class CandidatesViewController: NSViewController {
 
     func selectCandidate(offset: Int) {
         let selectedRow = self.tableView.selectedRow
-        if selectedRow + offset < 0 {
+        if selectedRow + offset < 0 || selectedRow + offset >= self.candidates.count{
             return
         }
         let nextRow: Int = (selectedRow + offset + self.candidates.count) % self.candidates.count
