@@ -1,4 +1,5 @@
-set -e
+#!/bin/bash
+set -xe -o pipefail
 
 # Check if xcpretty is installed
 if command -v xcpretty &> /dev/null
