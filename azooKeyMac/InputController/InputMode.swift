@@ -21,6 +21,10 @@ enum InputMode {
         case 49: // Space
             return .space
         case 51: // Delete
+            // Shift + Delete = Next Character Prediction
+            if event.modifierFlags == .shift {
+                return .predictNextCharacter
+            }
             return .backspace
         case 53: // Escape
             return .escape

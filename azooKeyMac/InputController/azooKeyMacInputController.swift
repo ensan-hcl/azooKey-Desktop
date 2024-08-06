@@ -144,6 +144,26 @@ class azooKeyMacInputController: IMKInputController {
             }
         return CharacterSet(text.unicodeScalars).isSubset(of: printable)
     }
+    
+    private func getLeftSideContext(maxCount: Int) -> String? {
+        let endIndex = client().selectedRange().location
+        // 取得する範囲をかなり狭く絞った
+        let leftRange = NSRange(location: max(endIndex - maxCount, 0), length: min(endIndex, maxCount))
+        var actual = NSRange()
+        // 同じ行の文字のみコンテキストに含める
+        let leftSideContext = self.client().string(from: leftRange, actualRange: &actual).map {
+            var last = $0.split(separator: "\n", omittingEmptySubsequences: false).last ?? $0[...]
+            // 空白を削除する
+            while last.first?.isWhitespace ?? false {
+                last = last.dropFirst()
+            }
+            while last.last?.isWhitespace ?? false {
+                last = last.dropLast()
+            }
+            return String(last)
+        }
+        return leftSideContext
+    }
 
     @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
         guard let event, let client = sender as? IMKTextInput else { return false }
@@ -230,6 +250,11 @@ class azooKeyMacInputController: IMKInputController {
         case .moveCursorToStart:
             _ = self.composingText.moveCursorFromCursorPosition(count: -self.composingText.convertTargetCursorPosition)
             self.updateRawCandidate()
+        case .inputNextCharacter:
+            let leftSideContext = self.getLeftSideContext(maxCount: 50)
+            if let item = self.kanaKanjiConverter.predictNextCharacter(leftSideContext: leftSideContext ?? "", count: 1, options: self.options(leftSideContext: leftSideContext)).first {
+                client.insertText(String(item.character), replacementRange: NSRange(location: NSNotFound, length: 0))
+            }
         case .commitMarkedText:
             let candidateString = self.displayedTextInComposingMode ?? self.composingText.convertTarget
             client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: NSRange(location: NSNotFound, length: 0))
@@ -302,23 +327,7 @@ class azooKeyMacInputController: IMKInputController {
 
     @MainActor private func updateRawCandidate() {
         let prefixComposingText = self.composingText.prefixToCursorPosition()
-        let endIndex = client().markedRange().location
-        // 取得する範囲をかなり狭く絞った
-        let leftRange = NSRange(location: max(endIndex - 30, 0), length: min(endIndex, 30))
-        var actual = NSRange()
-        // 同じ行の文字のみコンテキストに含める
-        let leftSideContext = self.client().string(from: leftRange, actualRange: &actual).map {
-            var last = $0.split(separator: "\n", omittingEmptySubsequences: false).last ?? $0[...]
-            // 空白を削除する
-            while last.first?.isWhitespace ?? false {
-                last = last.dropFirst()
-            }
-            while last.last?.isWhitespace ?? false {
-                last = last.dropLast()
-            }
-            return String(last)
-        }
-        let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options(leftSideContext: leftSideContext))
+        let result = self.kanaKanjiConverter.requestCandidates(self.composingText, options: options(leftSideContext: getLeftSideContext(maxCount: 30)))
         self.rawCandidates = result
 //        self.rawCandidates?.mainResults.append(Candidate(text: String((leftSideContext ?? "No Context").suffix(20)), value: .zero, correspondingCount: 0, lastMid: 0, data: []))
     }

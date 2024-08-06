@@ -26,6 +26,8 @@ enum InputState {
                 return .selectInputMode(.japanese)
             case .英数:
                 return .selectInputMode(.roman)
+            case .predictNextCharacter:
+                return .inputNextCharacter
             case .unknown, .navigation, .space, .backspace, .enter, .escape:
                 return .fallthrough
             }
@@ -62,6 +64,8 @@ enum InputState {
                     // ナビゲーションはハンドルしてしまう
                     return .consume
                 }
+            case .predictNextCharacter:
+                return .consume
             case .unknown:
                 return .fallthrough
             }
@@ -79,6 +83,8 @@ enum InputState {
             case .escape:
                 self = .composing
                 return .hideCandidateWindow
+            case .predictNextCharacter:
+                return .consume
             case .space:
                 // Spaceは下矢印キーに、Shift + Spaceは上矢印キーにマップする
                 // 下矢印キー: \u{F701} / 125

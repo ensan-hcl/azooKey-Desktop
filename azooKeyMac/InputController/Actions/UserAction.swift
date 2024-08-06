@@ -6,6 +6,7 @@ enum UserAction {
     case space
     case escape
     case unknown
+    case predictNextCharacter
     case 英数
     case かな
     case navigation(NavigationDirection)

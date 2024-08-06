@@ -10,6 +10,7 @@ indirect enum ClientAction {
     case removeLastMarkedText
     case moveCursorToStart
     case moveCursor(Int)
+    case inputNextCharacter
 
     case commitMarkedText
     case submitSelectedCandidate
