@@ -70,6 +70,7 @@ class CandidatesViewController: NSViewController {
     }
 
     func updateCandidates(_ candidates: [String], cursorLocation: CGPoint) {
+        showedRows = 0...8
         self.candidates = candidates
         self.currentSelectedRow = -1  // 選択をリセット
         self.tableView.reloadData()
