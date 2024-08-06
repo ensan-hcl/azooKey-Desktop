@@ -274,6 +274,8 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             self.updateMarkedTextInComposingMode(text: self.composingText.convertTarget, client: client)
             if self.composingText.isEmpty {
                 self.inputState = .none
+            } else {
+                self.updateRawCandidate()
             }
         case .consume:
             return true
