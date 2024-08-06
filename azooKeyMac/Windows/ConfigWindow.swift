@@ -11,26 +11,94 @@ struct ConfigWindow: View {
     @ConfigState private var liveConversion = Config.LiveConversion()
     @ConfigState private var englishConversion = Config.EnglishConversion()
     @ConfigState private var typeBackSlash = Config.TypeBackSlash()
-    // @ConfigState private var openAiApiKey = Config.OpenAiApiKey()
+    @ConfigState private var zenzai = Config.ZenzaiIntegration()
     @ConfigState private var zenzaiProfile = Config.ZenzaiProfile()
     @ConfigState private var learning = Config.Learning()
     @ConfigState private var inferenceLimit = Config.ZenzaiInferenceLimit()
 
-    var body: some View {
-        VStack {
-            Text("設定")
-                .font(.title)
-            Toggle("ライブ変換を有効化", isOn: $liveConversion)
-            Toggle("英単語変換を有効化", isOn: $englishConversion)
-            Toggle("円記号の代わりにバックスラッシュを入力", isOn: $typeBackSlash)
-            TextField("変換プロフィール（例：田中太郎/料理好き）", text: $zenzaiProfile)
-            Stepper("Zenzaiの推論上限: \(inferenceLimit.value)", value: $inferenceLimit, in: 0 ... 50)
-            Picker("学習", selection: $learning) {
-                Text("学習する").tag(Config.Learning.Value.inputAndOutput)
-                Text("学習を停止").tag(Config.Learning.Value.onlyOutput)
-                Text("学習を無視").tag(Config.Learning.Value.nothing)
+    @State private var zenzaiHelpPopover = false
+    @State private var zenzaiProfileHelpPopover = false
+    @State private var zenzaiInferenceLimitHelpPopover = false
+
+    @ViewBuilder
+    private func helpButton(helpContent: LocalizedStringKey, isPresented: Binding<Bool>) -> some View {
+        if #available(macOS 14, *) {
+            Button("ヘルプ", systemImage: "questionmark") {
+                isPresented.wrappedValue = true
+            }
+            .labelStyle(.iconOnly)
+            .buttonBorderShape(.circle)
+            .popover(isPresented: isPresented) {
+                Text(helpContent).padding()
             }
         }
-            .frame(width: 400, height: 300)
     }
+
+    var body: some View {
+        VStack {
+            Text("azooKey on macOS")
+                .bold()
+                .font(.title)
+            Spacer()
+            HStack {
+                Spacer()
+                Form {
+
+                    Picker("学習", selection: $learning) {
+                        Text("学習する").tag(Config.Learning.Value.inputAndOutput)
+                        Text("学習を停止").tag(Config.Learning.Value.onlyOutput)
+                        Text("学習を無視").tag(Config.Learning.Value.nothing)
+                    }
+                    Divider()
+                    HStack {
+                        Toggle("Zenzaiを有効化", isOn: $zenzai)
+                        helpButton(helpContent: "Zenzaiはニューラル言語モデルを利用した最新のかな漢字変換システムです。\nMacのGPUを利用して高精度な変換を行います。\n変換エンジンはローカルで動作するため、外部との通信は不要です。", isPresented: $zenzaiHelpPopover)
+                    }
+                    HStack {
+                        TextField("変換プロフィール", text: $zenzaiProfile, prompt: Text("例：田中太郎/高校生"))
+                            .disabled(!zenzai.value)
+                        helpButton(
+                            helpContent: """
+                            Zenzaiはあなたのプロフィールを考慮した変換を行うことができます。
+                            名前や仕事、趣味などを入力すると、それに合わせた変換が自動で推薦されます。
+                            （実験的な機能のため、精度が不十分な場合があります）
+                            """,
+                            isPresented: $zenzaiProfileHelpPopover
+                        )
+                    }
+                    HStack {
+                        TextField(
+                            "Zenzaiの推論上限",
+                            text: Binding(
+                                get: {
+                                    String(self.$inferenceLimit.wrappedValue)
+                                },
+                                set: {
+                                    if let value = Int($0), (1 ... 50).contains(value) {
+                                        self.$inferenceLimit.wrappedValue = value
+                                    }
+                                }
+                            )
+                        )
+                        .disabled(!zenzai.value)
+                        Stepper("", value: $inferenceLimit, in: 1 ... 50)
+                            .labelsHidden()
+                            .disabled(!zenzai.value)
+                        helpButton(helpContent: "推論上限を小さくすると、入力中のもたつきが改善されることがあります。", isPresented: $zenzaiInferenceLimitHelpPopover)
+                    }
+                    Divider()
+                    Toggle("ライブ変換を有効化", isOn: $liveConversion)
+                    Toggle("英単語変換を有効化", isOn: $englishConversion)
+                    Toggle("円記号の代わりにバックスラッシュを入力", isOn: $typeBackSlash)
+                }
+                Spacer()
+            }
+            Spacer()
+        }
+        .frame(width: 400, height: 300)
+    }
+}
+
+#Preview {
+    ConfigWindow()
 }

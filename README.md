@@ -22,6 +22,12 @@ macOS 14.3で動作確認しています。古いOSでの動作は検証して�
 
 azooKey on macOSの開発に参加したい方、使い方に質問がある方、要望や不具合報告がある方は、ぜひ[azooKeyのDiscordサーバ](https://discord.gg/dY9gHuyZN5)にご参加ください。
 
+
+### azooKey on macOSを支援する
+
+GitHub Sponsorsをご利用ください。
+
+
 ## 機能
 
 * ニューラルかな漢字変換システム「Zenzai」による高精度な変換のサポート

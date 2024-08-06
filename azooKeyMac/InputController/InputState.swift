@@ -1,4 +1,3 @@
-
 import InputMethodKit
 
 enum InputState {
@@ -22,6 +21,9 @@ enum InputState {
             case .input(let string):
                 self = .composing
                 return .appendToMarkedText(string)
+            case .number(let number):
+                self = .composing
+                return .appendToMarkedText(number.inputString)
             case .かな:
                 return .selectInputMode(.japanese)
             case .英数:
@@ -33,6 +35,8 @@ enum InputState {
             switch userAction {
             case .input(let string):
                 return .appendToMarkedText(string)
+            case .number(let number):
+                return .appendToMarkedText(number.inputString)
             case .backspace:
                 return .removeLastMarkedText
             case .enter:
@@ -80,29 +84,12 @@ enum InputState {
                 self = .composing
                 return .hideCandidateWindow
             case .space:
-                // Spaceは下矢印キーに、Shift + Spaceは上矢印キーにマップする
-                // 下矢印キー: \u{F701} / 125
-                // 上矢印キー: \u{F700} / 126
-                let (keyCode, characters) = if event.modifierFlags.contains(.shift) {
-                    (126 as UInt16, "\u{F700}")
+                // シフトが入っている場合は上に移動する
+                if event.modifierFlags.contains(.shift) {
+                    return .selectPrevCandidate
                 } else {
-                    (125 as UInt16, "\u{F701}")
+                    return .selectNextCandidate
                 }
-                // 下矢印キーを押した場合と同等のイベントを作って送信する
-                return .forwardToCandidateWindow(
-                    .keyEvent(
-                        with: .keyDown,
-                        location: event.locationInWindow,
-                        modifierFlags: event.modifierFlags.subtracting(.shift),  // シフトは除去する
-                        timestamp: event.timestamp,
-                        windowNumber: event.windowNumber,
-                        context: nil,
-                        characters: characters,
-                        charactersIgnoringModifiers: characters,
-                        isARepeat: event.isARepeat,
-                        keyCode: keyCode
-                    ) ?? event
-                )
             case .navigation(let direction):
                 if direction == .right {
                     if event.modifierFlags.contains(.shift) {
@@ -118,9 +105,35 @@ enum InputState {
                 } else if direction == .left && event.modifierFlags.contains(.shift) {
                     self = .selecting(rangeAdjusted: true)
                     return .sequence([.moveCursor(-1), .showCandidateWindow])
+                } else if direction == .down {
+                    return .selectNextCandidate
+                } else if direction == .up {
+                    return .selectPrevCandidate
                 } else {
-                    return .forwardToCandidateWindow(event)
+                    return .consume
                 }
+            case .number(let num):
+                switch num {
+                case .one:
+                    return .selectNumberCandidate(1)
+                case .two:
+                    return .selectNumberCandidate(2)
+                case .three:
+                    return .selectNumberCandidate(3)
+                case .four:
+                    return .selectNumberCandidate(4)
+                case .five:
+                    return .selectNumberCandidate(5)
+                case .six:
+                    return .selectNumberCandidate(6)
+                case .seven:
+                    return .selectNumberCandidate(7)
+                case .eight:
+                    return .selectNumberCandidate(8)
+                case .nine:
+                    return .selectNumberCandidate(9)
+                case .zero:
+                    return .appendToMarkedText("0")                }
             case .かな:
                 return .selectInputMode(.japanese)
             case .英数:
