@@ -116,7 +116,6 @@ class CandidatesViewController: NSViewController {
         cellView.candidateTextField.attributedStringValue = attributedString
     }
 
-
     func clearCandidates() {
         self.candidates = []
         self.tableView.reloadData()
@@ -169,14 +168,14 @@ class CandidatesViewController: NSViewController {
 
     func selectCandidate(offset: Int) {
         let selectedRow = self.tableView.selectedRow
-        if selectedRow + offset < 0 || selectedRow + offset >= self.candidates.count{
+        if selectedRow + offset < 0 || selectedRow + offset >= self.candidates.count {
             return
         }
         let nextRow: Int = (selectedRow + offset + self.candidates.count) % self.candidates.count
         self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
 
         // 表示範囲
-        if !showedRows.contains(nextRow){
+        if !showedRows.contains(nextRow) {
             // showedRowよりnextROwが小さい場合
             if nextRow < showedRows.lowerBound {
                 showedRows = nextRow...(nextRow + 8)
@@ -195,7 +194,7 @@ class CandidatesViewController: NSViewController {
         self.updateVisibleRows()
     }
 
-    func selectNumberCandidate(num: Int){
+    func selectNumberCandidate(num: Int) {
         let nextRow: Int = showedRows.lowerBound + num - 1
         self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
 
