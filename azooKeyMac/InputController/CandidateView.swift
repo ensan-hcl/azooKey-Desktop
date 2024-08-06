@@ -109,7 +109,7 @@ class CandidatesViewController: NSViewController {
         if numberRange.location != NSNotFound {
             attributedString.addAttributes([
                 .font: NSFont.systemFont(ofSize: 8),
-                .foregroundColor: NSColor.gray
+                .foregroundColor: currentSelectedRow == row ? NSColor.white : NSColor.gray
             ], range: numberRange)
         }
 
