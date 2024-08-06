@@ -102,7 +102,15 @@ class CandidatesViewController: NSViewController {
             displayText = self.candidates[row] // showedRowsの範囲外では番号を付けない
         }
 
-        cellView.candidateTextField.stringValue = displayText
+        // 数字部分と候補部分を別々に設定
+        let attributedString = NSMutableAttributedString(string: displayText)
+        let numberRange = (displayText as NSString).range(of: "\(displayIndex).")
+
+        if numberRange.location != NSNotFound {
+            attributedString.addAttribute(.font, value: NSFont.systemFont(ofSize: 8), range: numberRange)
+        }
+
+        cellView.candidateTextField.attributedStringValue = attributedString
     }
 
 
