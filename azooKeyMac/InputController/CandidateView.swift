@@ -166,47 +166,43 @@ class CandidatesViewController: NSViewController {
         window.setFrame(newWindowFrame, display: true, animate: false)
     }
 
-    func selectCandidate(offset: Int) {
-        let selectedRow = self.tableView.selectedRow
-        if selectedRow + offset < 0 || selectedRow + offset >= self.candidates.count {
-            return
-        }
-        let nextRow: Int = (selectedRow + offset + self.candidates.count) % self.candidates.count
-        self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
-
-        // 表示範囲
-        if !showedRows.contains(nextRow) {
-            // showedRowよりnextROwが小さい場合
-            if nextRow < showedRows.lowerBound {
-                showedRows = nextRow...(nextRow + 8)
-            } else {
-                showedRows = (nextRow - 8)...nextRow
-            }
-        }
-        self.tableView.scrollRowToVisible((selectedRow + offset + self.candidates.count) % self.candidates.count)
-        let selectedCandidate = self.candidates[nextRow]
+    // 選択行の移動
+    func updateSelection(to row: Int) {
+        self.tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+        self.tableView.scrollRowToVisible(row)
+        let selectedCandidate = self.candidates[row]
         self.delegate?.candidateSelectionChanged(selectedCandidate)
 
         // 新しい選択行を設定
-        self.currentSelectedRow = nextRow
+        self.currentSelectedRow = row
+
+        // 表示範囲
+        if !showedRows.contains(row) {
+            if row < showedRows.lowerBound {
+                showedRows = row...(row + 8)
+            } else {
+                showedRows = (row - 8)...row
+            }
+        }
 
         // 表示を更新
         self.updateVisibleRows()
     }
 
+    // offsetで移動
+    func selectCandidate(offset: Int) {
+        let selectedRow = self.tableView.selectedRow
+        if selectedRow + offset < 0 || selectedRow + offset >= self.candidates.count {
+            return
+        }
+        let nextRow = (selectedRow + offset + self.candidates.count) % self.candidates.count
+        self.updateSelection(to: nextRow)
+    }
+
+    // 表示されているナンバリング出の移動
     func selectNumberCandidate(num: Int) {
-        let nextRow: Int = showedRows.lowerBound + num - 1
-        self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
-
-        self.tableView.scrollRowToVisible(nextRow)
-        let selectedCandidate = self.candidates[nextRow]
-        self.delegate?.candidateSelectionChanged(selectedCandidate)
-
-        // 新しい選択行を設定
-        self.currentSelectedRow = nextRow
-
-        // 表示を更新
-        self.updateVisibleRows()
+        let nextRow = showedRows.lowerBound + num - 1
+        self.updateSelection(to: nextRow)
     }
 
     func selectFirstCandidate() {
