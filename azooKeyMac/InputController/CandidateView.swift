@@ -107,7 +107,10 @@ class CandidatesViewController: NSViewController {
         let numberRange = (displayText as NSString).range(of: "\(displayIndex).")
 
         if numberRange.location != NSNotFound {
-            attributedString.addAttribute(.font, value: NSFont.systemFont(ofSize: 8), range: numberRange)
+            attributedString.addAttributes([
+                .font: NSFont.systemFont(ofSize: 8),
+                .foregroundColor: NSColor.gray
+            ], range: numberRange)
         }
 
         cellView.candidateTextField.attributedStringValue = attributedString
