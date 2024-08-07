@@ -12,29 +12,34 @@ class CandidatesViewController: NSViewController {
     private var tableView: NSTableView!
     weak var delegate: (any CandidatesViewControllerDelegate)?
     private var currentSelectedRow: Int = -1
-    private var showedRows: ClosedRange = 0...8
+    private var showedRows: ClosedRange = 0 ... 8
     private let rowHeight: CGFloat = 20
     private let maxRows: Int = 9
 
     override func loadView() {
         let scrollView = NSScrollView()
-        self.tableView = NonClickableTableView()
-        scrollView.documentView = self.tableView
+        tableView = NonClickableTableView()
+        scrollView.documentView = tableView
         scrollView.hasVerticalScroller = true
 
         // グリッドスタイルを設定してセル間に水平線を表示
-        self.tableView.gridStyleMask = .solidHorizontalGridLineMask
+        tableView.gridStyleMask = .solidHorizontalGridLineMask
+        tableView.style = .plain
 
+        let stackView = NSStackView(views: [scrollView])
+        stackView.orientation = .vertical
+        stackView.spacing = 1 // ここを0にすると落ちる
+
+        view = stackView // 直接scrollViewを指定すると落ちる
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("CandidatesColumn"))
-        self.tableView.headerView = nil
-        self.tableView.addTableColumn(column)
-        self.tableView.delegate = self
-        self.tableView.dataSource = self
-        self.tableView.rowHeight = rowHeight
-        self.tableView.style = NSTableView.Style.plain
+        tableView.headerView = nil
+        tableView.addTableColumn(column)
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.rowHeight = rowHeight
+        tableView.style = NSTableView.Style.plain
 
-        self.view = scrollView
-
+        view = scrollView
     }
 
     override func viewDidLoad() {
@@ -45,7 +50,7 @@ class CandidatesViewController: NSViewController {
     }
 
     private func configureWindowForRoundedCorners() {
-        guard let window = self.view.window else { return }
+        guard let window = view.window else { return }
 
         // ウィンドウとそのコンテンツビューがレイヤーバックされるように設定
         window.contentView?.wantsLayer = true
@@ -72,19 +77,19 @@ class CandidatesViewController: NSViewController {
     }
 
     func updateCandidates(_ candidates: [String], cursorLocation: CGPoint) {
-        showedRows = 0...(maxRows - 1)
+        showedRows = 0 ... (maxRows - 1)
         self.candidates = candidates
-        self.currentSelectedRow = -1  // 選択をリセット
-        self.tableView.reloadData()
-        self.resizeWindowToFitContent(cursorLocation: cursorLocation)
-        self.selectFirstCandidate()  // 最初の候補を選択
+        currentSelectedRow = -1 // 選択をリセット
+        tableView.reloadData()
+        resizeWindowToFitContent(cursorLocation: cursorLocation)
+        selectFirstCandidate() // 最初の候補を選択
     }
 
     private func updateVisibleRows() {
-        let visibleRows = self.tableView.rows(in: self.tableView.visibleRect)
-        for row in visibleRows.lowerBound..<visibleRows.upperBound {
-            if let cellView = self.tableView.view(atColumn: 0, row: row, makeIfNecessary: false) as? CandidateTableCellView {
-                self.updateCellView(cellView, forRow: row)
+        let visibleRows = tableView.rows(in: tableView.visibleRect)
+        for row in visibleRows.lowerBound ..< visibleRows.upperBound {
+            if let cellView = tableView.view(atColumn: 0, row: row, makeIfNecessary: false) as? CandidateTableCellView {
+                updateCellView(cellView, forRow: row)
             }
         }
     }
@@ -96,12 +101,12 @@ class CandidatesViewController: NSViewController {
 
         if isWithinShowedRows {
             if displayIndex > maxRows {
-                displayText = " \(self.candidates[row])" // 行番号が10以上の場合、インデントを調整
+                displayText = " \(candidates[row])" // 行番号が10以上の場合、インデントを調整
             } else {
-                displayText = "\(displayIndex). \(self.candidates[row])"
+                displayText = "\(displayIndex). \(candidates[row])"
             }
         } else {
-            displayText = self.candidates[row] // showedRowsの範囲外では番号を付けない
+            displayText = candidates[row] // showedRowsの範囲外では番号を付けない
         }
 
         // 数字部分と候補部分を別々に設定
@@ -111,7 +116,7 @@ class CandidatesViewController: NSViewController {
         if numberRange.location != NSNotFound {
             attributedString.addAttributes([
                 .font: NSFont.systemFont(ofSize: 8),
-                .foregroundColor: currentSelectedRow == row ? NSColor.white : NSColor.gray
+                .foregroundColor: currentSelectedRow == row ? NSColor.white : NSColor.gray,
             ], range: numberRange)
         }
 
@@ -119,14 +124,14 @@ class CandidatesViewController: NSViewController {
     }
 
     func clearCandidates() {
-        self.candidates = []
-        self.tableView.reloadData()
+        candidates = []
+        tableView.reloadData()
     }
 
     private func resizeWindowToFitContent(cursorLocation: CGPoint) {
-        guard let window = self.view.window, let screen = window.screen else { return }
+        guard let window = view.window, let screen = window.screen else { return }
 
-        let numberOfRows = min(maxRows, self.tableView.numberOfRows)
+        let numberOfRows = min(maxRows, tableView.numberOfRows)
         let totalHeight = rowHeight * 9
 
         // 候補の最大幅を計算
@@ -167,75 +172,75 @@ class CandidatesViewController: NSViewController {
 
     // 選択行の移動
     func updateSelection(to row: Int) {
-        self.tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
-        self.tableView.scrollRowToVisible(row)
-        let selectedCandidate = self.candidates[row]
-        self.delegate?.candidateSelectionChanged(selectedCandidate)
+        tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+        tableView.scrollRowToVisible(row)
+        let selectedCandidate = candidates[row]
+        delegate?.candidateSelectionChanged(selectedCandidate)
 
         // 新しい選択行を設定
-        self.currentSelectedRow = row
+        currentSelectedRow = row
 
         // 表示範囲
         if !showedRows.contains(row) {
             if row < showedRows.lowerBound {
-                showedRows = row...(row + (maxRows - 1))
+                showedRows = row ... (row + (maxRows - 1))
             } else {
-                showedRows = (row - (maxRows - 1))...row
+                showedRows = (row - (maxRows - 1)) ... row
             }
         }
 
         // 表示を更新
-        self.updateVisibleRows()
+        updateVisibleRows()
     }
 
     // offsetで移動
     func selectCandidate(offset: Int) {
-        let selectedRow = self.tableView.selectedRow
-        if selectedRow + offset < 0 || selectedRow + offset >= self.candidates.count {
+        let selectedRow = tableView.selectedRow
+        if selectedRow + offset < 0 || selectedRow + offset >= candidates.count {
             return
         }
-        let nextRow = (selectedRow + offset + self.candidates.count) % self.candidates.count
-        self.updateSelection(to: nextRow)
+        let nextRow = (selectedRow + offset + candidates.count) % candidates.count
+        updateSelection(to: nextRow)
     }
 
     // 表示されているナンバリング出の移動
     func selectNumberCandidate(num: Int) {
         let nextRow = showedRows.lowerBound + num - 1
-        self.updateSelection(to: nextRow)
+        updateSelection(to: nextRow)
     }
 
     func selectFirstCandidate() {
-        guard !self.candidates.isEmpty else {
+        guard !candidates.isEmpty else {
             return
         }
         let nextRow = 0
-        self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
-        self.tableView.scrollRowToVisible(nextRow)
-        let selectedCandidate = self.candidates[nextRow]
-        self.delegate?.candidateSelectionChanged(selectedCandidate)
+        tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
+        tableView.scrollRowToVisible(nextRow)
+        let selectedCandidate = candidates[nextRow]
+        delegate?.candidateSelectionChanged(selectedCandidate)
 
         // 新しい選択行を設定
-        self.currentSelectedRow = nextRow
+        currentSelectedRow = nextRow
 
         // 表示を更新
-        self.updateVisibleRows()
+        updateVisibleRows()
     }
 
     func confirmCandidateSelection() {
-        let selectedRow = self.tableView.selectedRow
-        if selectedRow >= 0 && selectedRow < self.candidates.count {
-            let selectedCandidate = self.candidates[selectedRow]
+        let selectedRow = tableView.selectedRow
+        if selectedRow >= 0 && selectedRow < candidates.count {
+            let selectedCandidate = candidates[selectedRow]
             delegate?.candidateSelected(selectedCandidate)
         }
     }
 }
 
 extension CandidatesViewController: NSTableViewDelegate, NSTableViewDataSource {
-    func numberOfRows(in tableView: NSTableView) -> Int {
+    func numberOfRows(in _: NSTableView) -> Int {
         return candidates.count
     }
 
-    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+    func tableView(_ tableView: NSTableView, viewFor _: NSTableColumn?, row: Int) -> NSView? {
         let cellIdentifier = NSUserInterfaceItemIdentifier("CandidateCell")
         var cell = tableView.makeView(withIdentifier: cellIdentifier, owner: nil) as? CandidateTableCellView
         if cell == nil {
@@ -244,7 +249,7 @@ extension CandidatesViewController: NSTableViewDelegate, NSTableViewDataSource {
         }
 
         if let cell = cell {
-            self.updateCellView(cell, forRow: row)
+            updateCellView(cell, forRow: row)
         }
 
         return cell
@@ -252,15 +257,15 @@ extension CandidatesViewController: NSTableViewDelegate, NSTableViewDataSource {
 }
 
 class NonClickableTableView: NSTableView {
-    override func rightMouseDown(with event: NSEvent) {
+    override func rightMouseDown(with _: NSEvent) {
         // 右クリックイベントを無視
     }
 
-    override func mouseDown(with event: NSEvent) {
+    override func mouseDown(with _: NSEvent) {
         // 左クリックイベントも無視する場合はこのメソッド内を空に
     }
 
-    override func otherMouseDown(with event: NSEvent) {
+    override func otherMouseDown(with _: NSEvent) {
         // 中クリックなどその他のマウスボタンのクリックも無視
     }
 }
@@ -269,25 +274,25 @@ class CandidateTableCellView: NSTableCellView {
     let candidateTextField: NSTextField
 
     override init(frame frameRect: NSRect) {
-        self.candidateTextField = NSTextField(labelWithString: "")
+        candidateTextField = NSTextField(labelWithString: "")
         // font size
-        self.candidateTextField.font = NSFont.systemFont(ofSize: 16)
+        candidateTextField.font = NSFont.systemFont(ofSize: 16)
         super.init(frame: frameRect)
-        self.addSubview(self.candidateTextField)
+        addSubview(candidateTextField)
 
-        self.candidateTextField.translatesAutoresizingMaskIntoConstraints = false
+        candidateTextField.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            self.candidateTextField.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            self.candidateTextField.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            self.candidateTextField.centerYAnchor.constraint(equalTo: self.centerYAnchor) // 縦方向の中央配置
+            candidateTextField.leadingAnchor.constraint(equalTo: leadingAnchor),
+            candidateTextField.trailingAnchor.constraint(equalTo: trailingAnchor),
+            candidateTextField.centerYAnchor.constraint(equalTo: centerYAnchor), // 縦方向の中央配置
         ])
     }
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
 
 protocol CandidatesViewControllerDelegate: AnyObject {
     func candidateSelected(_ candidate: String)
