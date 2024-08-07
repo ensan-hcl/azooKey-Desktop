@@ -13,6 +13,8 @@ class CandidatesViewController: NSViewController {
     weak var delegate: (any CandidatesViewControllerDelegate)?
     private var currentSelectedRow: Int = -1
     private var showedRows: ClosedRange = 0...8
+    private let rowHeight: CGFloat = 20
+    private let maxRows: Int = 9
 
     override func loadView() {
         let scrollView = NSScrollView()
@@ -23,16 +25,16 @@ class CandidatesViewController: NSViewController {
         // グリッドスタイルを設定してセル間に水平線を表示
         self.tableView.gridStyleMask = .solidHorizontalGridLineMask
 
-        let stackView = NSStackView(views: [scrollView])
-        stackView.orientation = .vertical
-        stackView.spacing = 10
-        self.view = stackView
-
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("CandidatesColumn"))
         self.tableView.headerView = nil
         self.tableView.addTableColumn(column)
         self.tableView.delegate = self
         self.tableView.dataSource = self
+        self.tableView.rowHeight = rowHeight
+        self.tableView.style = NSTableView.Style.plain
+
+        self.view = scrollView
+
     }
 
     override func viewDidLoad() {
@@ -93,7 +95,7 @@ class CandidatesViewController: NSViewController {
         let displayText: String
 
         if isWithinShowedRows {
-            if displayIndex > 9 {
+            if displayIndex > maxRows {
                 displayText = " \(self.candidates[row])" // 行番号が10以上の場合、インデントを調整
             } else {
                 displayText = "\(displayIndex). \(self.candidates[row])"
@@ -124,11 +126,8 @@ class CandidatesViewController: NSViewController {
     private func resizeWindowToFitContent(cursorLocation: CGPoint) {
         guard let window = self.view.window, let screen = window.screen else { return }
 
-        let numberOfRows = min(9, self.tableView.numberOfRows)
-        let rowHeight = self.tableView.rowHeight
-        let tableViewHeight = CGFloat(numberOfRows) * rowHeight
-        let stackViewSpacing = (self.view as! NSStackView).spacing
-        let totalHeight = stackViewSpacing + tableViewHeight
+        let numberOfRows = min(maxRows, self.tableView.numberOfRows)
+        let totalHeight = rowHeight * 9
 
         // 候補の最大幅を計算
         let maxWidth = candidates.reduce(0) { maxWidth, candidate in
@@ -288,6 +287,7 @@ class CandidateTableCellView: NSTableCellView {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
 
 protocol CandidatesViewControllerDelegate: AnyObject {
     func candidateSelected(_ candidate: String)
