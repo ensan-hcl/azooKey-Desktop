@@ -15,8 +15,10 @@ struct ConfigWindow: View {
     @ConfigState private var zenzaiProfile = Config.ZenzaiProfile()
     @ConfigState private var learning = Config.Learning()
     @ConfigState private var inferenceLimit = Config.ZenzaiInferenceLimit()
+    @ConfigState private var richCandidates = Config.ZenzaiRichCandidatesMode()
 
     @State private var zenzaiHelpPopover = false
+    @State private var zenzaiRichCandidatesPopover = false
     @State private var zenzaiProfileHelpPopover = false
     @State private var zenzaiInferenceLimitHelpPopover = false
 
@@ -53,6 +55,10 @@ struct ConfigWindow: View {
                     HStack {
                         Toggle("Zenzaiを有効化", isOn: $zenzai)
                         helpButton(helpContent: "Zenzaiはニューラル言語モデルを利用した最新のかな漢字変換システムです。\nMacのGPUを利用して高精度な変換を行います。\n変換エンジンはローカルで動作するため、外部との通信は不要です。", isPresented: $zenzaiHelpPopover)
+                    }
+                    HStack {
+                        Toggle("より多様な候補を提案", isOn: $richCandidates)
+                        helpButton(helpContent: "Zenzaiの利用時、複数の多様な候補を提案します。\n候補リストを表示する際に遅延が発生する可能性があります。", isPresented: $zenzaiRichCandidatesPopover)
                     }
                     HStack {
                         TextField("変換プロフィール", text: $zenzaiProfile, prompt: Text("例：田中太郎/高校生"))
@@ -95,7 +101,8 @@ struct ConfigWindow: View {
             }
             Spacer()
         }
-        .frame(width: 400, height: 300)
+        .frame(height: 300)
+        .frame(minWidth: 400, maxWidth: 600)
     }
 }
 

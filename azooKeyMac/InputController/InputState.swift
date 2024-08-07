@@ -46,7 +46,7 @@ enum InputState {
                 return .stopComposition
             case .space:
                 self = .selecting(rangeAdjusted: false)
-                return .showCandidateWindow
+                return .enterCandidateSelectionMode
             case .かな:
                 return .selectInputMode(.japanese)
             case .英数:
@@ -55,7 +55,7 @@ enum InputState {
             case .navigation(let direction):
                 if direction == .down {
                     self = .selecting(rangeAdjusted: false)
-                    return .showCandidateWindow
+                    return .enterCandidateSelectionMode
                 } else if direction == .right && event.modifierFlags.contains(.shift) {
                     self = .selecting(rangeAdjusted: true)
                     return .sequence([.moveCursorToStart, .moveCursor(1), .showCandidateWindow])

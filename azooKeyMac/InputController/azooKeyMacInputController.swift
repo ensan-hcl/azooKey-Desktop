@@ -43,11 +43,12 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         )!.kanaKanjiConverter
     }
     private var rawCandidates: ConversionResult?
-    private func zenzaiMode(leftSideContext: String?) -> ConvertRequestOptions.ZenzaiMode {
+    private func zenzaiMode(leftSideContext: String?, requestRichCandidates: Bool) -> ConvertRequestOptions.ZenzaiMode {
         if self.zenzaiEnabled {
             return .on(
                 weight: Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/zenz-v2-Q5_K_M.gguf", isDirectory: false),
                 inferenceLimit: Config.ZenzaiInferenceLimit().value,
+                requestRichCandidates: requestRichCandidates,
                 versionDependentMode: .v2(
                     .init(
                         profile: Config.ZenzaiProfile().value,
@@ -60,7 +61,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         }
     }
 
-    private func options(leftSideContext: String? = nil) -> ConvertRequestOptions {
+    private func options(leftSideContext: String? = nil, requestRichCandidates: Bool = false) -> ConvertRequestOptions {
         .withDefaultDictionary(
             requireJapanesePrediction: false,
             requireEnglishPrediction: false,
@@ -69,7 +70,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             learningType: Config.Learning().value.learningType,
             memoryDirectoryURL: self.azooKeyMemoryDir,
             sharedContainerURL: self.azooKeyMemoryDir,
-            zenzaiMode: self.zenzaiMode(leftSideContext: leftSideContext),
+            zenzaiMode: self.zenzaiMode(leftSideContext: leftSideContext, requestRichCandidates: requestRichCandidates),
             metadata: .init(versionString: "azooKey on macOS / α version")
         )
     }
@@ -239,6 +240,9 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             case .japanese:
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
             }
+        case .enterCandidateSelectionMode:
+            self.updateRawCandidate(requestRichCandidates: Config.ZenzaiRichCandidatesMode().value)
+            self.showCandidateWindow()
         case .appendToMarkedText(let string):
             self.hideCandidateWindow()
             self.composingText.insertAtCursorPosition(string, inputStyle: .roman2kana)
@@ -306,7 +310,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         return true
     }
 
-    @MainActor private func updateRawCandidate() {
+    @MainActor private func updateRawCandidate(requestRichCandidates: Bool = false) {
         let prefixComposingText = self.composingText.prefixToCursorPosition()
         let endIndex = client().markedRange().location
         // 取得する範囲をかなり狭く絞った
@@ -324,7 +328,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             }
             return String(last)
         }
-        let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options(leftSideContext: leftSideContext))
+        let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options(leftSideContext: leftSideContext, requestRichCandidates: requestRichCandidates))
         self.rawCandidates = result
         //        self.rawCandidates?.mainResults.append(Candidate(text: String((leftSideContext ?? "No Context").suffix(20)), value: .zero, correspondingCount: 0, lastMid: 0, data: []))
     }

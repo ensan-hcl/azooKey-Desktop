@@ -12,6 +12,8 @@ indirect enum ClientAction {
 
     case commitMarkedText
 
+    /// スペースを押して`.selecting`に入るコマンド
+    case enterCandidateSelectionMode
     case submitSelectedCandidate
     case selectNextCandidate
     case selectPrevCandidate
