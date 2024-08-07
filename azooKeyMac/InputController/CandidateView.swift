@@ -72,7 +72,7 @@ class CandidatesViewController: NSViewController {
     }
 
     func updateCandidates(_ candidates: [String], cursorLocation: CGPoint) {
-        showedRows = 0...8
+        showedRows = 0...(maxRows - 1)
         self.candidates = candidates
         self.currentSelectedRow = -1  // 選択をリセット
         self.tableView.reloadData()
@@ -178,9 +178,9 @@ class CandidatesViewController: NSViewController {
         // 表示範囲
         if !showedRows.contains(row) {
             if row < showedRows.lowerBound {
-                showedRows = row...(row + 8)
+                showedRows = row...(row + (maxRows - 1))
             } else {
-                showedRows = (row - 8)...row
+                showedRows = (row - (maxRows - 1))...row
             }
         }
 
