@@ -116,7 +116,7 @@ class CandidatesViewController: NSViewController {
         if numberRange.location != NSNotFound {
             attributedString.addAttributes([
                 .font: NSFont.systemFont(ofSize: 8),
-                .foregroundColor: currentSelectedRow == row ? NSColor.white : NSColor.gray,
+                .foregroundColor: currentSelectedRow == row ? NSColor.white : NSColor.gray
             ], range: numberRange)
         }
 
@@ -284,7 +284,7 @@ class CandidateTableCellView: NSTableCellView {
         NSLayoutConstraint.activate([
             candidateTextField.leadingAnchor.constraint(equalTo: leadingAnchor),
             candidateTextField.trailingAnchor.constraint(equalTo: trailingAnchor),
-            candidateTextField.centerYAnchor.constraint(equalTo: centerYAnchor), // 縦方向の中央配置
+            candidateTextField.centerYAnchor.constraint(equalTo: centerYAnchor) // 縦方向の中央配置
         ])
     }
 
