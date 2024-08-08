@@ -32,6 +32,18 @@ enum InputMode {
             case (true, false, true), (false, false, false):
                 return .input(KeyMap.h2zMap("¥"))
             }
+        case 43: // Comma
+            if Config.TypeCommaAndPeriod().value{
+                return .input(KeyMap.h2zMap("，"))
+            }else{
+                return .input(KeyMap.h2zMap("、"))
+            }
+        case 47: // Period
+            if Config.TypeCommaAndPeriod().value{
+                return .input(KeyMap.h2zMap("．"))
+            }else{
+                return .input(KeyMap.h2zMap("。"))
+            }
         case 102: // Lang2/kVK_JIS_Eisu
             return .英数
         case 104: // Lang1/kVK_JIS_Kana

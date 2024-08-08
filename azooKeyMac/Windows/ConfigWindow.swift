@@ -11,6 +11,7 @@ struct ConfigWindow: View {
     @ConfigState private var liveConversion = Config.LiveConversion()
     @ConfigState private var englishConversion = Config.EnglishConversion()
     @ConfigState private var typeBackSlash = Config.TypeBackSlash()
+    @ConfigState private var typeCommaAndPeriod = Config.TypeCommaAndPeriod()
     @ConfigState private var zenzai = Config.ZenzaiIntegration()
     @ConfigState private var zenzaiProfile = Config.ZenzaiProfile()
     @ConfigState private var learning = Config.Learning()
@@ -90,6 +91,7 @@ struct ConfigWindow: View {
                     Toggle("ライブ変換を有効化", isOn: $liveConversion)
                     Toggle("英単語変換を有効化", isOn: $englishConversion)
                     Toggle("円記号の代わりにバックスラッシュを入力", isOn: $typeBackSlash)
+                    Toggle("「、」「。」の代わりに「，」「．」を入力", isOn: $typeCommaAndPeriod)
                 }
                 Spacer()
             }

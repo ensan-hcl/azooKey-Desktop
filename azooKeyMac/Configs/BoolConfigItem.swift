@@ -42,6 +42,11 @@ extension Config {
         static let `default` = false
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.typeBackSlash"
     }
+    /// 「、」「。」の代わりに「,」「.」を入力する設定
+    struct TypeCommaAndPeriod: BoolConfigItem {
+        static let `default` = false
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.typeCommaAndPeriod"
+    }
     /// Zenzaiを利用する設定
     /// - warning: この設定がオンになっているとき、現在は学習をオフにしている
     struct ZenzaiIntegration: BoolConfigItem {
