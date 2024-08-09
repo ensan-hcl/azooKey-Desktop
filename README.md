@@ -53,9 +53,13 @@ cloneする際には`--recursive`をつけてサブモジュールまでロー�
 git clone https://github.com/ensan-hcl/azooKey-Desktop --recursive
 ```
 
-以下のスクリプトを用いて最新のコードをビルドしてください。`.pkg`によるインストールと同等になります。その後、上記の手順を行ってください。
+以下のスクリプトを用いて最新のコードをビルドしてください。`.pkg`によるインストールと同等になります。その後、上記の手順を行ってください。また、submoduleが更新されている場合は `git submodule update --init` を行ってください。
 
 ```bash
+# submoduleを更新
+git submodule update --init
+
+# ビルド＆インストール
 ./install.sh
 ```
 
