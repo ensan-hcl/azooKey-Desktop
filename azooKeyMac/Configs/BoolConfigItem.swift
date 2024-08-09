@@ -48,9 +48,13 @@ extension Config {
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.typeCommaAndPeriod"
     }
     /// Zenzaiを利用する設定
-    /// - warning: この設定がオンになっているとき、現在は学習をオフにしている
     struct ZenzaiIntegration: BoolConfigItem {
         static let `default` = true
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzai"
+    }
+    /// Zenzaiを利用時、候補ウィンドウを出すタイミングでリッチな候補の要求を行う
+    struct ZenzaiRichCandidatesMode: BoolConfigItem {
+        static let `default` = true
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzaiRichCandidatesMode"
     }
 }
