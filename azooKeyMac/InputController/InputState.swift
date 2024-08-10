@@ -100,6 +100,7 @@ enum InputState {
                             return .sequence([.moveCursorToStart, .moveCursor(1), .showCandidateWindow])
                         }
                     } else {
+                        self = .none
                         return .submitSelectedCandidate
                     }
                 } else if direction == .left && event.modifierFlags.contains(.shift) {
@@ -114,26 +115,13 @@ enum InputState {
                 }
             case .number(let num):
                 switch num {
-                case .one:
-                    return .selectNumberCandidate(1)
-                case .two:
-                    return .selectNumberCandidate(2)
-                case .three:
-                    return .selectNumberCandidate(3)
-                case .four:
-                    return .selectNumberCandidate(4)
-                case .five:
-                    return .selectNumberCandidate(5)
-                case .six:
-                    return .selectNumberCandidate(6)
-                case .seven:
-                    return .selectNumberCandidate(7)
-                case .eight:
-                    return .selectNumberCandidate(8)
-                case .nine:
-                    return .selectNumberCandidate(9)
+                case .one, .two, .three, .four, .five, .six, .seven, .eight, .nine:
+                    self = .none
+                    return .selectNumberCandidate(num.intValue)
                 case .zero:
-                    return .appendToMarkedText("0")                }
+                    self = .composing
+                    return .sequence([.submitSelectedCandidate, .appendToMarkedText("0")])
+                }
             case .かな:
                 return .selectInputMode(.japanese)
             case .英数:

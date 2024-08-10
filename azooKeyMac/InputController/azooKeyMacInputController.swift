@@ -294,7 +294,6 @@ class azooKeyMacInputController: IMKInputController {
 
 extension azooKeyMacInputController: CandidatesViewControllerDelegate {
     @MainActor func candidateSubmitted(_ candidate: Candidate) {
-        self.inputState = .none
         if let client = self.client() {
             client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
             // アプリケーションサポートのディレクトリを準備しておく
