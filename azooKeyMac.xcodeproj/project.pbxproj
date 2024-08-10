@@ -15,6 +15,7 @@
 		1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64126E74627009B65D7 /* AppDelegate.swift */; };
 		1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */; };
 		1A41E64726E74937009B65D7 /* main.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E64626E74937009B65D7 /* main.tiff */; };
+		5502D79C2C66FE23002AAEF7 /* SegmentsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5502D79B2C66FE23002AAEF7 /* SegmentsManager.swift */; };
 		551398D72BDD376800F1DB82 /* ConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398D62BDD376800F1DB82 /* ConfigItem.swift */; };
 		551398D92BDD38B700F1DB82 /* BoolConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */; };
 		551398DB2BDD39B700F1DB82 /* StringConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */; };
@@ -70,6 +71,7 @@
 		1A41E64526E7470D009B65D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1A41E64626E74937009B65D7 /* main.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = main.tiff; path = azooKeyMac/main.tiff; sourceTree = SOURCE_ROOT; };
 		1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = azooKeyMac.entitlements; sourceTree = "<group>"; };
+		5502D79B2C66FE23002AAEF7 /* SegmentsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentsManager.swift; sourceTree = "<group>"; };
 		551398D62BDD376800F1DB82 /* ConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigItem.swift; sourceTree = "<group>"; };
 		551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoolConfigItem.swift; sourceTree = "<group>"; };
 		551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringConfigItem.swift; sourceTree = "<group>"; };
@@ -241,6 +243,7 @@
 				E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */,
 				E916C20A2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift */,
 				E97406CD2C5E546200696C66 /* CandidateView.swift */,
+				5502D79B2C66FE23002AAEF7 /* SegmentsManager.swift */,
 			);
 			path = InputController;
 			sourceTree = "<group>";
@@ -412,6 +415,7 @@
 				551398D72BDD376800F1DB82 /* ConfigItem.swift in Sources */,
 				1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */,
 				E9C0C6F32BF5E8AE00E0EA50 /* InputMode.swift in Sources */,
+				5502D79C2C66FE23002AAEF7 /* SegmentsManager.swift in Sources */,
 				E989B4582BF4B1550085AF6D /* ClientAction.swift in Sources */,
 				551398DB2BDD39B700F1DB82 /* StringConfigItem.swift in Sources */,
 			);
