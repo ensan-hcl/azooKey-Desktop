@@ -6,9 +6,10 @@
 //
 
 import Cocoa
+import KanaKanjiConverterModule
 
 class CandidatesViewController: NSViewController {
-    private var candidates: [String] = []
+    private var candidates: [Candidate] = []
     private var tableView: NSTableView!
     weak var delegate: (any CandidatesViewControllerDelegate)?
     private var currentSelectedRow: Int = -1
@@ -69,7 +70,7 @@ class CandidatesViewController: NSViewController {
         configureWindowForRoundedCorners()
     }
 
-    func updateCandidates(_ candidates: [String], cursorLocation: CGPoint) {
+    func updateCandidates(_ candidates: [Candidate], cursorLocation: CGPoint) {
         showedRows = 0...8
         self.candidates = candidates
         self.currentSelectedRow = -1  // 選択をリセット
@@ -94,12 +95,12 @@ class CandidatesViewController: NSViewController {
 
         if isWithinShowedRows {
             if displayIndex > 9 {
-                displayText = " \(self.candidates[row])" // 行番号が10以上の場合、インデントを調整
+                displayText = " " + self.candidates[row].text // 行番号が10以上の場合、インデントを調整
             } else {
-                displayText = "\(displayIndex). \(self.candidates[row])"
+                displayText = "\(displayIndex). " + self.candidates[row].text
             }
         } else {
-            displayText = self.candidates[row] // showedRowsの範囲外では番号を付けない
+            displayText = self.candidates[row].text // showedRowsの範囲外では番号を付けない
         }
 
         // 数字部分と候補部分を別々に設定
@@ -132,7 +133,7 @@ class CandidatesViewController: NSViewController {
 
         // 候補の最大幅を計算
         let maxWidth = candidates.reduce(0) { maxWidth, candidate in
-            let attributedString = NSAttributedString(string: candidate, attributes: [.font: NSFont.systemFont(ofSize: 16)])
+            let attributedString = NSAttributedString(string: candidate.text, attributes: [.font: NSFont.systemFont(ofSize: 16)])
             let width = attributedString.size().width
             return max(maxWidth, width)
         }
@@ -226,7 +227,7 @@ class CandidatesViewController: NSViewController {
         let selectedRow = self.tableView.selectedRow
         if selectedRow >= 0 && selectedRow < self.candidates.count {
             let selectedCandidate = self.candidates[selectedRow]
-            delegate?.candidateSelected(selectedCandidate)
+            delegate?.candidateSubmitted(selectedCandidate)
         }
     }
 }
@@ -290,6 +291,6 @@ class CandidateTableCellView: NSTableCellView {
 }
 
 protocol CandidatesViewControllerDelegate: AnyObject {
-    func candidateSelected(_ candidate: String)
-    func candidateSelectionChanged(_ candidateString: String)
+    func candidateSubmitted(_ candidate: Candidate)
+    func candidateSelectionChanged(_ candidate: Candidate)
 }

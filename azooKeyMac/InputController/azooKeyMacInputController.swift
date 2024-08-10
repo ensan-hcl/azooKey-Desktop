@@ -13,9 +13,8 @@ import KanaKanjiConverterModuleWithDefaultDictionary
 let applicationLogger: Logger = Logger(subsystem: "dev.ensan.inputmethod.azooKeyMac", category: "main")
 
 @objc(azooKeyMacInputController)
-class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDelegate {
-    private var composingText: ComposingText = ComposingText()
-    private var selectedCandidate: String?
+class azooKeyMacInputController: IMKInputController {
+    private var segmentsManager: SegmentsManager
     private var inputState: InputState = .none
     private var directMode = false
     var zenzaiEnabled: Bool {
@@ -33,49 +32,12 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
     var liveConversionToggleMenuItem: NSMenuItem
     var englishConversionToggleMenuItem: NSMenuItem
 
-    private var displayedTextInComposingMode: String?
     private var candidatesWindow: NSWindow
     private var candidatesViewController: CandidatesViewController
 
-    @MainActor private var kanaKanjiConverter: KanaKanjiConverter {
-        (
-            NSApplication.shared.delegate as? AppDelegate
-        )!.kanaKanjiConverter
-    }
-    private var rawCandidates: ConversionResult?
-    private func zenzaiMode(leftSideContext: String?, requestRichCandidates: Bool) -> ConvertRequestOptions.ZenzaiMode {
-        if self.zenzaiEnabled {
-            return .on(
-                weight: Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/zenz-v2-Q5_K_M.gguf", isDirectory: false),
-                inferenceLimit: Config.ZenzaiInferenceLimit().value,
-                requestRichCandidates: requestRichCandidates,
-                versionDependentMode: .v2(
-                    .init(
-                        profile: Config.ZenzaiProfile().value,
-                        leftSideContext: leftSideContext
-                    )
-                )
-            )
-        } else {
-            return .off
-        }
-    }
-
-    private func options(leftSideContext: String? = nil, requestRichCandidates: Bool = false) -> ConvertRequestOptions {
-        .withDefaultDictionary(
-            requireJapanesePrediction: false,
-            requireEnglishPrediction: false,
-            keyboardLanguage: .ja_JP,
-            englishCandidateInRoman2KanaInput: self.englishConversionEnabled,
-            learningType: Config.Learning().value.learningType,
-            memoryDirectoryURL: self.azooKeyMemoryDir,
-            sharedContainerURL: self.azooKeyMemoryDir,
-            zenzaiMode: self.zenzaiMode(leftSideContext: leftSideContext, requestRichCandidates: requestRichCandidates),
-            metadata: .init(versionString: "azooKey on macOS / α version")
-        )
-    }
-
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
+        self.segmentsManager = SegmentsManager()
+
         self.appMenu = NSMenu(title: "azooKey")
         self.zenzaiToggleMenuItem = NSMenuItem()
         self.liveConversionToggleMenuItem = NSMenuItem()
@@ -100,6 +62,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
 
         // デリゲートの設定を super.init の後に移動
         self.candidatesViewController.delegate = self
+        self.segmentsManager.delegate = self
         self.setupMenu()
     }
 
@@ -111,7 +74,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         self.updateZenzaiToggleMenuItem(newValue: self.zenzaiEnabled)
         self.updateLiveConversionToggleMenuItem(newValue: self.liveConversionEnabled)
         self.updateEnglishConversionToggleMenuItem(newValue: self.englishConversionEnabled)
-        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
+        self.segmentsManager.activate()
 
         if let client = sender as? IMKTextInput {
             client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
@@ -127,14 +90,9 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
 
     @MainActor
     override func deactivateServer(_ sender: Any!) {
-        self.kanaKanjiConverter.stopComposition()
-        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
-        self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+        self.segmentsManager.deactivate()
         self.candidatesWindow.orderOut(nil)
         self.candidatesViewController.updateCandidates([], cursorLocation: .zero)
-        self.rawCandidates = nil
-        self.displayedTextInComposingMode = nil
-        self.composingText.stopComposition()
         if let client = sender as? IMKTextInput {
             client.insertText("", replacementRange: .notFound)
         }
@@ -146,7 +104,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             self.client()?.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
             self.directMode = value == "com.apple.inputmethod.Roman"
             if self.directMode {
-                self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+                self.segmentsManager.stopJapaneseInput()
             }
         }
         super.setValue(value, forTag: tag, client: sender)
@@ -214,7 +172,7 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
     func showCandidateWindow() {
         var rect: NSRect = .zero
         self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-        self.candidatesViewController.updateCandidates(self.rawCandidates?.mainResults.map { $0.text } ?? [], cursorLocation: rect.origin)
+        self.candidatesViewController.updateCandidates(self.segmentsManager.candidates ?? [], cursorLocation: rect.origin)
         self.candidatesViewController.selectFirstCandidate()
         self.candidatesWindow.orderFront(nil)
     }
@@ -236,51 +194,39 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             switch mode {
             case .roman:
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Roman")
-                self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+                self.segmentsManager.stopJapaneseInput()
             case .japanese:
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
             }
         case .enterCandidateSelectionMode:
-            self.updateRawCandidate(requestRichCandidates: Config.ZenzaiRichCandidatesMode().value)
+            self.segmentsManager.update(requestRichCandidates: true)
             self.showCandidateWindow()
         case .appendToMarkedText(let string):
             self.hideCandidateWindow()
-            self.composingText.insertAtCursorPosition(string, inputStyle: .roman2kana)
-            self.updateRawCandidate()
-            // Live Conversion
-            let text = if self.liveConversionEnabled, self.composingText.convertTarget.count > 1, let firstCandidate = self.rawCandidates?.mainResults.first {
-                firstCandidate.text
-            } else {
-                self.composingText.convertTarget
-            }
-            self.updateMarkedTextInComposingMode(text: text, client: client)
+            self.segmentsManager.insertAtCursorPosition(string, inputStyle: .roman2kana)
+            self.refreshMarkedText()
         case .moveCursor(let value):
-            _ = self.composingText.moveCursorFromCursorPosition(count: value)
-            self.updateRawCandidate()
+            self.segmentsManager.moveCursor(count: value)
         case .moveCursorToStart:
-            _ = self.composingText.moveCursorFromCursorPosition(count: -self.composingText.convertTargetCursorPosition)
-            self.updateRawCandidate()
+            self.segmentsManager.moveCursorToStart()
         case .commitMarkedText:
-            let candidateString = self.displayedTextInComposingMode ?? self.composingText.convertTarget
-            client.insertText(self.displayedTextInComposingMode ?? self.composingText.convertTarget, replacementRange: NSRange(location: NSNotFound, length: 0))
-            if let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) {
-                self.update(with: candidate)
+            let markedText = self.segmentsManager.getCurrentMarkedText(inputState: self.inputState)
+            let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
+            client.insertText(text, replacementRange: NSRange(location: NSNotFound, length: 0))
+            if let candidate = self.segmentsManager.candidates?.first(where: {$0.text == text}) {
+                self.segmentsManager.candidateCommited(candidate)
             }
-            self.kanaKanjiConverter.stopComposition()
-            self.composingText.stopComposition()
+            self.segmentsManager.stopComposition()
             self.hideCandidateWindow()
-            self.displayedTextInComposingMode = nil
         case .submitSelectedCandidate:
             self.candidatesViewController.confirmCandidateSelection()
         case .removeLastMarkedText:
             self.hideCandidateWindow()
-            self.composingText.deleteBackwardFromCursorPosition(count: 1)
-            self.updateMarkedTextInComposingMode(text: self.composingText.convertTarget, client: client)
-            if self.composingText.isEmpty {
+            self.segmentsManager.deleteBackwardFromCursorPosition()
+            if self.segmentsManager.isEmpty {
                 self.inputState = .none
-            } else {
-                self.updateRawCandidate()
             }
+            self.refreshMarkedText()
         case .consume:
             return true
         case .fallthrough:
@@ -293,11 +239,9 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             self.candidatesViewController.selectNumberCandidate(num: num)
             self.candidatesViewController.confirmCandidateSelection()
         case .stopComposition:
-            self.updateMarkedTextInComposingMode(text: "", client: client)
-            self.composingText.stopComposition()
-            self.kanaKanjiConverter.stopComposition()
+            self.segmentsManager.stopComposition()
+            self.refreshMarkedText()
             self.hideCandidateWindow()
-            self.displayedTextInComposingMode = nil
         case .sequence(let actions):
             var found = false
             for action in actions {
@@ -310,55 +254,13 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         return true
     }
 
-    @MainActor private func updateRawCandidate(requestRichCandidates: Bool = false) {
-        let prefixComposingText = self.composingText.prefixToCursorPosition()
-        let endIndex = client().markedRange().location
-        // 取得する範囲をかなり狭く絞った
-        let leftRange = NSRange(location: max(endIndex - 30, 0), length: min(endIndex, 30))
-        var actual = NSRange()
-        // 同じ行の文字のみコンテキストに含める
-        let leftSideContext = self.client().string(from: leftRange, actualRange: &actual).map {
-            var last = $0.split(separator: "\n", omittingEmptySubsequences: false).last ?? $0[...]
-            // 空白を削除する
-            while last.first?.isWhitespace ?? false {
-                last = last.dropFirst()
-            }
-            while last.last?.isWhitespace ?? false {
-                last = last.dropLast()
-            }
-            return String(last)
-        }
-        let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options(leftSideContext: leftSideContext, requestRichCandidates: requestRichCandidates))
-        self.rawCandidates = result
-        //        self.rawCandidates?.mainResults.append(Candidate(text: String((leftSideContext ?? "No Context").suffix(20)), value: .zero, correspondingCount: 0, lastMid: 0, data: []))
-    }
-
     /// function to provide candidates
     /// - returns: `[String]`
     @MainActor override func candidates(_ sender: Any!) -> [Any]! {
-        self.updateRawCandidate()
-        return self.rawCandidates?.mainResults.map { $0.text } ?? []
+        self.segmentsManager.candidates?.map { $0.text } ?? []
     }
 
-    /// selecting modeの場合はこの関数は使わない
-    func updateMarkedTextInComposingMode(text: String, client: IMKTextInput) {
-        self.displayedTextInComposingMode = text
-        client.setMarkedText(
-            NSAttributedString(string: text, attributes: [:]),
-            selectionRange: .notFound,
-            replacementRange: NSRange(location: NSNotFound, length: 0)
-        )
-    }
-
-    /// selecting modeでのみ利用する
-    @MainActor
-    func updateMarkedTextWithCandidate(_ candidateString: String) {
-        guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
-            return
-        }
-        var afterComposingText = self.composingText
-        afterComposingText.prefixComplete(correspondingCount: candidate.correspondingCount)
-        // これを使うことで文節単位変換の際に変換対象の文節の色が変わる
+    func refreshMarkedText() {
         let highlight = self.mark(
             forStyle: kTSMHiliteSelectedConvertedText,
             at: NSRange(location: NSNotFound, length: 0)
@@ -368,48 +270,44 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
             at: NSRange(location: NSNotFound, length: 0)
         ) as? [NSAttributedString.Key: Any]
         let text = NSMutableAttributedString(string: "")
-        text.append(NSAttributedString(string: candidateString, attributes: highlight))
-        text.append(NSAttributedString(string: afterComposingText.convertTarget, attributes: underline))
+        let currentMarkedText = self.segmentsManager.getCurrentMarkedText(inputState: self.inputState)
+        for part in currentMarkedText where !part.content.isEmpty {
+            let attributes: [NSAttributedString.Key: Any]? = switch part.focus {
+            case .focused: highlight
+            case .unfocused: underline
+            case .none: [:]
+            }
+            text.append(
+                NSAttributedString(
+                    string: part.content,
+                    attributes: attributes
+                )
+            )
+        }
         self.client()?.setMarkedText(
             text,
-            selectionRange: NSRange(location: candidateString.count, length: 0),
+            selectionRange: currentMarkedText.selectionRange,
             replacementRange: NSRange(location: NSNotFound, length: 0)
         )
     }
+}
 
-    @MainActor private func update(with candidate: Candidate) {
-        self.kanaKanjiConverter.setCompletedData(candidate)
-        self.kanaKanjiConverter.updateLearningData(candidate)
-    }
-
-    @MainActor func candidateSelected(_ candidate: String) {
-        self.selectedCandidate = candidate
+extension azooKeyMacInputController: CandidatesViewControllerDelegate {
+    @MainActor func candidateSubmitted(_ candidate: Candidate) {
         self.inputState = .none
         if let client = self.client() {
-            let candidateString = self.selectedCandidate ?? self.composingText.convertTarget
-            client.insertText(candidateString, replacementRange: NSRange(location: NSNotFound, length: 0))
-            guard let candidate = self.rawCandidates?.mainResults.first(where: {$0.text == candidateString}) else {
-                self.kanaKanjiConverter.stopComposition()
-                self.composingText.stopComposition()
-                self.rawCandidates = nil
-                return
-            }
+            client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
             // アプリケーションサポートのディレクトリを準備しておく
-            self.update(with: candidate)
-            self.composingText.prefixComplete(correspondingCount: candidate.correspondingCount)
+            self.segmentsManager.candidateCommited(candidate)
 
-            self.selectedCandidate = nil
-            if self.composingText.isEmpty {
-                self.rawCandidates = nil
-                self.kanaKanjiConverter.stopComposition()
-                self.composingText.stopComposition()
+            if self.segmentsManager.isEmpty {
+                self.segmentsManager.stopComposition()
                 self.candidatesViewController.clearCandidates()
                 self.hideCandidateWindow()
             } else {
                 self.inputState = .selecting(rangeAdjusted: false)
-                self.updateRawCandidate()
                 client.setMarkedText(
-                    NSAttributedString(string: self.composingText.convertTarget, attributes: [:]),
+                    NSAttributedString(string: self.segmentsManager.convertTarget, attributes: [:]),
                     selectionRange: .notFound,
                     replacementRange: NSRange(location: NSNotFound, length: 0)
                 )
@@ -418,8 +316,19 @@ class azooKeyMacInputController: IMKInputController, CandidatesViewControllerDel
         }
     }
 
-    @MainActor func candidateSelectionChanged(_ candidateString: String) {
-        self.updateMarkedTextWithCandidate(candidateString)
-        self.selectedCandidate = candidateString
+    @MainActor func candidateSelectionChanged(_ candidate: Candidate) {
+        self.segmentsManager.requestUpdateMarkedText(selectedPrefixCandidate: candidate)
+        self.refreshMarkedText()
+    }
+}
+
+extension azooKeyMacInputController: SegmentManagerDelegate {
+    func getLeftSideContext(maxCount: Int) -> String? {
+        let endIndex = client().markedRange().location
+        let leftRange = NSRange(location: max(endIndex - maxCount, 0), length: min(endIndex, maxCount))
+        var actual = NSRange()
+        // 同じ行の文字のみコンテキストに含める
+        let leftSideContext = self.client().string(from: leftRange, actualRange: &actual)
+        return leftSideContext
     }
 }
