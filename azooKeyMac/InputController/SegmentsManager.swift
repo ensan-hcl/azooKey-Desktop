@@ -153,7 +153,14 @@ final class SegmentsManager {
     }
 
     var candidates: [Candidate]? {
-        self.rawCandidates?.mainResults
+        if let rawCandidates {
+            let seenAsFirstClauseResults = rawCandidates.firstClauseResults.mapSet(transform: \.text)
+            return rawCandidates.firstClauseResults + rawCandidates.mainResults.filter {
+                !seenAsFirstClauseResults.contains($0.text)
+            }
+        } else {
+            return nil
+        }
     }
 
     var convertTarget: String {
