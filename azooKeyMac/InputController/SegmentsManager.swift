@@ -178,10 +178,15 @@ final class SegmentsManager {
     var candidates: [Candidate]? {
         if let rawCandidates {
             if !self.didExperienceSegmentEdition {
-                // 変換範囲がエディットされていない場合
-                let seenAsFirstClauseResults = rawCandidates.firstClauseResults.mapSet(transform: \.text)
-                return rawCandidates.firstClauseResults + rawCandidates.mainResults.filter {
-                    !seenAsFirstClauseResults.contains($0.text)
+                if rawCandidates.firstClauseResults.lazy.map({$0.correspondingCount}).max() == rawCandidates.mainResults.lazy.map({$0.correspondingCount}).max() {
+                    // firstClauseCandidateがmainResultsと同じサイズの場合は、何もしない方が良い
+                    return rawCandidates.mainResults
+                } else {
+                    // 変換範囲がエディットされていない場合
+                    let seenAsFirstClauseResults = rawCandidates.firstClauseResults.mapSet(transform: \.text)
+                    return rawCandidates.firstClauseResults + rawCandidates.mainResults.filter {
+                        !seenAsFirstClauseResults.contains($0.text)
+                    }
                 }
             } else {
                 return rawCandidates.mainResults
