@@ -64,23 +64,10 @@ extension azooKeyMacInputController {
     }
 
     // MARK: - Application Support Directory
-
-    var azooKeyMemoryDir: URL {
-        if #available(macOS 13, *) {
-            URL.applicationSupportDirectory
-                .appending(path: "azooKey", directoryHint: .isDirectory)
-                .appending(path: "memory", directoryHint: .isDirectory)
-        } else {
-            FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-                .appendingPathComponent("azooKey", isDirectory: true)
-                .appendingPathComponent("memory", isDirectory: true)
-        }
-    }
-
     func prepareApplicationSupportDirectory() {
         do {
-            applicationLogger.info("\(#line, privacy: .public): Applicatiion Support Directory Path: \(self.azooKeyMemoryDir, privacy: .public)")
-            try FileManager.default.createDirectory(at: self.azooKeyMemoryDir, withIntermediateDirectories: true)
+            applicationLogger.info("\(#line, privacy: .public): Applicatiion Support Directory Path: \(self.segmentsManager.azooKeyMemoryDir, privacy: .public)")
+            try FileManager.default.createDirectory(at: self.segmentsManager.azooKeyMemoryDir, withIntermediateDirectories: true)
         } catch {
             applicationLogger.error("\(#line, privacy: .public): \(error.localizedDescription, privacy: .public)")
         }

@@ -75,7 +75,7 @@ final class SegmentsManager {
         )
     }
 
-    private var azooKeyMemoryDir: URL {
+    var azooKeyMemoryDir: URL {
         if #available(macOS 13, *) {
             URL.applicationSupportDirectory
                 .appending(path: "azooKey", directoryHint: .isDirectory)

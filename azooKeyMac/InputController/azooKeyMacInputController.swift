@@ -14,7 +14,7 @@ let applicationLogger: Logger = Logger(subsystem: "dev.ensan.inputmethod.azooKey
 
 @objc(azooKeyMacInputController)
 class azooKeyMacInputController: IMKInputController {
-    private var segmentsManager: SegmentsManager
+    var segmentsManager: SegmentsManager
     private var inputState: InputState = .none
     private var directMode = false
     var zenzaiEnabled: Bool {
