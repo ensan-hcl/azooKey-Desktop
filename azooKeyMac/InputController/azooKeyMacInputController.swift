@@ -213,7 +213,7 @@ class azooKeyMacInputController: IMKInputController {
             let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
             client.insertText(text, replacementRange: NSRange(location: NSNotFound, length: 0))
             if let candidate = self.segmentsManager.candidates?.first(where: {$0.text == text}) {
-                self.segmentsManager.candidateCommited(candidate)
+                self.segmentsManager.prefixCandidateCommited(candidate)
             }
             self.segmentsManager.stopComposition()
             self.hideCandidateWindow()
@@ -296,7 +296,7 @@ extension azooKeyMacInputController: CandidatesViewControllerDelegate {
         if let client = self.client() {
             client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
             // アプリケーションサポートのディレクトリを準備しておく
-            self.segmentsManager.candidateCommited(candidate)
+            self.segmentsManager.prefixCandidateCommited(candidate)
 
             if self.segmentsManager.isEmpty {
                 self.segmentsManager.stopComposition()

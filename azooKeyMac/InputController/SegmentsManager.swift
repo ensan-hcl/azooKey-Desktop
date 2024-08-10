@@ -28,6 +28,7 @@ final class SegmentsManager {
     private var rawCandidates: ConversionResult?
 
     private var selectedPrefixCandidate: Candidate?
+    private var didExperienceSegmentEdition = false
     private var lastOperation: Operation = .other
 
     private enum Operation: Sendable {
@@ -99,6 +100,7 @@ final class SegmentsManager {
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
         self.rawCandidates = nil
         self.selectedPrefixCandidate = nil
+        self.didExperienceSegmentEdition = false
         self.lastOperation = .other
         self.composingText.stopComposition()
     }
@@ -109,6 +111,7 @@ final class SegmentsManager {
         self.composingText.stopComposition()
         self.kanaKanjiConverter.stopComposition()
         self.rawCandidates = nil
+        self.didExperienceSegmentEdition = false
         self.selectedPrefixCandidate = nil
         self.lastOperation = .other
     }
@@ -118,6 +121,7 @@ final class SegmentsManager {
     func stopJapaneseInput() {
         self.selectedPrefixCandidate = nil
         self.rawCandidates = nil
+        self.didExperienceSegmentEdition = false
         self.lastOperation = .other
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
     }
@@ -131,10 +135,17 @@ final class SegmentsManager {
 
     @MainActor
     func editSegment(count: Int) {
+        // 現在選ばれているprefix candidateが存在する場合、まずそれに合わせてカーソルを移動する
+        if let selectedPrefixCandidate {
+            var afterComposingText = self.composingText
+            afterComposingText.prefixComplete(correspondingCount: selectedPrefixCandidate.correspondingCount)
+            let prefixCount = self.composingText.convertTarget.count - afterComposingText.convertTarget.count
+            _ = self.composingText.moveCursorFromCursorPosition(count: -self.composingText.convertTargetCursorPosition + prefixCount)
+        }
         if count > 0 {
-            if self.composingText.isAtEndIndex {
+            if self.composingText.isAtEndIndex && !self.didExperienceSegmentEdition {
                 // 現在のカーソルが右端にある場合、左端の次に移動する
-                _ = self.composingText.moveCursorFromCursorPosition(count: self.composingText.convertTargetCursorPosition - count)
+                _ = self.composingText.moveCursorFromCursorPosition(count: -self.composingText.convertTargetCursorPosition + count)
             } else {
                 // それ以外の場合、右に広げる
                 _ = self.composingText.moveCursorFromCursorPosition(count: count)
@@ -142,28 +153,36 @@ final class SegmentsManager {
         } else {
             _ = self.composingText.moveCursorFromCursorPosition(count: count)
         }
+        if self.composingText.isAtStartIndex {
+            // 最初にある場合は一つ右に進める
+            _ = self.composingText.moveCursorFromCursorPosition(count: 1)
+        }
         self.lastOperation = .editSegment
+        self.didExperienceSegmentEdition = true
         self.updateRawCandidate()
     }
 
     @MainActor
     func deleteBackwardFromCursorPosition(count: Int = 1) {
         self.composingText.deleteBackwardFromCursorPosition(count: count)
+        if self.composingText.isAtStartIndex {
+            // 右端に持っていく
+            _ = self.composingText.moveCursorFromCursorPosition(count: self.composingText.convertTarget.count)
+        }
         self.lastOperation = .delete
-        self.updateRawCandidate()
-    }
-
-    @MainActor
-    func moveCursorToStart() {
-        _ = self.composingText.moveCursorFromCursorPosition(count: -self.composingText.convertTargetCursorPosition)
         self.updateRawCandidate()
     }
 
     var candidates: [Candidate]? {
         if let rawCandidates {
-            let seenAsFirstClauseResults = rawCandidates.firstClauseResults.mapSet(transform: \.text)
-            return rawCandidates.firstClauseResults + rawCandidates.mainResults.filter {
-                !seenAsFirstClauseResults.contains($0.text)
+            if !self.didExperienceSegmentEdition {
+                // 変換範囲がエディットされていない場合
+                let seenAsFirstClauseResults = rawCandidates.firstClauseResults.mapSet(transform: \.text)
+                return rawCandidates.firstClauseResults + rawCandidates.mainResults.filter {
+                    !seenAsFirstClauseResults.contains($0.text)
+                }
+            } else {
+                return rawCandidates.mainResults
             }
         } else {
             return nil
@@ -206,12 +225,15 @@ final class SegmentsManager {
         self.updateRawCandidate(requestRichCandidates: requestRichCandidates)
     }
 
-    @MainActor func candidateCommited(_ candidate: Candidate) {
+    @MainActor func prefixCandidateCommited(_ candidate: Candidate) {
         self.kanaKanjiConverter.setCompletedData(candidate)
         self.kanaKanjiConverter.updateLearningData(candidate)
         self.composingText.prefixComplete(correspondingCount: candidate.correspondingCount)
 
         if !self.composingText.isEmpty {
+            // カーソルを右端に移動する
+            _ = self.composingText.moveCursorFromCursorPosition(count: self.composingText.convertTarget.count - self.composingText.convertTargetCursorPosition)
+            self.didExperienceSegmentEdition = false
             self.updateRawCandidate()
         }
     }
