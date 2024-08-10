@@ -98,6 +98,7 @@ final class SegmentsManager {
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
         self.rawCandidates = nil
+        self.selectedPrefixCandidate = nil
         self.lastOperation = .other
         self.composingText.stopComposition()
     }
@@ -108,12 +109,15 @@ final class SegmentsManager {
         self.composingText.stopComposition()
         self.kanaKanjiConverter.stopComposition()
         self.rawCandidates = nil
+        self.selectedPrefixCandidate = nil
         self.lastOperation = .other
     }
 
     @MainActor
     /// 日本語入力自体をやめる
     func stopJapaneseInput() {
+        self.selectedPrefixCandidate = nil
+        self.rawCandidates = nil
         self.lastOperation = .other
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
     }
@@ -185,7 +189,7 @@ final class SegmentsManager {
     }
 
     @MainActor func update(requestRichCandidates: Bool) {
-        self.updateRawCandidate(requestRichCandidates: true)
+        self.updateRawCandidate(requestRichCandidates: requestRichCandidates)
     }
 
     @MainActor func candidateCommited(_ candidate: Candidate) {
