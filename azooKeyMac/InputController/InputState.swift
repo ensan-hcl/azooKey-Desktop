@@ -3,8 +3,7 @@ import InputMethodKit
 enum InputState {
     case none
     case composing
-    /// 変換範囲をユーザが調整したか
-    case selecting(rangeAdjusted: Bool)
+    case selecting
 
     mutating func event(_ event: NSEvent!, userAction: UserAction) -> ClientAction {
         if event.modifierFlags.contains(.command) {
@@ -45,7 +44,7 @@ enum InputState {
             case .escape:
                 return .stopComposition
             case .space:
-                self = .selecting(rangeAdjusted: false)
+                self = .selecting
                 return .enterCandidateSelectionMode
             case .かな:
                 return .selectInputMode(.japanese)
@@ -54,14 +53,14 @@ enum InputState {
                 return .sequence([.commitMarkedText, .selectInputMode(.roman)])
             case .navigation(let direction):
                 if direction == .down {
-                    self = .selecting(rangeAdjusted: false)
+                    self = .selecting
                     return .enterCandidateSelectionMode
                 } else if direction == .right && event.modifierFlags.contains(.shift) {
-                    self = .selecting(rangeAdjusted: true)
-                    return .sequence([.moveCursorToStart, .moveCursor(1), .showCandidateWindow])
+                    self = .selecting
+                    return .editSegment(1)
                 } else if direction == .left && event.modifierFlags.contains(.shift) {
-                    self = .selecting(rangeAdjusted: true)
-                    return .sequence([.moveCursor(-1), .showCandidateWindow])
+                    self = .selecting
+                    return .editSegment(-1)
                 } else {
                     // ナビゲーションはハンドルしてしまう
                     return .consume
@@ -69,7 +68,7 @@ enum InputState {
             case .unknown:
                 return .fallthrough
             }
-        case .selecting(let rangeAdjusted):
+        case .selecting:
             switch userAction {
             case .input(let string):
                 self = .composing
@@ -93,19 +92,14 @@ enum InputState {
             case .navigation(let direction):
                 if direction == .right {
                     if event.modifierFlags.contains(.shift) {
-                        if rangeAdjusted {
-                            return .sequence([.moveCursor(1), .showCandidateWindow])
-                        } else {
-                            self = .selecting(rangeAdjusted: true)
-                            return .sequence([.moveCursorToStart, .moveCursor(1), .showCandidateWindow])
-                        }
+                        return .editSegment(1)
                     } else {
                         self = .none
                         return .submitSelectedCandidate
                     }
                 } else if direction == .left && event.modifierFlags.contains(.shift) {
-                    self = .selecting(rangeAdjusted: true)
-                    return .sequence([.moveCursor(-1), .showCandidateWindow])
+                    self = .selecting
+                    return .editSegment(-1)
                 } else if direction == .down {
                     return .selectNextCandidate
                 } else if direction == .up {

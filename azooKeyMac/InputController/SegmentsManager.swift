@@ -33,7 +33,7 @@ final class SegmentsManager {
     private enum Operation: Sendable {
         case insert
         case delete
-        case moveCursor
+        case editSegment
         case other
     }
 
@@ -130,12 +130,19 @@ final class SegmentsManager {
     }
 
     @MainActor
-    func moveCursor(count: Int) {
-        _ = self.composingText.moveCursorFromCursorPosition(count: count)
-        if self.composingText.convertTargetCursorPosition == 0 {
-            _ = self.composingText.moveCursorFromCursorPosition(count: 1)
+    func editSegment(count: Int) {
+        if count > 0 {
+            if self.composingText.isAtEndIndex {
+                // 現在のカーソルが右端にある場合、左端の次に移動する
+                _ = self.composingText.moveCursorFromCursorPosition(count: self.composingText.convertTargetCursorPosition - count)
+            } else {
+                // それ以外の場合、右に広げる
+                _ = self.composingText.moveCursorFromCursorPosition(count: count)
+            }
+        } else {
+            _ = self.composingText.moveCursorFromCursorPosition(count: count)
         }
-        self.lastOperation = .moveCursor
+        self.lastOperation = .editSegment
         self.updateRawCandidate()
     }
 

@@ -7,10 +7,10 @@ indirect enum ClientAction {
     case hideCandidateWindow
     case appendToMarkedText(String)
     case removeLastMarkedText
-    case moveCursorToStart
-    case moveCursor(Int)
 
     case commitMarkedText
+    /// Shift+←→で選択範囲をエディットするコマンド
+    case editSegment(Int)
 
     /// スペースを押して`.selecting`に入るコマンド
     case enterCandidateSelectionMode

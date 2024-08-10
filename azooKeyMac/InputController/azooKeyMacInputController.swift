@@ -205,10 +205,9 @@ class azooKeyMacInputController: IMKInputController {
             self.hideCandidateWindow()
             self.segmentsManager.insertAtCursorPosition(string, inputStyle: .roman2kana)
             self.refreshMarkedText()
-        case .moveCursor(let value):
-            self.segmentsManager.moveCursor(count: value)
-        case .moveCursorToStart:
-            self.segmentsManager.moveCursorToStart()
+        case .editSegment(let count):
+            self.segmentsManager.editSegment(count: count)
+            self.showCandidateWindow()
         case .commitMarkedText:
             let markedText = self.segmentsManager.getCurrentMarkedText(inputState: self.inputState)
             let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
@@ -304,7 +303,7 @@ extension azooKeyMacInputController: CandidatesViewControllerDelegate {
                 self.candidatesViewController.clearCandidates()
                 self.hideCandidateWindow()
             } else {
-                self.inputState = .selecting(rangeAdjusted: false)
+                self.inputState = .selecting
                 client.setMarkedText(
                     NSAttributedString(string: self.segmentsManager.convertTarget, attributes: [:]),
                     selectionRange: .notFound,
