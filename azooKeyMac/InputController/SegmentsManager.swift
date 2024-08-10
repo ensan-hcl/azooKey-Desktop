@@ -164,11 +164,13 @@ final class SegmentsManager {
 
     @MainActor
     func deleteBackwardFromCursorPosition(count: Int = 1) {
-        self.composingText.deleteBackwardFromCursorPosition(count: count)
-        if self.composingText.isAtStartIndex {
+        if !self.composingText.isAtEndIndex {
             // 右端に持っていく
-            _ = self.composingText.moveCursorFromCursorPosition(count: self.composingText.convertTarget.count)
+            _ = self.composingText.moveCursorFromCursorPosition(count: self.composingText.convertTarget.count - self.composingText.convertTargetCursorPosition)
+            // 一度segmentの編集状態もリセットにする
+            self.didExperienceSegmentEdition = false
         }
+        self.composingText.deleteBackwardFromCursorPosition(count: count)
         self.lastOperation = .delete
         self.updateRawCandidate()
     }
