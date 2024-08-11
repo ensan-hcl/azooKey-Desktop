@@ -30,7 +30,7 @@ final class SegmentsManager {
     private var selectedPrefixCandidate: Candidate?
     private var didExperienceSegmentEdition = false
     private var lastOperation: Operation = .other
-    private(set) var shouldShowCandidateWindow = false
+    private var shouldShowCandidateWindow = false
 
     private enum Operation: Sendable {
         case insert
@@ -183,7 +183,7 @@ final class SegmentsManager {
         self.updateRawCandidate()
     }
 
-    var candidates: [Candidate]? {
+    private var candidates: [Candidate]? {
         if let rawCandidates {
             if !self.didExperienceSegmentEdition {
                 if rawCandidates.firstClauseResults.lazy.map({$0.correspondingCount}).max() == rawCandidates.mainResults.lazy.map({$0.correspondingCount}).max() {
@@ -255,6 +255,23 @@ final class SegmentsManager {
         }
     }
 
+    enum CandidateWindow: Sendable {
+        case hidden
+        case shown([Candidate])
+    }
+
+    func requestSetCandidateWindowState(visible: Bool) {
+        self.shouldShowCandidateWindow = visible
+    }
+
+    func getCurrentCandidateWindow() -> CandidateWindow {
+        if self.shouldShowCandidateWindow, let candidates {
+            return .shown(candidates)
+        } else {
+            return .hidden
+        }
+    }
+
     struct MarkedText: Sendable, Equatable, Hashable, Sequence {
         enum FocusState: Sendable, Equatable, Hashable {
             case focused
@@ -279,8 +296,15 @@ final class SegmentsManager {
         self.selectedPrefixCandidate = selectedPrefixCandidate
     }
 
-    func requestSetCandidateWindowState(visible: Bool) {
-        self.shouldShowCandidateWindow = visible
+    @MainActor
+    func commitMarkedText(inputState: InputState) -> String {
+        let markedText = self.getCurrentMarkedText(inputState: inputState)
+        let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
+        if let candidate = self.candidates?.first(where: {$0.text == text}) {
+            self.prefixCandidateCommited(candidate)
+        }
+        self.stopComposition()
+        return text
     }
 
     func getCurrentMarkedText(inputState: InputState) -> MarkedText {
