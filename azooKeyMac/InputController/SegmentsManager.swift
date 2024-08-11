@@ -30,6 +30,7 @@ final class SegmentsManager {
     private var selectedPrefixCandidate: Candidate?
     private var didExperienceSegmentEdition = false
     private var lastOperation: Operation = .other
+    private(set) var shouldShowCandidateWindow = false
 
     private enum Operation: Sendable {
         case insert
@@ -90,6 +91,7 @@ final class SegmentsManager {
 
     @MainActor
     func activate() {
+        self.shouldShowCandidateWindow = false
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
     }
 
@@ -103,6 +105,7 @@ final class SegmentsManager {
         self.didExperienceSegmentEdition = false
         self.lastOperation = .other
         self.composingText.stopComposition()
+        self.shouldShowCandidateWindow = false
     }
 
     @MainActor
@@ -114,6 +117,7 @@ final class SegmentsManager {
         self.didExperienceSegmentEdition = false
         self.selectedPrefixCandidate = nil
         self.lastOperation = .other
+        self.shouldShowCandidateWindow = false
     }
 
     @MainActor
@@ -124,12 +128,14 @@ final class SegmentsManager {
         self.didExperienceSegmentEdition = false
         self.lastOperation = .other
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+        self.shouldShowCandidateWindow = false
     }
 
     @MainActor
     func insertAtCursorPosition(_ string: String, inputStyle: InputStyle) {
         self.composingText.insertAtCursorPosition(string, inputStyle: inputStyle)
         self.lastOperation = .insert
+        self.shouldShowCandidateWindow = false
         self.updateRawCandidate()
     }
 
@@ -159,6 +165,7 @@ final class SegmentsManager {
         }
         self.lastOperation = .editSegment
         self.didExperienceSegmentEdition = true
+        self.shouldShowCandidateWindow = true
         self.updateRawCandidate()
     }
 
@@ -172,6 +179,7 @@ final class SegmentsManager {
         }
         self.composingText.deleteBackwardFromCursorPosition(count: count)
         self.lastOperation = .delete
+        self.shouldShowCandidateWindow = false
         self.updateRawCandidate()
     }
 
@@ -230,6 +238,7 @@ final class SegmentsManager {
 
     @MainActor func update(requestRichCandidates: Bool) {
         self.updateRawCandidate(requestRichCandidates: requestRichCandidates)
+        self.shouldShowCandidateWindow = true
     }
 
     @MainActor func prefixCandidateCommited(_ candidate: Candidate) {
@@ -241,6 +250,7 @@ final class SegmentsManager {
             // カーソルを右端に移動する
             _ = self.composingText.moveCursorFromCursorPosition(count: self.composingText.convertTarget.count - self.composingText.convertTargetCursorPosition)
             self.didExperienceSegmentEdition = false
+            self.shouldShowCandidateWindow = true
             self.updateRawCandidate()
         }
     }
@@ -267,6 +277,10 @@ final class SegmentsManager {
 
     func requestUpdateMarkedText(selectedPrefixCandidate: Candidate) {
         self.selectedPrefixCandidate = selectedPrefixCandidate
+    }
+
+    func requestSetCandidateWindowState(visible: Bool) {
+        self.shouldShowCandidateWindow = visible
     }
 
     func getCurrentMarkedText(inputState: InputState) -> MarkedText {
