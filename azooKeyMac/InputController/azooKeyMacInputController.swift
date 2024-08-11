@@ -205,16 +205,15 @@ class azooKeyMacInputController: IMKInputController {
             self.hideCandidateWindow()
             self.segmentsManager.insertAtCursorPosition(string, inputStyle: .roman2kana)
             self.refreshMarkedText()
-        case .moveCursor(let value):
-            self.segmentsManager.moveCursor(count: value)
-        case .moveCursorToStart:
-            self.segmentsManager.moveCursorToStart()
+        case .editSegment(let count):
+            self.segmentsManager.editSegment(count: count)
+            self.showCandidateWindow()
         case .commitMarkedText:
             let markedText = self.segmentsManager.getCurrentMarkedText(inputState: self.inputState)
             let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
             client.insertText(text, replacementRange: NSRange(location: NSNotFound, length: 0))
             if let candidate = self.segmentsManager.candidates?.first(where: {$0.text == text}) {
-                self.segmentsManager.candidateCommited(candidate)
+                self.segmentsManager.prefixCandidateCommited(candidate)
             }
             self.segmentsManager.stopComposition()
             self.hideCandidateWindow()
@@ -297,14 +296,14 @@ extension azooKeyMacInputController: CandidatesViewControllerDelegate {
         if let client = self.client() {
             client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
             // アプリケーションサポートのディレクトリを準備しておく
-            self.segmentsManager.candidateCommited(candidate)
+            self.segmentsManager.prefixCandidateCommited(candidate)
 
             if self.segmentsManager.isEmpty {
                 self.segmentsManager.stopComposition()
                 self.candidatesViewController.clearCandidates()
                 self.hideCandidateWindow()
             } else {
-                self.inputState = .selecting(rangeAdjusted: false)
+                self.inputState = .selecting
                 client.setMarkedText(
                     NSAttributedString(string: self.segmentsManager.convertTarget, attributes: [:]),
                     selectionRange: .notFound,
