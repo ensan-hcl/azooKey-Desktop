@@ -84,8 +84,7 @@ class azooKeyMacInputController: IMKInputController {
         } else {
             self.candidatesViewController.updateCandidates([], cursorLocation: .zero)
         }
-        // activate直後はwindowをhideする
-        self.hideCandidateWindow()
+        self.refreshCandidateWindow()
     }
 
     @MainActor
@@ -169,26 +168,15 @@ class azooKeyMacInputController: IMKInputController {
         return .continue
     }
 
-    func showCandidateWindow() {
-        var rect: NSRect = .zero
-        self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-        self.candidatesViewController.updateCandidates(self.segmentsManager.candidates ?? [], cursorLocation: rect.origin)
-        self.candidatesViewController.selectFirstCandidate()
-        self.candidatesWindow.orderFront(nil)
-    }
-
-    func hideCandidateWindow() {
-        self.candidatesWindow.setIsVisible(false)
-        self.candidatesWindow.orderOut(nil)
-    }
-
     @MainActor func handleClientAction(_ clientAction: ClientAction, client: IMKTextInput) -> Bool {
         // return only false
         switch clientAction {
         case .showCandidateWindow:
-            self.showCandidateWindow()
+            self.segmentsManager.requestSetCandidateWindowState(visible: true)
+            self.refreshCandidateWindow()
         case .hideCandidateWindow:
-            self.hideCandidateWindow()
+            self.segmentsManager.requestSetCandidateWindowState(visible: false)
+            self.refreshCandidateWindow()
         case .selectInputMode(let mode):
             client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
             switch mode {
@@ -200,14 +188,14 @@ class azooKeyMacInputController: IMKInputController {
             }
         case .enterCandidateSelectionMode:
             self.segmentsManager.update(requestRichCandidates: true)
-            self.showCandidateWindow()
+            self.refreshCandidateWindow()
         case .appendToMarkedText(let string):
-            self.hideCandidateWindow()
             self.segmentsManager.insertAtCursorPosition(string, inputStyle: .roman2kana)
+            self.refreshCandidateWindow()
             self.refreshMarkedText()
         case .editSegment(let count):
             self.segmentsManager.editSegment(count: count)
-            self.showCandidateWindow()
+            self.refreshCandidateWindow()
         case .commitMarkedText:
             let markedText = self.segmentsManager.getCurrentMarkedText(inputState: self.inputState)
             let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
@@ -216,15 +204,15 @@ class azooKeyMacInputController: IMKInputController {
                 self.segmentsManager.prefixCandidateCommited(candidate)
             }
             self.segmentsManager.stopComposition()
-            self.hideCandidateWindow()
+            self.refreshCandidateWindow()
         case .submitSelectedCandidate:
             self.candidatesViewController.confirmCandidateSelection()
         case .removeLastMarkedText:
-            self.hideCandidateWindow()
             self.segmentsManager.deleteBackwardFromCursorPosition()
             if self.segmentsManager.isEmpty {
                 self.inputState = .none
             }
+            self.refreshCandidateWindow()
             self.refreshMarkedText()
         case .consume:
             return true
@@ -240,7 +228,7 @@ class azooKeyMacInputController: IMKInputController {
         case .stopComposition:
             self.segmentsManager.stopComposition()
             self.refreshMarkedText()
-            self.hideCandidateWindow()
+            self.refreshCandidateWindow()
         case .sequence(let actions):
             var found = false
             for action in actions {
@@ -257,6 +245,19 @@ class azooKeyMacInputController: IMKInputController {
     /// - returns: `[String]`
     @MainActor override func candidates(_ sender: Any!) -> [Any]! {
         self.segmentsManager.candidates?.map { $0.text } ?? []
+    }
+
+    func refreshCandidateWindow() {
+        if self.segmentsManager.shouldShowCandidateWindow {
+            var rect: NSRect = .zero
+            self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+            self.candidatesViewController.updateCandidates(self.segmentsManager.candidates ?? [], cursorLocation: rect.origin)
+            self.candidatesViewController.selectFirstCandidate()
+            self.candidatesWindow.orderFront(nil)
+        } else {
+            self.candidatesWindow.setIsVisible(false)
+            self.candidatesWindow.orderOut(nil)
+        }
     }
 
     func refreshMarkedText() {
@@ -301,7 +302,7 @@ extension azooKeyMacInputController: CandidatesViewControllerDelegate {
             if self.segmentsManager.isEmpty {
                 self.segmentsManager.stopComposition()
                 self.candidatesViewController.clearCandidates()
-                self.hideCandidateWindow()
+                self.refreshCandidateWindow()
             } else {
                 self.inputState = .selecting
                 client.setMarkedText(
@@ -309,7 +310,8 @@ extension azooKeyMacInputController: CandidatesViewControllerDelegate {
                     selectionRange: .notFound,
                     replacementRange: NSRange(location: NSNotFound, length: 0)
                 )
-                self.showCandidateWindow()
+                self.segmentsManager.requestSetCandidateWindowState(visible: true)
+                self.refreshCandidateWindow()
             }
         }
     }
