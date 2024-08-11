@@ -135,7 +135,8 @@ final class SegmentsManager {
     func insertAtCursorPosition(_ string: String, inputStyle: InputStyle) {
         self.composingText.insertAtCursorPosition(string, inputStyle: inputStyle)
         self.lastOperation = .insert
-        self.shouldShowCandidateWindow = false
+        // ライブ変換がオフの場合は変換候補ウィンドウを出したい
+        self.shouldShowCandidateWindow = !self.liveConversionEnabled
         self.updateRawCandidate()
     }
 
@@ -179,7 +180,8 @@ final class SegmentsManager {
         }
         self.composingText.deleteBackwardFromCursorPosition(count: count)
         self.lastOperation = .delete
-        self.shouldShowCandidateWindow = false
+        // ライブ変換がオフの場合は変換候補ウィンドウを出したい
+        self.shouldShowCandidateWindow = !self.liveConversionEnabled  
         self.updateRawCandidate()
     }
 
@@ -257,16 +259,19 @@ final class SegmentsManager {
 
     enum CandidateWindow: Sendable {
         case hidden
-        case shown([Candidate])
+        case composing([Candidate])
+        case selecting([Candidate])
     }
 
     func requestSetCandidateWindowState(visible: Bool) {
         self.shouldShowCandidateWindow = visible
     }
 
-    func getCurrentCandidateWindow() -> CandidateWindow {
-        if self.shouldShowCandidateWindow, let candidates {
-            return .shown(candidates)
+    func getCurrentCandidateWindow(inputState: InputState) -> CandidateWindow {
+        if inputState == .composing, let firstCandidate = self.rawCandidates?.mainResults.first {
+            return .composing([firstCandidate])
+        } else if self.shouldShowCandidateWindow, let candidates {
+            return .selecting(candidates)
         } else {
             return .hidden
         }

@@ -239,10 +239,18 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     func refreshCandidateWindow() {
-        switch self.segmentsManager.getCurrentCandidateWindow() {
-        case .shown(let candidates):
+        switch self.segmentsManager.getCurrentCandidateWindow(inputState: self.inputState) {
+        case .selecting(let candidates):
             var rect: NSRect = .zero
             self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+            self.candidatesViewController.showCandidateIndex = true
+            self.candidatesViewController.updateCandidates(candidates, cursorLocation: rect.origin)
+            self.candidatesViewController.selectFirstCandidate()
+            self.candidatesWindow.orderFront(nil)
+        case .composing(let candidates):
+            var rect: NSRect = .zero
+            self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+            self.candidatesViewController.showCandidateIndex = false
             self.candidatesViewController.updateCandidates(candidates, cursorLocation: rect.origin)
             self.candidatesViewController.selectFirstCandidate()
             self.candidatesWindow.orderFront(nil)

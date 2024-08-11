@@ -14,6 +14,7 @@ class CandidatesViewController: NSViewController {
     weak var delegate: (any CandidatesViewControllerDelegate)?
     private var currentSelectedRow: Int = -1
     private var showedRows: ClosedRange = 0...8
+    var showCandidateIndex = false
 
     override func loadView() {
         let scrollView = NSScrollView()
@@ -93,7 +94,7 @@ class CandidatesViewController: NSViewController {
         let displayIndex = row - showedRows.lowerBound + 1 // showedRowsの下限からの相対的な位置
         let displayText: String
 
-        if isWithinShowedRows {
+        if isWithinShowedRows && self.showCandidateIndex {
             if displayIndex > 9 {
                 displayText = " " + self.candidates[row].text // 行番号が10以上の場合、インデントを調整
             } else {
