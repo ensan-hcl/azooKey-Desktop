@@ -30,7 +30,7 @@ final class SegmentsManager {
     private var selectedPrefixCandidate: Candidate?
     private var didExperienceSegmentEdition = false
     private var lastOperation: Operation = .other
-    private(set) var shouldShowCandidateWindow = false
+    private var shouldShowCandidateWindow = false
 
     private enum Operation: Sendable {
         case insert
@@ -135,7 +135,8 @@ final class SegmentsManager {
     func insertAtCursorPosition(_ string: String, inputStyle: InputStyle) {
         self.composingText.insertAtCursorPosition(string, inputStyle: inputStyle)
         self.lastOperation = .insert
-        self.shouldShowCandidateWindow = false
+        // ライブ変換がオフの場合は変換候補ウィンドウを出したい
+        self.shouldShowCandidateWindow = !self.liveConversionEnabled
         self.updateRawCandidate()
     }
 
@@ -179,11 +180,12 @@ final class SegmentsManager {
         }
         self.composingText.deleteBackwardFromCursorPosition(count: count)
         self.lastOperation = .delete
-        self.shouldShowCandidateWindow = false
+        // ライブ変換がオフの場合は変換候補ウィンドウを出したい
+        self.shouldShowCandidateWindow = !self.liveConversionEnabled  
         self.updateRawCandidate()
     }
 
-    var candidates: [Candidate]? {
+    private var candidates: [Candidate]? {
         if let rawCandidates {
             if !self.didExperienceSegmentEdition {
                 if rawCandidates.firstClauseResults.lazy.map({$0.correspondingCount}).max() == rawCandidates.mainResults.lazy.map({$0.correspondingCount}).max() {
@@ -255,6 +257,26 @@ final class SegmentsManager {
         }
     }
 
+    enum CandidateWindow: Sendable {
+        case hidden
+        case composing([Candidate])
+        case selecting([Candidate])
+    }
+
+    func requestSetCandidateWindowState(visible: Bool) {
+        self.shouldShowCandidateWindow = visible
+    }
+
+    func getCurrentCandidateWindow(inputState: InputState) -> CandidateWindow {
+        if inputState == .composing, let firstCandidate = self.rawCandidates?.mainResults.first {
+            return .composing([firstCandidate])
+        } else if self.shouldShowCandidateWindow, let candidates {
+            return .selecting(candidates)
+        } else {
+            return .hidden
+        }
+    }
+
     struct MarkedText: Sendable, Equatable, Hashable, Sequence {
         enum FocusState: Sendable, Equatable, Hashable {
             case focused
@@ -279,8 +301,15 @@ final class SegmentsManager {
         self.selectedPrefixCandidate = selectedPrefixCandidate
     }
 
-    func requestSetCandidateWindowState(visible: Bool) {
-        self.shouldShowCandidateWindow = visible
+    @MainActor
+    func commitMarkedText(inputState: InputState) -> String {
+        let markedText = self.getCurrentMarkedText(inputState: inputState)
+        let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
+        if let candidate = self.candidates?.first(where: {$0.text == text}) {
+            self.prefixCandidateCommited(candidate)
+        }
+        self.stopComposition()
+        return text
     }
 
     func getCurrentMarkedText(inputState: InputState) -> MarkedText {

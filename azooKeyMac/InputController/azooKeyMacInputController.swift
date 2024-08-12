@@ -197,13 +197,10 @@ class azooKeyMacInputController: IMKInputController {
             self.segmentsManager.editSegment(count: count)
             self.refreshCandidateWindow()
         case .commitMarkedText:
-            let markedText = self.segmentsManager.getCurrentMarkedText(inputState: self.inputState)
-            let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
+            let text = self.segmentsManager.commitMarkedText(inputState: self.inputState)
             client.insertText(text, replacementRange: NSRange(location: NSNotFound, length: 0))
-            if let candidate = self.segmentsManager.candidates?.first(where: {$0.text == text}) {
-                self.segmentsManager.prefixCandidateCommited(candidate)
-            }
             self.segmentsManager.stopComposition()
+            self.refreshMarkedText()
             self.refreshCandidateWindow()
         case .submitSelectedCandidate:
             self.candidatesViewController.confirmCandidateSelection()
@@ -241,20 +238,23 @@ class azooKeyMacInputController: IMKInputController {
         return true
     }
 
-    /// function to provide candidates
-    /// - returns: `[String]`
-    @MainActor override func candidates(_ sender: Any!) -> [Any]! {
-        self.segmentsManager.candidates?.map { $0.text } ?? []
-    }
-
     func refreshCandidateWindow() {
-        if self.segmentsManager.shouldShowCandidateWindow {
+        switch self.segmentsManager.getCurrentCandidateWindow(inputState: self.inputState) {
+        case .selecting(let candidates):
             var rect: NSRect = .zero
             self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-            self.candidatesViewController.updateCandidates(self.segmentsManager.candidates ?? [], cursorLocation: rect.origin)
+            self.candidatesViewController.showCandidateIndex = true
+            self.candidatesViewController.updateCandidates(candidates, cursorLocation: rect.origin)
             self.candidatesViewController.selectFirstCandidate()
             self.candidatesWindow.orderFront(nil)
-        } else {
+        case .composing(let candidates):
+            var rect: NSRect = .zero
+            self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+            self.candidatesViewController.showCandidateIndex = false
+            self.candidatesViewController.updateCandidates(candidates, cursorLocation: rect.origin)
+            self.candidatesViewController.selectFirstCandidate()
+            self.candidatesWindow.orderFront(nil)
+        case .hidden:
             self.candidatesWindow.setIsVisible(false)
             self.candidatesWindow.orderOut(nil)
         }
