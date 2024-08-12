@@ -80,9 +80,9 @@ class azooKeyMacInputController: IMKInputController {
             client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
             var rect: NSRect = .zero
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-            self.candidatesViewController.updateCandidates([], cursorLocation: rect.origin)
+            self.candidatesViewController.updateCandidates([], selectionIndex: nil, cursorLocation: rect.origin)
         } else {
-            self.candidatesViewController.updateCandidates([], cursorLocation: .zero)
+            self.candidatesViewController.updateCandidates([], selectionIndex: nil, cursorLocation: .zero)
         }
         self.refreshCandidateWindow()
     }
@@ -91,7 +91,7 @@ class azooKeyMacInputController: IMKInputController {
     override func deactivateServer(_ sender: Any!) {
         self.segmentsManager.deactivate()
         self.candidatesWindow.orderOut(nil)
-        self.candidatesViewController.updateCandidates([], cursorLocation: .zero)
+        self.candidatesViewController.updateCandidates([], selectionIndex: nil, cursorLocation: .zero)
         if let client = sender as? IMKTextInput {
             client.insertText("", replacementRange: .notFound)
         }
@@ -138,8 +138,8 @@ class azooKeyMacInputController: IMKInputController {
         }
 
         let userAction = InputMode.getUserAction(event: event)
-        let clientAction = inputState.event(event, userAction: userAction)
-        return handleClientAction(clientAction, client: client)
+        let (clientAction, clientActionCallback) = inputState.event(event, userAction: userAction, liveConversionEnabled: Config.LiveConversion().value)
+        return handleClientAction(clientAction, clientActionCallback: clientActionCallback, client: client)
     }
 
     enum HandleDirectModeRequest {
@@ -168,15 +168,13 @@ class azooKeyMacInputController: IMKInputController {
         return .continue
     }
 
-    @MainActor func handleClientAction(_ clientAction: ClientAction, client: IMKTextInput) -> Bool {
+    @MainActor func handleClientAction(_ clientAction: ClientAction, clientActionCallback: ClientActionCallback, client: IMKTextInput) -> Bool {
         // return only false
         switch clientAction {
         case .showCandidateWindow:
             self.segmentsManager.requestSetCandidateWindowState(visible: true)
-            self.refreshCandidateWindow()
         case .hideCandidateWindow:
             self.segmentsManager.requestSetCandidateWindowState(visible: false)
-            self.refreshCandidateWindow()
         case .selectInputMode(let mode):
             client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
             switch mode {
@@ -186,77 +184,93 @@ class azooKeyMacInputController: IMKInputController {
             case .japanese:
                 client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
             }
+        case .enterFirstCandidatePreviewMode:
+            self.segmentsManager.requestSetCandidateWindowState(visible: false)
         case .enterCandidateSelectionMode:
             self.segmentsManager.update(requestRichCandidates: true)
-            self.refreshCandidateWindow()
         case .appendToMarkedText(let string):
             self.segmentsManager.insertAtCursorPosition(string, inputStyle: .roman2kana)
-            self.refreshCandidateWindow()
-            self.refreshMarkedText()
         case .editSegment(let count):
             self.segmentsManager.editSegment(count: count)
-            self.refreshCandidateWindow()
         case .commitMarkedText:
             let text = self.segmentsManager.commitMarkedText(inputState: self.inputState)
             client.insertText(text, replacementRange: NSRange(location: NSNotFound, length: 0))
             self.segmentsManager.stopComposition()
-            self.refreshMarkedText()
-            self.refreshCandidateWindow()
+        case .commitMarkedTextAndAppendToMarkedText(let string):
+            let text = self.segmentsManager.commitMarkedText(inputState: self.inputState)
+            client.insertText(text, replacementRange: NSRange(location: NSNotFound, length: 0))
+            self.segmentsManager.stopComposition()
+            self.segmentsManager.insertAtCursorPosition(string, inputStyle: .roman2kana)
+        case .commitMarkedTextAndSelectInputMode(let mode):
+            let text = self.segmentsManager.commitMarkedText(inputState: self.inputState)
+            client.insertText(text, replacementRange: NSRange(location: NSNotFound, length: 0))
+            self.segmentsManager.stopComposition()
+            client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.US")
+            switch mode {
+            case .roman:
+                client.selectMode("dev.ensan.inputmethod.azooKeyMac.Roman")
+                self.segmentsManager.stopJapaneseInput()
+            case .japanese:
+                client.selectMode("dev.ensan.inputmethod.azooKeyMac.Japanese")
+            }
         case .submitSelectedCandidate:
-            self.candidatesViewController.confirmCandidateSelection()
+            self.submitSelectedCandidate()
+        case .submitSelectedCandidateAndAppendToMarkedText(let string):
+            self.submitSelectedCandidate()
+            self.segmentsManager.insertAtCursorPosition(string, inputStyle: .roman2kana)
+        case .submitSelectedCandidateAndEnterFirstCandidatePreviewMode:
+            self.submitSelectedCandidate()
+            self.segmentsManager.requestSetCandidateWindowState(visible: false)
         case .removeLastMarkedText:
             self.segmentsManager.deleteBackwardFromCursorPosition()
-            if self.segmentsManager.isEmpty {
-                self.inputState = .none
-            }
-            self.refreshCandidateWindow()
-            self.refreshMarkedText()
+        case .selectPrevCandidate:
+            self.segmentsManager.requestSelectingPrevCandidate()
+        case .selectNextCandidate:
+            self.segmentsManager.requestSelectingNextCandidate()
+        case .selectNumberCandidate(let num):
+            self.candidatesViewController.selectNumberCandidate(num: num)
+            self.submitSelectedCandidate()
+        case .stopComposition:
+            self.segmentsManager.stopComposition()
+        // MARK: 特殊ケース
         case .consume:
             return true
         case .fallthrough:
             return false
-        case .selectPrevCandidate:
-            self.candidatesViewController.selectCandidate(offset: -1)
-        case .selectNextCandidate:
-            self.candidatesViewController.selectCandidate(offset: 1)
-        case .selectNumberCandidate(let num):
-            self.candidatesViewController.selectNumberCandidate(num: num)
-            self.candidatesViewController.confirmCandidateSelection()
-        case .stopComposition:
-            self.segmentsManager.stopComposition()
-            self.refreshMarkedText()
-            self.refreshCandidateWindow()
-        case .sequence(let actions):
-            var found = false
-            for action in actions {
-                if self.handleClientAction(action, client: client) {
-                    found = true
-                }
-            }
-            return found
         }
+
+        switch clientActionCallback {
+        case .fallthrough:
+            break
+        case .transition(let inputState):
+            self.inputState = inputState
+        case .basedOnBackspace(let ifIsEmpty, let ifIsNotEmpty), .basedOnSubmitCandidate(let ifIsEmpty, let ifIsNotEmpty):
+            self.inputState = self.segmentsManager.isEmpty ? ifIsEmpty : ifIsNotEmpty
+        }
+
+        self.refreshMarkedText()
+        self.refreshCandidateWindow()
         return true
     }
 
     func refreshCandidateWindow() {
         switch self.segmentsManager.getCurrentCandidateWindow(inputState: self.inputState) {
-        case .selecting(let candidates):
+        case .selecting(let candidates, let selectionIndex):
             var rect: NSRect = .zero
             self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
             self.candidatesViewController.showCandidateIndex = true
-            self.candidatesViewController.updateCandidates(candidates, cursorLocation: rect.origin)
-            self.candidatesViewController.selectFirstCandidate()
+            self.candidatesViewController.updateCandidates(candidates, selectionIndex: selectionIndex, cursorLocation: rect.origin)
             self.candidatesWindow.orderFront(nil)
-        case .composing(let candidates):
+        case .composing(let candidates, let selectionIndex):
             var rect: NSRect = .zero
             self.client().attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
             self.candidatesViewController.showCandidateIndex = false
-            self.candidatesViewController.updateCandidates(candidates, cursorLocation: rect.origin)
-            self.candidatesViewController.selectFirstCandidate()
+            self.candidatesViewController.updateCandidates(candidates, selectionIndex: selectionIndex, cursorLocation: rect.origin)
             self.candidatesWindow.orderFront(nil)
         case .hidden:
             self.candidatesWindow.setIsVisible(false)
             self.candidatesWindow.orderOut(nil)
+            self.candidatesViewController.hide()
         }
     }
 
@@ -290,35 +304,32 @@ class azooKeyMacInputController: IMKInputController {
             replacementRange: NSRange(location: NSNotFound, length: 0)
         )
     }
-}
 
-extension azooKeyMacInputController: CandidatesViewControllerDelegate {
-    @MainActor func candidateSubmitted(_ candidate: Candidate) {
+    @MainActor
+    func submitCandidate(_ candidate: Candidate) {
         if let client = self.client() {
             client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
             // アプリケーションサポートのディレクトリを準備しておく
             self.segmentsManager.prefixCandidateCommited(candidate)
-
-            if self.segmentsManager.isEmpty {
-                self.segmentsManager.stopComposition()
-                self.candidatesViewController.clearCandidates()
-                self.refreshCandidateWindow()
-            } else {
-                self.inputState = .selecting
-                client.setMarkedText(
-                    NSAttributedString(string: self.segmentsManager.convertTarget, attributes: [:]),
-                    selectionRange: .notFound,
-                    replacementRange: NSRange(location: NSNotFound, length: 0)
-                )
-                self.segmentsManager.requestSetCandidateWindowState(visible: true)
-                self.refreshCandidateWindow()
-            }
         }
     }
 
-    @MainActor func candidateSelectionChanged(_ candidate: Candidate) {
-        self.segmentsManager.requestUpdateMarkedText(selectedPrefixCandidate: candidate)
-        self.refreshMarkedText()
+    @MainActor
+    func submitSelectedCandidate() {
+        if let candidate = self.segmentsManager.selectedCandidate {
+            self.submitCandidate(candidate)
+            self.segmentsManager.requestResettingSelection()
+        }
+    }
+}
+
+extension azooKeyMacInputController: CandidatesViewControllerDelegate {
+    @MainActor func candidateSubmitted() {
+        self.submitSelectedCandidate()
+    }
+
+    @MainActor func candidateSelectionChanged(_ row: Int) {
+        self.segmentsManager.requestSelectingRow(row)
     }
 }
 

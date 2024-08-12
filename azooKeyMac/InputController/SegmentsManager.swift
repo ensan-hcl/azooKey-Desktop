@@ -27,7 +27,7 @@ final class SegmentsManager {
     }
     private var rawCandidates: ConversionResult?
 
-    private var selectedPrefixCandidate: Candidate?
+    private var selectionIndex: Int?
     private var didExperienceSegmentEdition = false
     private var lastOperation: Operation = .other
     private var shouldShowCandidateWindow = false
@@ -101,11 +101,11 @@ final class SegmentsManager {
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
         self.rawCandidates = nil
-        self.selectedPrefixCandidate = nil
         self.didExperienceSegmentEdition = false
         self.lastOperation = .other
         self.composingText.stopComposition()
         self.shouldShowCandidateWindow = false
+        self.selectionIndex = nil
     }
 
     @MainActor
@@ -115,20 +115,20 @@ final class SegmentsManager {
         self.kanaKanjiConverter.stopComposition()
         self.rawCandidates = nil
         self.didExperienceSegmentEdition = false
-        self.selectedPrefixCandidate = nil
         self.lastOperation = .other
         self.shouldShowCandidateWindow = false
+        self.selectionIndex = nil
     }
 
     @MainActor
     /// 日本語入力自体をやめる
     func stopJapaneseInput() {
-        self.selectedPrefixCandidate = nil
         self.rawCandidates = nil
         self.didExperienceSegmentEdition = false
         self.lastOperation = .other
         self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
         self.shouldShowCandidateWindow = false
+        self.selectionIndex = nil
     }
 
     @MainActor
@@ -143,9 +143,9 @@ final class SegmentsManager {
     @MainActor
     func editSegment(count: Int) {
         // 現在選ばれているprefix candidateが存在する場合、まずそれに合わせてカーソルを移動する
-        if let selectedPrefixCandidate {
+        if let selectionIndex, let candidates, candidates.indices.contains(selectionIndex) {
             var afterComposingText = self.composingText
-            afterComposingText.prefixComplete(correspondingCount: selectedPrefixCandidate.correspondingCount)
+            afterComposingText.prefixComplete(correspondingCount: candidates[selectionIndex].correspondingCount)
             let prefixCount = self.composingText.convertTarget.count - afterComposingText.convertTarget.count
             _ = self.composingText.moveCursorFromCursorPosition(count: -self.composingText.convertTargetCursorPosition + prefixCount)
         }
@@ -253,27 +253,61 @@ final class SegmentsManager {
             _ = self.composingText.moveCursorFromCursorPosition(count: self.composingText.convertTarget.count - self.composingText.convertTargetCursorPosition)
             self.didExperienceSegmentEdition = false
             self.shouldShowCandidateWindow = true
+            self.selectionIndex = nil
             self.updateRawCandidate()
         }
     }
 
     enum CandidateWindow: Sendable {
         case hidden
-        case composing([Candidate])
-        case selecting([Candidate])
+        case composing([Candidate], selectionIndex: Int?)
+        case selecting([Candidate], selectionIndex: Int?)
     }
 
     func requestSetCandidateWindowState(visible: Bool) {
         self.shouldShowCandidateWindow = visible
     }
 
+    func requestSelectingNextCandidate() {
+        self.selectionIndex = (self.selectionIndex ?? -1) + 1
+    }
+
+    func requestSelectingPrevCandidate() {
+        self.selectionIndex = max(0, (self.selectionIndex ?? 1) - 1)
+    }
+
+    func requestSelectingRow(_ index: Int) {
+        self.selectionIndex = max(0, index)
+    }
+
+    func requestResettingSelection() {
+        self.selectionIndex = nil
+    }
+
+    var selectedCandidate: Candidate? {
+        if let selectionIndex, let candidates, candidates.indices.contains(selectionIndex) {
+            return candidates[selectionIndex]
+        }
+        return nil
+    }
+
     func getCurrentCandidateWindow(inputState: InputState) -> CandidateWindow {
-        if inputState == .composing, let firstCandidate = self.rawCandidates?.mainResults.first {
-            return .composing([firstCandidate])
-        } else if self.shouldShowCandidateWindow, let candidates {
-            return .selecting(candidates)
-        } else {
+        switch inputState {
+        case .none, .previewing:
             return .hidden
+        case .composing:
+            if !self.liveConversionEnabled, let firstCandidate = self.rawCandidates?.mainResults.first {
+                return .composing([firstCandidate], selectionIndex: 0)
+            } else {
+                return .hidden
+            }
+        case .selecting:
+            if self.shouldShowCandidateWindow, let candidates, !candidates.isEmpty {
+                self.selectionIndex = max(0, min(self.selectionIndex ?? 0, candidates.count - 1))
+                return .selecting(candidates, selectionIndex: self.selectionIndex)
+            } else {
+                return .hidden
+            }
         }
     }
 
@@ -295,10 +329,6 @@ final class SegmentsManager {
         func makeIterator() -> Array<Element>.Iterator {
             return text.makeIterator()
         }
-    }
-
-    func requestUpdateMarkedText(selectedPrefixCandidate: Candidate) {
-        self.selectedPrefixCandidate = selectedPrefixCandidate
     }
 
     @MainActor
@@ -328,17 +358,23 @@ final class SegmentsManager {
                 self.composingText.convertTarget
             }
             return MarkedText(text: [.init(content: text, focus: .none)], selectionRange: .notFound)
+        case .previewing:
+            if let fullCandidate = self.rawCandidates?.mainResults.first, fullCandidate.correspondingCount == self.composingText.input.count {
+                return MarkedText(text: [.init(content: fullCandidate.text, focus: .none)], selectionRange: .notFound)
+            } else {
+                return MarkedText(text: [.init(content: self.composingText.convertTarget, focus: .none)], selectionRange: .notFound)
+            }
         case .selecting:
-            if let selectedPrefixCandidate {
+            if let candidates, !candidates.isEmpty {
+                self.selectionIndex = min(self.selectionIndex ?? 0, candidates.count - 1)
                 var afterComposingText = self.composingText
-                afterComposingText.prefixComplete(correspondingCount: selectedPrefixCandidate.correspondingCount)
-
+                afterComposingText.prefixComplete(correspondingCount: candidates[self.selectionIndex!].correspondingCount)
                 return MarkedText(
                     text: [
-                        .init(content: selectedPrefixCandidate.text, focus: .focused),
+                        .init(content: candidates[self.selectionIndex!].text, focus: .focused),
                         .init(content: afterComposingText.convertTarget, focus: .unfocused)
                     ],
-                    selectionRange: NSRange(location: selectedPrefixCandidate.text.count, length: 0)
+                    selectionRange: NSRange(location: candidates[self.selectionIndex!].text.count, length: 0)
                 )
             } else {
                 return MarkedText(text: [.init(content: self.composingText.convertTarget, focus: .none)], selectionRange: .notFound)

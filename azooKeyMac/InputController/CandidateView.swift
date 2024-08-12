@@ -71,13 +71,13 @@ class CandidatesViewController: NSViewController {
         configureWindowForRoundedCorners()
     }
 
-    func updateCandidates(_ candidates: [Candidate], cursorLocation: CGPoint) {
-        showedRows = 0...8
+    func updateCandidates(_ candidates: [Candidate], selectionIndex: Int?, cursorLocation: CGPoint) {
+        self.showedRows = selectionIndex == nil ? 0...8 : self.showedRows
         self.candidates = candidates
-        self.currentSelectedRow = -1  // 選択をリセット
+        self.currentSelectedRow = selectionIndex ?? -1
         self.tableView.reloadData()
         self.resizeWindowToFitContent(cursorLocation: cursorLocation)
-        self.selectFirstCandidate()  // 最初の候補を選択
+        self.updateSelection(to: selectionIndex ?? -1)
     }
 
     private func updateVisibleRows() {
@@ -90,8 +90,8 @@ class CandidatesViewController: NSViewController {
     }
 
     private func updateCellView(_ cellView: CandidateTableCellView, forRow row: Int) {
-        let isWithinShowedRows = showedRows.contains(row)
-        let displayIndex = row - showedRows.lowerBound + 1 // showedRowsの下限からの相対的な位置
+        let isWithinShowedRows = self.showedRows.contains(row)
+        let displayIndex = row - self.showedRows.lowerBound + 1 // showedRowsの下限からの相対的な位置
         let displayText: String
 
         if isWithinShowedRows && self.showCandidateIndex {
@@ -110,7 +110,7 @@ class CandidatesViewController: NSViewController {
 
         if numberRange.location != NSNotFound {
             attributedString.addAttributes([
-                .font: NSFont.systemFont(ofSize: 8),
+                .font: NSFont.monospacedSystemFont(ofSize: 8, weight: .regular),
                 .foregroundColor: currentSelectedRow == row ? NSColor.white : NSColor.gray
             ], range: numberRange)
         }
@@ -170,20 +170,22 @@ class CandidatesViewController: NSViewController {
 
     // 選択行の移動
     func updateSelection(to row: Int) {
+        if row == -1 {
+            return
+        }
         self.tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         self.tableView.scrollRowToVisible(row)
-        let selectedCandidate = self.candidates[row]
-        self.delegate?.candidateSelectionChanged(selectedCandidate)
+        self.delegate?.candidateSelectionChanged(row)
 
         // 新しい選択行を設定
         self.currentSelectedRow = row
 
         // 表示範囲
-        if !showedRows.contains(row) {
-            if row < showedRows.lowerBound {
-                showedRows = row...(row + 8)
+        if !self.showedRows.contains(row) {
+            if row < self.showedRows.lowerBound {
+                self.showedRows = row...(row + 8)
             } else {
-                showedRows = (row - 8)...row
+                self.showedRows = (row - 8)...row
             }
         }
 
@@ -191,45 +193,15 @@ class CandidatesViewController: NSViewController {
         self.updateVisibleRows()
     }
 
-    // offsetで移動
-    func selectCandidate(offset: Int) {
-        let selectedRow = self.tableView.selectedRow
-        if selectedRow + offset < 0 || selectedRow + offset >= self.candidates.count {
-            return
-        }
-        let nextRow = (selectedRow + offset + self.candidates.count) % self.candidates.count
-        self.updateSelection(to: nextRow)
-    }
-
-    // 表示されているナンバリング出の移動
+    // 表示されているナンバリングでの移動
     func selectNumberCandidate(num: Int) {
-        let nextRow = showedRows.lowerBound + num - 1
+        let nextRow = self.showedRows.lowerBound + num - 1
         self.updateSelection(to: nextRow)
     }
 
-    func selectFirstCandidate() {
-        guard !self.candidates.isEmpty else {
-            return
-        }
-        let nextRow = 0
-        self.tableView.selectRowIndexes(IndexSet(integer: nextRow), byExtendingSelection: false)
-        self.tableView.scrollRowToVisible(nextRow)
-        let selectedCandidate = self.candidates[nextRow]
-        self.delegate?.candidateSelectionChanged(selectedCandidate)
-
-        // 新しい選択行を設定
-        self.currentSelectedRow = nextRow
-
-        // 表示を更新
-        self.updateVisibleRows()
-    }
-
-    func confirmCandidateSelection() {
-        let selectedRow = self.tableView.selectedRow
-        if selectedRow >= 0 && selectedRow < self.candidates.count {
-            let selectedCandidate = self.candidates[selectedRow]
-            delegate?.candidateSubmitted(selectedCandidate)
-        }
+    func hide() {
+        self.currentSelectedRow = -1
+        self.showedRows = 0 ... 8
     }
 }
 
@@ -292,6 +264,6 @@ class CandidateTableCellView: NSTableCellView {
 }
 
 protocol CandidatesViewControllerDelegate: AnyObject {
-    func candidateSubmitted(_ candidate: Candidate)
-    func candidateSelectionChanged(_ candidate: Candidate)
+    func candidateSubmitted()
+    func candidateSelectionChanged(_ row: Int)
 }
