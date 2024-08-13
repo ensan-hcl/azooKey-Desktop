@@ -3,126 +3,150 @@ import InputMethodKit
 enum InputState {
     case none
     case composing
+    case previewing
     case selecting
 
-    mutating func event(_ event: NSEvent!, userAction: UserAction) -> ClientAction {
+    func event(_ event: NSEvent!, userAction: UserAction, liveConversionEnabled: Bool) -> (ClientAction, ClientActionCallback) {
         if event.modifierFlags.contains(.command) {
-            return .fallthrough
+            return (.fallthrough, .fallthrough)
         }
         if event.modifierFlags.contains(.option) {
             guard case .input = userAction else {
-                return .fallthrough
+                return (.fallthrough, .fallthrough)
             }
         }
         switch self {
         case .none:
             switch userAction {
             case .input(let string):
-                self = .composing
-                return .appendToMarkedText(string)
+                return (.appendToMarkedText(string), .transition(.composing))
             case .number(let number):
-                self = .composing
-                return .appendToMarkedText(number.inputString)
+                return (.appendToMarkedText(number.inputString), .transition(.composing))
             case .かな:
-                return .selectInputMode(.japanese)
+                return (.selectInputMode(.japanese), .transition(.none))
             case .英数:
-                return .selectInputMode(.roman)
+                return (.selectInputMode(.roman), .transition(.none))
             case .unknown, .navigation, .space, .backspace, .enter, .escape:
-                return .fallthrough
+                return (.fallthrough, .fallthrough)
             }
         case .composing:
             switch userAction {
             case .input(let string):
-                return .appendToMarkedText(string)
+                return (.appendToMarkedText(string), .fallthrough)
             case .number(let number):
-                return .appendToMarkedText(number.inputString)
+                return (.appendToMarkedText(number.inputString), .fallthrough)
             case .backspace:
-                return .removeLastMarkedText
+                return (.removeLastMarkedText, .basedOnBackspace(ifIsEmpty: .none, ifIsNotEmpty: .composing))
             case .enter:
-                self = .none
-                return .commitMarkedText
+                return (.commitMarkedText, .transition(.none))
             case .escape:
-                return .stopComposition
+                return (.stopComposition, .transition(.none))
             case .space:
-                self = .selecting
-                return .enterCandidateSelectionMode
+                if liveConversionEnabled {
+                    return (.enterCandidateSelectionMode, .transition(.selecting))
+                } else {
+                    return (.enterFirstCandidatePreviewMode, .transition(.previewing))
+                }
             case .かな:
-                return .selectInputMode(.japanese)
+                return (.selectInputMode(.japanese), .fallthrough)
             case .英数:
-                self = .none
-                return .sequence([.commitMarkedText, .selectInputMode(.roman)])
+                return (.commitMarkedTextAndSelectInputMode(.roman), .transition(.none))
             case .navigation(let direction):
                 if direction == .down {
-                    self = .selecting
-                    return .enterCandidateSelectionMode
+                    return (.enterCandidateSelectionMode, .transition(.selecting))
                 } else if direction == .right && event.modifierFlags.contains(.shift) {
-                    self = .selecting
-                    return .editSegment(1)
+                    return (.editSegment(1), .transition(.selecting))
                 } else if direction == .left && event.modifierFlags.contains(.shift) {
-                    self = .selecting
-                    return .editSegment(-1)
+                    return (.editSegment(-1), .transition(.selecting))
                 } else {
                     // ナビゲーションはハンドルしてしまう
-                    return .consume
+                    return (.consume, .fallthrough)
                 }
             case .unknown:
-                return .fallthrough
+                return (.fallthrough, .fallthrough)
+            }
+        case .previewing:
+            switch userAction {
+            case .input(let string):
+                return (.commitMarkedTextAndAppendToMarkedText(string), .transition(.composing))
+            case .number(let number):
+                return (.appendToMarkedText(number.inputString), .transition(.composing))
+            case .backspace:
+                return (.removeLastMarkedText, .transition(.composing))
+            case .enter:
+                return (.commitMarkedText, .transition(.none))
+            case .space:
+                return (.enterCandidateSelectionMode, .transition(.selecting))
+            case .escape:
+                return (.hideCandidateWindow, .transition(.composing))
+            case .かな:
+                return (.selectInputMode(.japanese), .fallthrough)
+            case .英数:
+                return (.commitMarkedTextAndSelectInputMode(.roman), .transition(.none))
+            case .navigation(let direction):
+                if direction == .down {
+                    return (.enterCandidateSelectionMode, .transition(.selecting))
+                } else if direction == .right && event.modifierFlags.contains(.shift) {
+                    return (.editSegment(1), .transition(.selecting))
+                } else if direction == .left && event.modifierFlags.contains(.shift) {
+                    return (.editSegment(-1), .transition(.selecting))
+                } else {
+                    // ナビゲーションはハンドルしてしまう
+                    return (.consume, .fallthrough)
+                }
+            case .unknown:
+                return (.fallthrough, .fallthrough)
             }
         case .selecting:
             switch userAction {
             case .input(let string):
-                self = .composing
-                return .sequence([.submitSelectedCandidate, .appendToMarkedText(string)])
+                return (.commitMarkedTextAndAppendToMarkedText(string), .transition(.composing))
             case .enter:
-                self = .none
-                return .submitSelectedCandidate
+                return (.submitSelectedCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .previewing))
             case .backspace:
-                self = .composing
-                return .removeLastMarkedText
+                return (.removeLastMarkedText, .basedOnBackspace(ifIsEmpty: .none, ifIsNotEmpty: .composing))
             case .escape:
-                self = .composing
-                return .hideCandidateWindow
+                if liveConversionEnabled {
+                    return (.hideCandidateWindow, .transition(.composing))
+                } else {
+                    return (.enterFirstCandidatePreviewMode, .transition(.previewing))
+                }
             case .space:
                 // シフトが入っている場合は上に移動する
                 if event.modifierFlags.contains(.shift) {
-                    return .selectPrevCandidate
+                    return (.selectPrevCandidate, .fallthrough)
                 } else {
-                    return .selectNextCandidate
+                    return (.selectNextCandidate, .fallthrough)
                 }
             case .navigation(let direction):
                 if direction == .right {
                     if event.modifierFlags.contains(.shift) {
-                        return .editSegment(1)
+                        return (.editSegment(1), .fallthrough)
                     } else {
-                        self = .none
-                        return .submitSelectedCandidate
+                        return (.submitSelectedCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                     }
                 } else if direction == .left && event.modifierFlags.contains(.shift) {
-                    self = .selecting
-                    return .editSegment(-1)
+                    return (.editSegment(-1), .fallthrough)
                 } else if direction == .down {
-                    return .selectNextCandidate
+                    return (.selectNextCandidate, .fallthrough)
                 } else if direction == .up {
-                    return .selectPrevCandidate
+                    return (.selectPrevCandidate, .fallthrough)
                 } else {
-                    return .consume
+                    return (.consume, .fallthrough)
                 }
             case .number(let num):
                 switch num {
                 case .one, .two, .three, .four, .five, .six, .seven, .eight, .nine:
-                    self = .none
-                    return .selectNumberCandidate(num.intValue)
+                    return (.selectNumberCandidate(num.intValue), .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .previewing))
                 case .zero:
-                    self = .composing
-                    return .sequence([.submitSelectedCandidate, .appendToMarkedText("0")])
+                    return (.submitSelectedCandidateAndAppendToMarkedText(num.inputString), .transition(.composing))
                 }
             case .かな:
-                return .selectInputMode(.japanese)
+                return (.selectInputMode(.japanese), .fallthrough)
             case .英数:
-                self = .none
-                return .sequence([.submitSelectedCandidate, .selectInputMode(.roman)])
+                return (.commitMarkedTextAndSelectInputMode(.roman), .transition(.none))
             case .unknown:
-                return .fallthrough
+                return (.fallthrough, .fallthrough)
             }
         }
     }
