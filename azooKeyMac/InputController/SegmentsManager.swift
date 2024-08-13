@@ -167,6 +167,7 @@ final class SegmentsManager {
         self.lastOperation = .editSegment
         self.didExperienceSegmentEdition = true
         self.shouldShowCandidateWindow = true
+        self.selectionIndex = nil
         self.updateRawCandidate()
     }
 
