@@ -19,16 +19,13 @@ class CandidatesViewController: NSViewController {
     override func loadView() {
         let scrollView = NSScrollView()
         self.tableView = NonClickableTableView()
+        self.tableView.style = .plain
         scrollView.documentView = self.tableView
         scrollView.hasVerticalScroller = true
 
         // グリッドスタイルを設定してセル間に水平線を表示
         self.tableView.gridStyleMask = .solidHorizontalGridLineMask
-
-        let stackView = NSStackView(views: [scrollView])
-        stackView.orientation = .vertical
-        stackView.spacing = 10
-        self.view = stackView
+        self.view = scrollView
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("CandidatesColumn"))
         self.tableView.headerView = nil
@@ -127,10 +124,11 @@ class CandidatesViewController: NSViewController {
         guard let window = self.view.window, let screen = window.screen else { return }
 
         let numberOfRows = min(9, self.tableView.numberOfRows)
+        if numberOfRows == 0 {
+            return
+        }
         let rowHeight = self.tableView.rowHeight
         let tableViewHeight = CGFloat(numberOfRows) * rowHeight
-        let stackViewSpacing = (self.view as! NSStackView).spacing
-        let totalHeight = stackViewSpacing + tableViewHeight
 
         // 候補の最大幅を計算
         let maxWidth = candidates.reduce(0) { maxWidth, candidate in
@@ -144,7 +142,7 @@ class CandidatesViewController: NSViewController {
 
         var newWindowFrame = window.frame
         newWindowFrame.size.width = windowWidth
-        newWindowFrame.size.height = totalHeight
+        newWindowFrame.size.height = tableViewHeight
 
         // 画面のサイズを取得
         let screenRect = screen.visibleFrame
@@ -154,18 +152,19 @@ class CandidatesViewController: NSViewController {
         let cursorHeight: CGFloat = 16 // カーソルの高さを16ピクセルと仮定
 
         // ウィンドウをカーソルの下に表示
-        if cursorY - totalHeight < screenRect.origin.y {
+        if cursorY - tableViewHeight < screenRect.origin.y {
             newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + cursorHeight)
         } else {
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - totalHeight - cursorHeight)
+            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - tableViewHeight - cursorHeight)
         }
 
         // 右端でウィンドウが画面外に出る場合は左にシフト
         if newWindowFrame.maxX > screenRect.maxX {
             newWindowFrame.origin.x = screenRect.maxX - newWindowFrame.width
         }
-
-        window.setFrame(newWindowFrame, display: true, animate: false)
+        if newWindowFrame != window.frame {
+            window.setFrame(newWindowFrame, display: true, animate: false)
+        }
     }
 
     // 選択行の移動
