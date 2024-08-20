@@ -138,7 +138,12 @@ class CandidatesViewController: NSViewController {
         }
 
         // ウィンドウの幅を設定（番号とパディングのための追加幅を考慮）
-        let windowWidth = max(maxWidth + 50, 400) // 最小400px
+        // 20 = corner radius * 2
+        let windowWidth = if self.showCandidateIndex {
+            maxWidth + 32
+        } else {
+            maxWidth + 20
+        }
 
         var newWindowFrame = window.frame
         newWindowFrame.size.width = windowWidth
