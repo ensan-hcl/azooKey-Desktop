@@ -136,7 +136,12 @@ class azooKeyMacInputController: IMKInputController {
         }
 
         let userAction = InputMode.getUserAction(event: event)
-        let (clientAction, clientActionCallback) = inputState.event(event, userAction: userAction, liveConversionEnabled: Config.LiveConversion().value)
+        let (clientAction, clientActionCallback) = inputState.event(
+            event,
+            userAction: userAction,
+            liveConversionEnabled: Config.LiveConversion().value,
+            enableDebugWindow: Config.DebugWindow().value
+        )
         return handleClientAction(clientAction, clientActionCallback: clientActionCallback, client: client)
     }
 
