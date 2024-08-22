@@ -32,6 +32,10 @@ enum ClientAction {
     case submitSelectedCandidateAndAppendToMarkedText(String)
     case submitSelectedCandidateAndEnterFirstCandidatePreviewMode
 
+    /// デバッグウィンドウを表示するコマンド
+    case enableDebugWindow
+    case disableDebugWindow
+
     case stopComposition
 
     enum InputMode {

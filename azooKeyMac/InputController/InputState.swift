@@ -100,6 +100,11 @@ enum InputState {
         case .selecting:
             switch userAction {
             case .input(let string):
+                if string == "d" {
+                    return (.enableDebugWindow, .fallthrough)
+                } else if string == "D" {
+                    return (.disableDebugWindow, .fallthrough)
+                }
                 return (.commitMarkedTextAndAppendToMarkedText(string), .transition(.composing))
             case .enter:
                 return (.submitSelectedCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .previewing))

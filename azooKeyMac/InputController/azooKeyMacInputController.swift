@@ -10,8 +10,6 @@ import Cocoa
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
 
-let applicationLogger: Logger = Logger(subsystem: "dev.ensan.inputmethod.azooKeyMac", category: "main")
-
 @objc(azooKeyMacInputController)
 class azooKeyMacInputController: IMKInputController {
     var segmentsManager: SegmentsManager
@@ -230,6 +228,10 @@ class azooKeyMacInputController: IMKInputController {
         case .selectNumberCandidate(let num):
             self.candidatesViewController.selectNumberCandidate(num: num)
             self.submitSelectedCandidate()
+        case .enableDebugWindow:
+            self.segmentsManager.requestDebugWindowMode(enabled: true)
+        case .disableDebugWindow:
+            self.segmentsManager.requestDebugWindowMode(enabled: false)
         case .stopComposition:
             self.segmentsManager.stopComposition()
         // MARK: 特殊ケース
@@ -340,6 +342,7 @@ extension azooKeyMacInputController: SegmentManagerDelegate {
         var actual = NSRange()
         // 同じ行の文字のみコンテキストに含める
         let leftSideContext = self.client().string(from: leftRange, actualRange: &actual)
+        self.segmentsManager.appendDebugMessage("\(#function): leftSideContext=\(leftSideContext ?? "nil")")
         return leftSideContext
     }
 }
