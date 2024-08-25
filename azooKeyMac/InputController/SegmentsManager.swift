@@ -201,7 +201,7 @@ final class SegmentsManager {
         self.composingText.deleteBackwardFromCursorPosition(count: count)
         self.lastOperation = .delete
         // ライブ変換がオフの場合は変換候補ウィンドウを出したい
-        self.shouldShowCandidateWindow = !self.liveConversionEnabled  
+        self.shouldShowCandidateWindow = !self.liveConversionEnabled
         self.updateRawCandidate()
     }
 
@@ -384,7 +384,6 @@ final class SegmentsManager {
             return nil
         }
     }
-
 
     @MainActor
     func commitMarkedText(inputState: InputState) -> String {
