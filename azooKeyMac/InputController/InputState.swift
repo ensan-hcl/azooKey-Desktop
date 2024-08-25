@@ -26,7 +26,7 @@ enum InputState {
                 return (.selectInputMode(.japanese), .transition(.none))
             case .英数:
                 return (.selectInputMode(.roman), .transition(.none))
-            case .unknown, .navigation, .space, .backspace, .enter, .escape, .function(_):
+            case .unknown, .navigation, .space, .backspace, .enter, .escape, .function:
                 return (.fallthrough, .fallthrough)
             }
         case .composing:
