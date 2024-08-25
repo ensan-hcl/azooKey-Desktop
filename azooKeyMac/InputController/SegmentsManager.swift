@@ -358,6 +358,10 @@ final class SegmentsManager {
         }
     }
 
+    func getConvertTarget() -> String{
+        return self.composingText.convertTarget
+    }
+    
     @MainActor
     func submitSelectedCandidate() {
         if let selectedCandidate = self.selectedCandidate {
