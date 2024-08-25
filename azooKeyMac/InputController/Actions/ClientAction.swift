@@ -48,7 +48,6 @@ enum ClientAction {
     }
 }
 
-
 enum ClientActionCallback {
     case `fallthrough`
     case transition(InputState)
