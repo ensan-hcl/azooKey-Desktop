@@ -6,7 +6,7 @@ enum InputState {
     case previewing
     case selecting
 
-    func event(_ event: NSEvent!, userAction: UserAction, liveConversionEnabled: Bool) -> (ClientAction, ClientActionCallback) {
+    func event(_ event: NSEvent!, userAction: UserAction, liveConversionEnabled: Bool, enableDebugWindow: Bool) -> (ClientAction, ClientActionCallback) {
         if event.modifierFlags.contains(.command) {
             return (.fallthrough, .fallthrough)
         }
@@ -100,6 +100,11 @@ enum InputState {
         case .selecting:
             switch userAction {
             case .input(let string):
+                if string == "d" && enableDebugWindow {
+                    return (.enableDebugWindow, .fallthrough)
+                } else if string == "D" && enableDebugWindow {
+                    return (.disableDebugWindow, .fallthrough)
+                }
                 return (.commitMarkedTextAndAppendToMarkedText(string), .transition(.composing))
             case .enter:
                 return (.submitSelectedCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .previewing))

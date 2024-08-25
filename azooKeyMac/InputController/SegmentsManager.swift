@@ -32,6 +32,9 @@ final class SegmentsManager {
     private var lastOperation: Operation = .other
     private var shouldShowCandidateWindow = false
 
+    private var shouldShowDebugCandidateWindow: Bool = false
+    private var debugCandidates: [Candidate] = []
+
     private enum Operation: Sendable {
         case insert
         case delete
@@ -43,6 +46,22 @@ final class SegmentsManager {
         (
             NSApplication.shared.delegate as? AppDelegate
         )!.kanaKanjiConverter
+    }
+
+    func appendDebugMessage(_ string: String) {
+        self.debugCandidates.insert(
+            Candidate(
+                text: string.replacingOccurrences(of: "\n", with: "\\n"),
+                value: 0,
+                correspondingCount: 0,
+                lastMid: 0,
+                data: []
+            ),
+            at: 0
+        )
+        while self.debugCandidates.count > 100 {
+            self.debugCandidates.removeLast()
+        }
     }
 
     private func zenzaiMode(leftSideContext: String?, requestRichCandidates: Bool) -> ConvertRequestOptions.ZenzaiMode {
@@ -269,6 +288,10 @@ final class SegmentsManager {
         self.shouldShowCandidateWindow = visible
     }
 
+    func requestDebugWindowMode(enabled: Bool) {
+        self.shouldShowDebugCandidateWindow = enabled
+    }
+
     func requestSelectingNextCandidate() {
         self.selectionIndex = (self.selectionIndex ?? -1) + 1
     }
@@ -303,7 +326,10 @@ final class SegmentsManager {
                 return .hidden
             }
         case .selecting:
-            if self.shouldShowCandidateWindow, let candidates, !candidates.isEmpty {
+            if self.shouldShowDebugCandidateWindow {
+                self.selectionIndex = max(0, min(self.selectionIndex ?? 0, debugCandidates.count - 1))
+                return .selecting(debugCandidates, selectionIndex: self.selectionIndex)
+            } else if self.shouldShowCandidateWindow, let candidates, !candidates.isEmpty {
                 self.selectionIndex = max(0, min(self.selectionIndex ?? 0, candidates.count - 1))
                 return .selecting(candidates, selectionIndex: self.selectionIndex)
             } else {

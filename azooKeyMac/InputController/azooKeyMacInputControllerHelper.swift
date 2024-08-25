@@ -16,7 +16,7 @@ extension azooKeyMacInputController {
     }
 
     @objc private func toggleZenzai(_ sender: Any) {
-        applicationLogger.info("\(#line): toggleZenzai")
+        self.segmentsManager.appendDebugMessage("\(#line): toggleZenzai")
         let config = Config.ZenzaiIntegration()
         config.value = !self.zenzaiEnabled
         self.updateZenzaiToggleMenuItem(newValue: config.value)
@@ -31,7 +31,7 @@ extension azooKeyMacInputController {
     }
 
     @objc func toggleLiveConversion(_ sender: Any) {
-        applicationLogger.info("\(#line): toggleLiveConversion")
+        self.segmentsManager.appendDebugMessage("\(#line): toggleLiveConversion")
         let config = Config.LiveConversion()
         config.value = !self.liveConversionEnabled
         self.updateLiveConversionToggleMenuItem(newValue: config.value)
@@ -42,7 +42,7 @@ extension azooKeyMacInputController {
     }
 
     @objc func toggleEnglishConversion(_ sender: Any) {
-        applicationLogger.info("\(#line): toggleEnglishConversion")
+        self.segmentsManager.appendDebugMessage("\(#line): toggleEnglishConversion")
         let config = Config.EnglishConversion()
         config.value = !self.englishConversionEnabled
         self.updateEnglishConversionToggleMenuItem(newValue: config.value)
@@ -66,10 +66,10 @@ extension azooKeyMacInputController {
     // MARK: - Application Support Directory
     func prepareApplicationSupportDirectory() {
         do {
-            applicationLogger.info("\(#line, privacy: .public): Applicatiion Support Directory Path: \(self.segmentsManager.azooKeyMemoryDir, privacy: .public)")
+            self.segmentsManager.appendDebugMessage("\(#line): Applicatiion Support Directory Path: \(self.segmentsManager.azooKeyMemoryDir)")
             try FileManager.default.createDirectory(at: self.segmentsManager.azooKeyMemoryDir, withIntermediateDirectories: true)
         } catch {
-            applicationLogger.error("\(#line, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            self.segmentsManager.appendDebugMessage("\(#line): \(error.localizedDescription)")
         }
     }
 }
