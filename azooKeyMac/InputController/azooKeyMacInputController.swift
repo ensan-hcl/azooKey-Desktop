@@ -247,6 +247,20 @@ class azooKeyMacInputController: IMKInputController {
                 self.segmentsManager.stopComposition()
             }
             self.refreshMarkedText()
+        case .selectHalfKatakanaCandidate:
+            // 選択範囲の有無に応じて処理を分岐
+            if let selectedCandidateRuby = self.segmentsManager.selectedCandidateRuby() {
+                // 選択されたテキストを半角カタカナに変換して確定
+                let katakanaText = selectedCandidateRuby.applyingTransform(.fullwidthToHalfwidth, reverse: false)
+                client.insertText(katakanaText, replacementRange: .notFound)
+                self.segmentsManager.submitSelectedCandidate()
+            } else {
+                // ComposingText全体をカタカナに変換して確定
+                let katakanaText = segmentsManager.getConvertTarget().applyingTransform(.fullwidthToHalfwidth, reverse: false)
+                client.insertText(katakanaText, replacementRange: .notFound)
+                self.segmentsManager.stopComposition()
+            }
+            self.refreshMarkedText()
         case .selectHiraganaCandidate:
             // 選択範囲の有無に応じて処理を分岐
             if let selectedCandidateRuby = self.segmentsManager.selectedCandidateRuby() {
@@ -255,8 +269,8 @@ class azooKeyMacInputController: IMKInputController {
                 client.insertText(katakanaText, replacementRange: .notFound)
                 self.segmentsManager.submitSelectedCandidate()
             } else {
-                // ComposingText全体をカタカナに変換して確定
-                let katakanaText = segmentsManager.getConvertTarget().toKatakana()
+                // ComposingText全体をひらがなに変換して確定
+                let katakanaText = segmentsManager.getConvertTarget().toHiragana()
                 client.insertText(katakanaText, replacementRange: .notFound)
                 self.segmentsManager.stopComposition()
             }

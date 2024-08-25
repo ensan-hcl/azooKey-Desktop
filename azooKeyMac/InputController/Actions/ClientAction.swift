@@ -38,6 +38,7 @@ enum ClientAction {
 
     // Fnキーでの変換
     case selectKatakanaCandidate
+    case selectHalfKatakanaCandidate
     case selectHiraganaCandidate
 
     case stopComposition

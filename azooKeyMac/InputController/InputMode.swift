@@ -48,6 +48,8 @@ enum InputMode {
             return .function(.six)
         case 98: // F7
             return .function(.seven)
+        case 100: // F8
+            return .function(.eight)
         case 102: // Lang2/kVK_JIS_Eisu
             return .英数
         case 104: // Lang1/kVK_JIS_Kana

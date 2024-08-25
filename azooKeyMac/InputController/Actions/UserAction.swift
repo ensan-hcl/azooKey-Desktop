@@ -16,7 +16,7 @@ enum UserAction {
     }
 
     enum Function {
-        case six, seven
+        case six, seven, eight
     }
 
     enum Number {

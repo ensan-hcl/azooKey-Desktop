@@ -50,9 +50,11 @@ enum InputState {
             case let .function(function):
                 switch function {
                 case .six:
-                    return (.selectHiraganaCandidate, .fallthrough)
+                    return (.selectHiraganaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 case .seven:
-                    return (.selectKatakanaCandidate, .fallthrough)
+                    return (.selectKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                case .eight:
+                    return (.selectHalfKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 }
             case .かな:
                 return (.selectInputMode(.japanese), .fallthrough)
@@ -89,9 +91,11 @@ enum InputState {
             case let .function(function):
                 switch function {
                 case .six:
-                    return (.selectHiraganaCandidate, .fallthrough)
+                    return (.selectHiraganaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 case .seven:
-                    return (.selectKatakanaCandidate, .fallthrough)
+                    return (.selectKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                case .eight:
+                    return (.selectHalfKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 }
             case .かな:
                 return (.selectInputMode(.japanese), .fallthrough)
@@ -156,9 +160,11 @@ enum InputState {
             case let .function(function):
                 switch function {
                 case .six:
-                    return (.selectHiraganaCandidate, .fallthrough)
+                    return (.selectHiraganaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 case .seven:
-                    return (.selectKatakanaCandidate, .fallthrough)
+                    return (.selectKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                case .eight:
+                    return (.selectHalfKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 }
             case .number(let num):
                 switch num {
