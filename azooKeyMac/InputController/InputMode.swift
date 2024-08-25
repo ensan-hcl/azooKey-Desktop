@@ -44,6 +44,10 @@ enum InputMode {
             }else{
                 return .input(KeyMap.h2zMap("。"))
             }
+        case 97: // F6
+            return .function(.six)
+        case 98: // F7
+            return .function(.seven)
         case 102: // Lang2/kVK_JIS_Eisu
             return .英数
         case 104: // Lang1/kVK_JIS_Kana
@@ -83,7 +87,7 @@ enum InputMode {
             }
         }
     }
-
+    
     private static func isPrintable(_ text: String) -> Bool {
         let printable: CharacterSet = [.alphanumerics, .symbols, .punctuationCharacters]
             .reduce(into: CharacterSet()) {

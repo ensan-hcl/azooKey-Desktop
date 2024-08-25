@@ -26,7 +26,7 @@ enum InputState {
                 return (.selectInputMode(.japanese), .transition(.none))
             case .英数:
                 return (.selectInputMode(.roman), .transition(.none))
-            case .unknown, .navigation, .space, .backspace, .enter, .escape:
+            case .unknown, .navigation, .space, .backspace, .enter, .escape, .function(_):
                 return (.fallthrough, .fallthrough)
             }
         case .composing:
@@ -46,6 +46,13 @@ enum InputState {
                     return (.enterCandidateSelectionMode, .transition(.selecting))
                 } else {
                     return (.enterFirstCandidatePreviewMode, .transition(.previewing))
+                }
+            case let .function(function):
+                switch function {
+                case .six:
+                    return (.selectHiraganaCandidate, .fallthrough)
+                case .seven:
+                    return (.selectKatakanaCandidate, .fallthrough)
                 }
             case .かな:
                 return (.selectInputMode(.japanese), .fallthrough)
@@ -79,6 +86,13 @@ enum InputState {
                 return (.enterCandidateSelectionMode, .transition(.selecting))
             case .escape:
                 return (.hideCandidateWindow, .transition(.composing))
+            case let .function(function):
+                switch function {
+                case .six:
+                    return (.selectHiraganaCandidate, .fallthrough)
+                case .seven:
+                    return (.selectKatakanaCandidate, .fallthrough)
+                }
             case .かな:
                 return (.selectInputMode(.japanese), .fallthrough)
             case .英数:
@@ -138,6 +152,13 @@ enum InputState {
                     return (.selectPrevCandidate, .fallthrough)
                 } else {
                     return (.consume, .fallthrough)
+                }
+            case let .function(function):
+                switch function {
+                case .six:
+                    return (.selectHiraganaCandidate, .fallthrough)
+                case .seven:
+                    return (.selectKatakanaCandidate, .fallthrough)
                 }
             case .number(let num):
                 switch num {

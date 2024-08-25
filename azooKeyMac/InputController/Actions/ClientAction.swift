@@ -36,6 +36,10 @@ enum ClientAction {
     case enableDebugWindow
     case disableDebugWindow
 
+    // Fnキーでの変換
+    case selectKatakanaCandidate
+    case selectHiraganaCandidate
+
     case stopComposition
 
     enum InputMode {
