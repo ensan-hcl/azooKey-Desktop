@@ -234,13 +234,19 @@ class azooKeyMacInputController: IMKInputController {
             self.candidatesViewController.selectNumberCandidate(num: num)
             self.submitSelectedCandidate()
         case .selectKatakanaCandidate:
-            self.segmentsManager.convertToKatakana()
+            if let selectedCandidate = segmentsManager.selectedCandidate{
+                // 最初に確定テキストを挿入
+                client.insertText(segmentsManager.selectedCandidateRuby().toKatakana(), replacementRange: NSRange(location: 0, length: 0))
+                self.segmentsManager.submitSelectedCandidate()
+            }else{
+                // ComposingTextを全てカタカナに変換する
+            }
             self.refreshMarkedText()
-
         case .selectHiraganaCandidate:
-            self.segmentsManager.convertToHiragana()
+            // 最初に確定テキストを挿入
+            client.insertText(segmentsManager.selectedCandidateRuby().toHiragana(), replacementRange: NSRange(location: 0, length: 0))
+            self.segmentsManager.submitSelectedCandidate()
             self.refreshMarkedText()
-
         case .enableDebugWindow:
             self.segmentsManager.requestDebugWindowMode(enabled: true)
         case .disableDebugWindow:

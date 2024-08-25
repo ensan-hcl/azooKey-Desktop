@@ -357,25 +357,20 @@ final class SegmentsManager {
             return text.makeIterator()
         }
     }
+
     @MainActor
-    func convertToKatakana() {
+    func submitSelectedCandidate() {
         if let selectedCandidate = self.selectedCandidate {
-            self.appendDebugMessage("convertToKatakana: Selected candidate found. Converting selected candidate's ruby to Katakana.")
+            // 現在の文頭にある選択範囲のテキストをカタカナに変換して確定
+            self.composingText.prefixComplete(correspondingCount: selectedCandidate.correspondingCount)
 
-            // `selectedCandidate.data` の全ての `ruby` をカタカナに変換
-            let katakanaText = selectedCandidate.data.map { element in
-                element.ruby.toKatakana()
-            }.joined()
+            // 現在のカーソル位置にカタカナに変換したテキストを挿入
+            let currentCursorPosition = self.composingText.convertTargetCursorPosition
 
-            self.appendDebugMessage("convertToKatakana: Katakana text generated: \(katakanaText)")
+            // カーソルをカタカナに変換されたテキストの後に移動
+            _ = self.composingText.moveCursorFromCursorPosition(count: currentCursorPosition - self.composingText.convertTargetCursorPosition)
 
-            // カタカナに変換したテキストを挿入
-            self.composingText.insertAtCursorPosition(katakanaText, inputStyle: .direct)
-
-            // カーソルを変換したカタカナの後に移動
-            _ = self.composingText.moveCursorFromCursorPosition(count: katakanaText.count)
-
-            self.appendDebugMessage("convertToKatakana: Cursor moved to the end of the Katakana text.")
+            self.appendDebugMessage("convertToKatakana: Katakana text inserted and cursor moved to the next candidate.")
 
         } else {
             self.appendDebugMessage("convertToKatakana: No selected candidate found. Converting entire ComposingText to Katakana.")
@@ -387,8 +382,6 @@ final class SegmentsManager {
 
             self.composingText.stopComposition() // 現在のテキストをクリア
             self.composingText.insertAtCursorPosition(katakanaText, inputStyle: .direct)
-
-            self.appendDebugMessage("convertToKatakana: Katakana text inserted into ComposingText.")
         }
 
         // 次の範囲の変換候補を更新
@@ -396,45 +389,17 @@ final class SegmentsManager {
         self.appendDebugMessage("convertToKatakana: Raw candidates updated after Katakana conversion.")
     }
 
-    @MainActor
-    func convertToHiragana() {
+    func selectedCandidateRuby() -> String{
         if let selectedCandidate = self.selectedCandidate {
-            self.appendDebugMessage("convertToHiragana: Selected candidate found. Converting selected candidate's ruby to Hiragana.")
-
             // `selectedCandidate.data` の全ての `ruby` をひらがなに変換
-            let hiraganaText = selectedCandidate.data.map { element in
+            return selectedCandidate.data.map { element in
                 element.ruby.toHiragana()
             }.joined()
-
-            self.appendDebugMessage("convertToHiragana: Hiragana text generated: \(hiraganaText)")
-
-            // ひらがなに変換したテキストを挿入
-            self.composingText.insertAtCursorPosition(hiraganaText, inputStyle: .direct)
-
-            // カーソルを変換したひらがなの後に移動
-            _ = self.composingText.moveCursorFromCursorPosition(count: hiraganaText.count)
-
-            self.appendDebugMessage("convertToHiragana: Cursor moved to the end of the Hiragana text.")
-
-        } else {
-            self.appendDebugMessage("convertToHiragana: No selected candidate found. Converting entire ComposingText to Hiragana.")
-
-            // 選択された候補がない場合はComposingText全体をひらがなに変換
-            let hiraganaText = self.composingText.convertTarget.toHiragana()
-
-            self.appendDebugMessage("convertToHiragana: Entire ComposingText converted to Hiragana: \(hiraganaText)")
-
-            self.composingText.stopComposition() // 現在のテキストをクリア
-            self.composingText.insertAtCursorPosition(hiraganaText, inputStyle: .direct)
-
-            self.appendDebugMessage("convertToHiragana: Hiragana text inserted into ComposingText.")
+        }else{
+            // 選択範囲なし
+            return ""
         }
-
-        // 次の範囲の変換候補を更新
-        self.updateRawCandidate()
-        self.appendDebugMessage("convertToHiragana: Raw candidates updated after Hiragana conversion.")
     }
-
 
     @MainActor
     func commitMarkedText(inputState: InputState) -> String {
