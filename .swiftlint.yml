@@ -1,0 +1,32 @@
+# document: https://github.com/realm/SwiftLint
+disabled_rules:
+  - line_length # 行の長さが気になる場合はエディタで折り返しを設定してください
+  - nesting # 型名のネストの深さを気にするのは非本質的
+  - file_length # ファイルの長さを気にするのは非本質的
+  - function_body_length # 関数の実装の長さを気にするのも非本質的
+  - type_body_length # 型の実装の長さを気にするのも非本質的
+
+identifier_name:
+  min_length: 1
+  max_length: 10000 # 長さ上限を無効化
+  excluded: ["英数|かな"]
+
+analyzer_rules:
+  - unused_import
+  - unused_declaration
+
+opt_in_rules:
+  - implicit_return # implicit returnを推奨
+  - sorted_imports # importをsortする
+  - array_init # Array()を推奨
+  - conditional_returns_on_newline
+  - empty_string # 同上
+  - explicit_init # explicitに.initを書かない
+  - first_where # .filter { }.firstよりも.first(where:)を用いる．
+  - operator_usage_whitespace # 演算子の左右に空白を
+  - redundant_nil_coalescing # ?? nilを禁止
+  - reduce_into # reduce(into:)を推奨
+  - toggle_bool # .toggleを推奨
+
+included:
+  - azooKeyMac

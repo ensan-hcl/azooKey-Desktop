@@ -5,13 +5,13 @@
 //  Created by ensan on 2021/09/07.
 //
 
-import OSLog
 import Cocoa
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
+import OSLog
 
 @objc(azooKeyMacInputController)
-class azooKeyMacInputController: IMKInputController {
+class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this type_name
     var segmentsManager: SegmentsManager
     private var inputState: InputState = .none
     private var directMode = false
@@ -120,7 +120,9 @@ class azooKeyMacInputController: IMKInputController {
     }
 
     @MainActor override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
-        guard let event, let client = sender as? IMKTextInput else { return false }
+        guard let event, let client = sender as? IMKTextInput else {
+            return false
+        }
 
         if event.type != .keyDown {
             return false
@@ -171,6 +173,8 @@ class azooKeyMacInputController: IMKInputController {
         return .continue
     }
 
+    // この種のコードは複雑にしかならないので、lintを無効にする
+    // swiftlint:disable:next cyclomatic_complexity
     @MainActor func handleClientAction(_ clientAction: ClientAction, clientActionCallback: ClientActionCallback, client: IMKTextInput) -> Bool {
         // return only false
         switch clientAction {
