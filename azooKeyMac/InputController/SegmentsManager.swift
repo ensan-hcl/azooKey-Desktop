@@ -366,7 +366,7 @@ final class SegmentsManager {
                 element.ruby
             }.joined()
         } else {
-            // 選択範囲なしの場合は空文字を返す
+            // 選択範囲なしの場合はconvertTargetを返す
             self.composingText.convertTarget
         }
         let candidateText = transform(ruby)
