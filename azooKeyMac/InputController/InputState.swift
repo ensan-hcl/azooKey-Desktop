@@ -50,11 +50,11 @@ enum InputState {
             case let .function(function):
                 switch function {
                 case .six:
-                    return (.selectHiraganaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                    return (.submitHiraganaCandidate, .transition(.none))
                 case .seven:
-                    return (.selectKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                    return (.submitKatakanaCandidate, .transition(.none))
                 case .eight:
-                    return (.selectHalfKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                    return (.submitHankakuKatakanaCandidate, .transition(.none))
                 }
             case .かな:
                 return (.selectInputMode(.japanese), .fallthrough)
@@ -91,11 +91,11 @@ enum InputState {
             case let .function(function):
                 switch function {
                 case .six:
-                    return (.selectHiraganaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                    return (.submitHiraganaCandidate, .transition(.none))
                 case .seven:
-                    return (.selectKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                    return (.submitKatakanaCandidate, .transition(.none))
                 case .eight:
-                    return (.selectHalfKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                    return (.submitHankakuKatakanaCandidate, .transition(.none))
                 }
             case .かな:
                 return (.selectInputMode(.japanese), .fallthrough)
@@ -160,11 +160,11 @@ enum InputState {
             case let .function(function):
                 switch function {
                 case .six:
-                    return (.selectHiraganaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                    return (.submitHiraganaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 case .seven:
-                    return (.selectKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                    return (.submitKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 case .eight:
-                    return (.selectHalfKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                    return (.submitHankakuKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 }
             case .number(let num):
                 switch num {

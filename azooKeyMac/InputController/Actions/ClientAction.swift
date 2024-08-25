@@ -37,9 +37,9 @@ enum ClientAction {
     case disableDebugWindow
 
     // Fnキーでの変換
-    case selectKatakanaCandidate
-    case selectHalfKatakanaCandidate
-    case selectHiraganaCandidate
+    case submitKatakanaCandidate
+    case submitHiraganaCandidate
+    case submitHankakuKatakanaCandidate
 
     case stopComposition
 

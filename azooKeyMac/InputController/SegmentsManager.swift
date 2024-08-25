@@ -357,32 +357,42 @@ final class SegmentsManager {
             return text.makeIterator()
         }
     }
-    func getConvertTarget() -> String {
-        return self.composingText.convertTarget
-    }
 
     @MainActor
-    func submitSelectedCandidate() {
-        if let selectedCandidate = self.selectedCandidate {
-            // 選択された範囲を確定
-            self.composingText.prefixComplete(correspondingCount: selectedCandidate.correspondingCount)
-            self.appendDebugMessage("submitSelectedCandidate: Candidate confirmed and cursor moved to the next candidate.")
-        }
-        // 次の範囲の変換候補を更新
-        self.updateRawCandidate()
-        self.appendDebugMessage("submitSelectedCandidate: Raw candidates updated after candidate submission.")
-    }
-
-    func selectedCandidateRuby() -> String? {
-        if let selectedCandidate = self.selectedCandidate {
+    func getModifiedRubyCandidate(_ transform: (String) -> String) -> Candidate {
+        let ruby = if let selectedCandidate {
             // `selectedCandidate.data` の全ての `ruby` を連結して返す
-            return selectedCandidate.data.map { element in
+            selectedCandidate.data.map { element in
                 element.ruby
             }.joined()
         } else {
             // 選択範囲なしの場合は空文字を返す
-            return nil
+            self.composingText.convertTarget
         }
+        let candidateText = transform(ruby)
+        let candidate = if let selectedCandidate {
+            {
+                var candidate = selectedCandidate
+                candidate.text = candidateText
+                return candidate
+            }()
+        } else {
+            Candidate(
+                text: candidateText,
+                value: 0,
+                correspondingCount: composingText.input.count,
+                lastMid: 0,
+                data: [DicdataElement(
+                    word: candidateText,
+                    ruby: ruby,
+                    cid: CIDData.固有名詞.cid,
+                    mid: MIDData.一般.mid,
+                    value: 0
+                )]
+            )
+        }
+
+        return candidate
     }
 
     @MainActor

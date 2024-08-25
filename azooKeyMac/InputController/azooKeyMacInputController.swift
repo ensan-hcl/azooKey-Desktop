@@ -233,48 +233,18 @@ class azooKeyMacInputController: IMKInputController {
         case .selectNumberCandidate(let num):
             self.candidatesViewController.selectNumberCandidate(num: num)
             self.submitSelectedCandidate()
-        case .selectKatakanaCandidate:
-            // 選択範囲の有無に応じて処理を分岐
-            if let selectedCandidateRuby = self.segmentsManager.selectedCandidateRuby() {
-                // 選択されたテキストをカタカナに変換して確定
-                let katakanaText = selectedCandidateRuby.toKatakana()
-                client.insertText(katakanaText, replacementRange: .notFound)
-                self.segmentsManager.submitSelectedCandidate()
-            } else {
-                // ComposingText全体をカタカナに変換して確定
-                let katakanaText = segmentsManager.getConvertTarget().toKatakana()
-                client.insertText(katakanaText, replacementRange: .notFound)
-                self.segmentsManager.stopComposition()
-            }
-            self.refreshMarkedText()
-        case .selectHalfKatakanaCandidate:
-            // 選択範囲の有無に応じて処理を分岐
-            if let selectedCandidateRuby = self.segmentsManager.selectedCandidateRuby() {
-                // 選択されたテキストをカタカナに変換し、半角にする
-                let katakanaText = selectedCandidateRuby.toKatakana().applyingTransform(.fullwidthToHalfwidth, reverse: false)
-                client.insertText(katakanaText, replacementRange: .notFound)
-                self.segmentsManager.submitSelectedCandidate()
-            } else {
-                // ComposingText全体をカタカナに変換し、半角にする
-                let katakanaText = segmentsManager.getConvertTarget().toKatakana().applyingTransform(.fullwidthToHalfwidth, reverse: false)
-                client.insertText(katakanaText, replacementRange: .notFound)
-                self.segmentsManager.stopComposition()
-            }
-            self.refreshMarkedText()
-        case .selectHiraganaCandidate:
-            // 選択範囲の有無に応じて処理を分岐
-            if let selectedCandidateRuby = self.segmentsManager.selectedCandidateRuby() {
-                // 選択されたテキストをひらがなに変換して確定
-                let katakanaText = selectedCandidateRuby.toHiragana()
-                client.insertText(katakanaText, replacementRange: .notFound)
-                self.segmentsManager.submitSelectedCandidate()
-            } else {
-                // ComposingText全体をひらがなに変換して確定
-                let katakanaText = segmentsManager.getConvertTarget().toHiragana()
-                client.insertText(katakanaText, replacementRange: .notFound)
-                self.segmentsManager.stopComposition()
-            }
-            self.refreshMarkedText()
+        case .submitHiraganaCandidate:
+            self.submitCandidate(self.segmentsManager.getModifiedRubyCandidate {
+                $0.toHiragana()
+            })
+        case .submitKatakanaCandidate:
+            self.submitCandidate(self.segmentsManager.getModifiedRubyCandidate {
+                $0.toKatakana()
+            })
+        case .submitHankakuKatakanaCandidate:
+            self.submitCandidate(self.segmentsManager.getModifiedRubyCandidate {
+                $0.toKatakana().applyingTransform(.fullwidthToHalfwidth, reverse: false)!
+            })
         case .enableDebugWindow:
             self.segmentsManager.requestDebugWindowMode(enabled: true)
         case .disableDebugWindow:
