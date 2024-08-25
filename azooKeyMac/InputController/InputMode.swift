@@ -33,15 +33,15 @@ enum InputMode {
                 return .input(KeyMap.h2zMap("¥"))
             }
         case 43: // Comma
-            if Config.TypeCommaAndPeriod().value{
+            if Config.TypeCommaAndPeriod().value {
                 return .input(KeyMap.h2zMap("，"))
-            }else{
+            } else {
                 return .input(KeyMap.h2zMap("、"))
             }
         case 47: // Period
-            if Config.TypeCommaAndPeriod().value{
+            if Config.TypeCommaAndPeriod().value {
                 return .input(KeyMap.h2zMap("．"))
-            }else{
+            } else {
                 return .input(KeyMap.h2zMap("。"))
             }
         case 102: // Lang2/kVK_JIS_Eisu

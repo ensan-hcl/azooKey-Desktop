@@ -182,7 +182,7 @@ final class SegmentsManager {
         self.composingText.deleteBackwardFromCursorPosition(count: count)
         self.lastOperation = .delete
         // ライブ変換がオフの場合は変換候補ウィンドウを出したい
-        self.shouldShowCandidateWindow = !self.liveConversionEnabled  
+        self.shouldShowCandidateWindow = !self.liveConversionEnabled
         self.updateRawCandidate()
     }
 
@@ -350,8 +350,8 @@ final class SegmentsManager {
                 // 削除のあとは常にひらがなを示す
                 self.composingText.convertTarget
             } else if self.liveConversionEnabled,
-                self.composingText.convertTarget.count > 1,
-            let firstCandidate = self.rawCandidates?.mainResults.first {
+                      self.composingText.convertTarget.count > 1,
+                      let firstCandidate = self.rawCandidates?.mainResults.first {
                 // それ以外の場合、ライブ変換が有効なら
                 firstCandidate.text
             } else {
