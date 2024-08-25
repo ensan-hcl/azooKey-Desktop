@@ -8,10 +8,15 @@ enum UserAction {
     case 英数
     case かな
     case navigation(NavigationDirection)
+    case function(Function)
     case number(Number)
 
     enum NavigationDirection {
         case up, down, right, left
+    }
+
+    enum Function {
+        case six, seven, eight
     }
 
     enum Number {

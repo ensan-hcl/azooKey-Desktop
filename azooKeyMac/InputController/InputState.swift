@@ -26,7 +26,7 @@ enum InputState {
                 return (.selectInputMode(.japanese), .transition(.none))
             case .英数:
                 return (.selectInputMode(.roman), .transition(.none))
-            case .unknown, .navigation, .space, .backspace, .enter, .escape:
+            case .unknown, .navigation, .space, .backspace, .enter, .escape, .function:
                 return (.fallthrough, .fallthrough)
             }
         case .composing:
@@ -46,6 +46,15 @@ enum InputState {
                     return (.enterCandidateSelectionMode, .transition(.selecting))
                 } else {
                     return (.enterFirstCandidatePreviewMode, .transition(.previewing))
+                }
+            case let .function(function):
+                switch function {
+                case .six:
+                    return (.submitHiraganaCandidate, .transition(.none))
+                case .seven:
+                    return (.submitKatakanaCandidate, .transition(.none))
+                case .eight:
+                    return (.submitHankakuKatakanaCandidate, .transition(.none))
                 }
             case .かな:
                 return (.selectInputMode(.japanese), .fallthrough)
@@ -79,6 +88,15 @@ enum InputState {
                 return (.enterCandidateSelectionMode, .transition(.selecting))
             case .escape:
                 return (.hideCandidateWindow, .transition(.composing))
+            case let .function(function):
+                switch function {
+                case .six:
+                    return (.submitHiraganaCandidate, .transition(.none))
+                case .seven:
+                    return (.submitKatakanaCandidate, .transition(.none))
+                case .eight:
+                    return (.submitHankakuKatakanaCandidate, .transition(.none))
+                }
             case .かな:
                 return (.selectInputMode(.japanese), .fallthrough)
             case .英数:
@@ -138,6 +156,15 @@ enum InputState {
                     return (.selectPrevCandidate, .fallthrough)
                 } else {
                     return (.consume, .fallthrough)
+                }
+            case let .function(function):
+                switch function {
+                case .six:
+                    return (.submitHiraganaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                case .seven:
+                    return (.submitKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
+                case .eight:
+                    return (.submitHankakuKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
                 }
             case .number(let num):
                 switch num {

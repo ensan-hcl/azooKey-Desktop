@@ -48,7 +48,7 @@ struct ConfigWindow: View {
                 Spacer()
                 ScrollView {
                     Form {
-                        
+
                         Picker("学習", selection: $learning) {
                             Text("学習する").tag(Config.Learning.Value.inputAndOutput)
                             Text("学習を停止").tag(Config.Learning.Value.onlyOutput)

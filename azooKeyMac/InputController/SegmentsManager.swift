@@ -359,6 +359,43 @@ final class SegmentsManager {
     }
 
     @MainActor
+    func getModifiedRubyCandidate(_ transform: (String) -> String) -> Candidate {
+        let ruby = if let selectedCandidate {
+            // `selectedCandidate.data` の全ての `ruby` を連結して返す
+            selectedCandidate.data.map { element in
+                element.ruby
+            }.joined()
+        } else {
+            // 選択範囲なしの場合はconvertTargetを返す
+            self.composingText.convertTarget
+        }
+        let candidateText = transform(ruby)
+        let candidate = if let selectedCandidate {
+            {
+                var candidate = selectedCandidate
+                candidate.text = candidateText
+                return candidate
+            }()
+        } else {
+            Candidate(
+                text: candidateText,
+                value: 0,
+                correspondingCount: composingText.input.count,
+                lastMid: 0,
+                data: [DicdataElement(
+                    word: candidateText,
+                    ruby: ruby,
+                    cid: CIDData.固有名詞.cid,
+                    mid: MIDData.一般.mid,
+                    value: 0
+                )]
+            )
+        }
+
+        return candidate
+    }
+
+    @MainActor
     func commitMarkedText(inputState: InputState) -> String {
         let markedText = self.getCurrentMarkedText(inputState: inputState)
         let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
