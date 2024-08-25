@@ -264,7 +264,7 @@ class azooKeyMacInputController: IMKInputController {
         case .selectHiraganaCandidate:
             // 選択範囲の有無に応じて処理を分岐
             if let selectedCandidateRuby = self.segmentsManager.selectedCandidateRuby() {
-                // 選択されたテキストをカタカナに変換して確定
+                // 選択されたテキストをひらがなに変換して確定
                 let katakanaText = selectedCandidateRuby.toHiragana()
                 client.insertText(katakanaText, replacementRange: .notFound)
                 self.segmentsManager.submitSelectedCandidate()
