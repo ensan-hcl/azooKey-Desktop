@@ -233,6 +233,14 @@ class azooKeyMacInputController: IMKInputController {
         case .selectNumberCandidate(let num):
             self.candidatesViewController.selectNumberCandidate(num: num)
             self.submitSelectedCandidate()
+        case .selectKatakanaCandidate:
+            self.segmentsManager.convertToKatakana()
+            self.refreshMarkedText()
+
+        case .selectHiraganaCandidate:
+            self.segmentsManager.convertToHiragana()
+            self.refreshMarkedText()
+
         case .enableDebugWindow:
             self.segmentsManager.requestDebugWindowMode(enabled: true)
         case .disableDebugWindow:
