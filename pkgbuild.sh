@@ -20,3 +20,14 @@ productbuild --distribution distribution.xml --package-path . azooKey-release.pk
 
 # Clean up
 rm azooKey-tmp.pkg
+
+# Sign Pkg
+productsign --sign "Developer ID Installer" ./azooKey-release.pkg ./azooKey-release-signed.pkg
+rm azooKey-release.pkg
+
+# Submit for Notarization
+# For fork developers: You would need to update `--keychain--profile "Notarytool"` part, because this is environment-depenedent command.
+xcrun notarytool submit azooKey-release-signed.pkg --keychain-profile "Notarytool" --wait
+
+# Staple
+xcrun stapler staple azooKey-release-signed.pkg
