@@ -23,6 +23,7 @@ if [ "$IGNORE_LINT" = false ]; then
         echo "swiftlint could not be found. Please rerun the script as \`./install.sh --ignore-lint\`."
         echo "For contributing azooKey on macOS, we strongly recommend you to install swiftlint"
         echo "To install swiftlint, run \`brew install swiftlint\`"
+        exit 1
     fi
 else
     echo "Skipping swiftlint checks due to --ignore-lint option."
