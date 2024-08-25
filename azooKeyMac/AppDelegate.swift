@@ -6,9 +6,9 @@
 //
 
 import Cocoa
-import SwiftUI
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
+import SwiftUI
 
 // Necessary to launch this app
 class NSManualApplication: NSApplication {

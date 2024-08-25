@@ -354,7 +354,7 @@ final class SegmentsManager {
         var selectionRange: NSRange
 
         func makeIterator() -> Array<Element>.Iterator {
-            return text.makeIterator()
+            text.makeIterator()
         }
     }
 

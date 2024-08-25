@@ -42,7 +42,9 @@ class CandidatesViewController: NSViewController {
     }
 
     private func configureWindowForRoundedCorners() {
-        guard let window = self.view.window else { return }
+        guard let window = self.view.window else {
+            return
+        }
 
         // ウィンドウとそのコンテンツビューがレイヤーバックされるように設定
         window.contentView?.wantsLayer = true
@@ -122,7 +124,9 @@ class CandidatesViewController: NSViewController {
     }
 
     private func resizeWindowToFitContent(cursorLocation: CGPoint) {
-        guard let window = self.view.window, let screen = window.screen else { return }
+        guard let window = self.view.window, let screen = window.screen else {
+            return
+        }
 
         let numberOfRows = min(9, self.tableView.numberOfRows)
         if numberOfRows == 0 {
@@ -212,7 +216,7 @@ class CandidatesViewController: NSViewController {
 
 extension CandidatesViewController: NSTableViewDelegate, NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
-        return candidates.count
+        candidates.count
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {

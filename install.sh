@@ -1,15 +1,31 @@
 #!/bin/bash
 set -xe -o pipefail
 
+IGNORE_LINT=false
 
-# Check if swiftlint is installed
-if command -v swiftlint &> /dev/null
-then
-    swiftlint --fix --format --quiet
+# Parse command-line options
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --ignore-lint) IGNORE_LINT=true ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+if [ "$IGNORE_LINT" = false ]; then
+    if command -v swiftlint &> /dev/null
+    then
+        # Fix auto-fixable errors
+        swiftlint --fix --format
+        # Check other errors
+        swiftlint --quiet --strict
+    else
+        echo "swiftlint could not be found. Please rerun the script as \`./install.sh --ignore-lint\`."
+        echo "For contributing azooKey on macOS, we strongly recommend you to install swiftlint"
+        echo "To install swiftlint, run \`brew install swiftlint\`"
+    fi
 else
-    echo "swiftlint could not be found. Proceeding without swiftlint."
-    echo "For contributing azooKey on macOS, we strongly recommend you to install swiftlint"
-    echo "to install swiftlint, run \`brew install swiftlint\`"
+    echo "Skipping swiftlint checks due to --ignore-lint option."
 fi
 
 

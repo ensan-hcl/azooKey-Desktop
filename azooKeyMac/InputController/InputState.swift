@@ -6,6 +6,8 @@ enum InputState {
     case previewing
     case selecting
 
+    // この種のコードは複雑にしかならないので、lintを無効にする
+    // swiftlint:disable:next cyclomatic_complexity
     func event(_ event: NSEvent!, userAction: UserAction, liveConversionEnabled: Bool, enableDebugWindow: Bool) -> (ClientAction, ClientActionCallback) {
         if event.modifierFlags.contains(.command) {
             return (.fallthrough, .fallthrough)
