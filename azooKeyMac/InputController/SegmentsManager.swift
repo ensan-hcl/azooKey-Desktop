@@ -357,53 +357,34 @@ final class SegmentsManager {
             return text.makeIterator()
         }
     }
-
-    func getConvertTarget() -> String{
+    func getConvertTarget() -> String {
         return self.composingText.convertTarget
     }
-    
+
     @MainActor
     func submitSelectedCandidate() {
         if let selectedCandidate = self.selectedCandidate {
-            // 現在の文頭にある選択範囲のテキストをカタカナに変換して確定
+            // 選択された範囲を確定
             self.composingText.prefixComplete(correspondingCount: selectedCandidate.correspondingCount)
-
-            // 現在のカーソル位置にカタカナに変換したテキストを挿入
-            let currentCursorPosition = self.composingText.convertTargetCursorPosition
-
-            // カーソルをカタカナに変換されたテキストの後に移動
-            _ = self.composingText.moveCursorFromCursorPosition(count: currentCursorPosition - self.composingText.convertTargetCursorPosition)
-
-            self.appendDebugMessage("convertToKatakana: Katakana text inserted and cursor moved to the next candidate.")
-
-        } else {
-            self.appendDebugMessage("convertToKatakana: No selected candidate found. Converting entire ComposingText to Katakana.")
-
-            // 選択された候補がない場合はComposingText全体をカタカナに変換
-            let katakanaText = self.composingText.convertTarget.toKatakana()
-
-            self.appendDebugMessage("convertToKatakana: Entire ComposingText converted to Katakana: \(katakanaText)")
-
-            self.composingText.stopComposition() // 現在のテキストをクリア
-            self.composingText.insertAtCursorPosition(katakanaText, inputStyle: .direct)
+            self.appendDebugMessage("submitSelectedCandidate: Candidate confirmed and cursor moved to the next candidate.")
         }
-
         // 次の範囲の変換候補を更新
         self.updateRawCandidate()
-        self.appendDebugMessage("convertToKatakana: Raw candidates updated after Katakana conversion.")
+        self.appendDebugMessage("submitSelectedCandidate: Raw candidates updated after candidate submission.")
     }
 
-    func selectedCandidateRuby() -> String{
+    func selectedCandidateRuby() -> String? {
         if let selectedCandidate = self.selectedCandidate {
-            // `selectedCandidate.data` の全ての `ruby` をひらがなに変換
+            // `selectedCandidate.data` の全ての `ruby` を連結して返す
             return selectedCandidate.data.map { element in
-                element.ruby.toHiragana()
+                element.ruby
             }.joined()
-        }else{
-            // 選択範囲なし
-            return ""
+        } else {
+            // 選択範囲なしの場合は空文字を返す
+            return nil
         }
     }
+
 
     @MainActor
     func commitMarkedText(inputState: InputState) -> String {

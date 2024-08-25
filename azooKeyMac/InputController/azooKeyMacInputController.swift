@@ -234,23 +234,32 @@ class azooKeyMacInputController: IMKInputController {
             self.candidatesViewController.selectNumberCandidate(num: num)
             self.submitSelectedCandidate()
         case .selectKatakanaCandidate:
-            // 選択範囲の有無
-            if let selectedCandidate = segmentsManager.selectedCandidate {
-                // 最初に確定テキストを挿入
-                client.insertText(segmentsManager.selectedCandidateRuby().toKatakana(), replacementRange: NSRange(location: 0, length: 0))
+            // 選択範囲の有無に応じて処理を分岐
+            if let selectedCandidateRuby = self.segmentsManager.selectedCandidateRuby() {
+                // 選択されたテキストをカタカナに変換して確定
+                let katakanaText = selectedCandidateRuby.toKatakana()
+                client.insertText(katakanaText, replacementRange: .notFound)
                 self.segmentsManager.submitSelectedCandidate()
-                self.refreshMarkedText()
             } else {
-                // ComposingTextを全てカタカナに変換して確定する
-                let katakanaText = self.segmentsManager.getConvertTarget().toKatakana()
-                client.insertText(katakanaText, replacementRange: NSRange(location: 0, length: 0))
+                // ComposingText全体をカタカナに変換して確定
+                let katakanaText = segmentsManager.getConvertTarget().toKatakana()
+                client.insertText(katakanaText, replacementRange: .notFound)
                 self.segmentsManager.stopComposition()
-                self.refreshMarkedText()
             }
+            self.refreshMarkedText()
         case .selectHiraganaCandidate:
-            // 最初に確定テキストを挿入
-            client.insertText(segmentsManager.selectedCandidateRuby().toHiragana(), replacementRange: NSRange(location: 0, length: 0))
-            self.segmentsManager.submitSelectedCandidate()
+            // 選択範囲の有無に応じて処理を分岐
+            if let selectedCandidateRuby = self.segmentsManager.selectedCandidateRuby() {
+                // 選択されたテキストをカタカナに変換して確定
+                let katakanaText = selectedCandidateRuby.toHiragana()
+                client.insertText(katakanaText, replacementRange: .notFound)
+                self.segmentsManager.submitSelectedCandidate()
+            } else {
+                // ComposingText全体をカタカナに変換して確定
+                let katakanaText = segmentsManager.getConvertTarget().toKatakana()
+                client.insertText(katakanaText, replacementRange: .notFound)
+                self.segmentsManager.stopComposition()
+            }
             self.refreshMarkedText()
         case .enableDebugWindow:
             self.segmentsManager.requestDebugWindowMode(enabled: true)
