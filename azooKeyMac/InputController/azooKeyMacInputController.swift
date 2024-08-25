@@ -250,13 +250,13 @@ class azooKeyMacInputController: IMKInputController {
         case .selectHalfKatakanaCandidate:
             // 選択範囲の有無に応じて処理を分岐
             if let selectedCandidateRuby = self.segmentsManager.selectedCandidateRuby() {
-                // 選択されたテキストを半角カタカナに変換して確定
-                let katakanaText = selectedCandidateRuby.applyingTransform(.fullwidthToHalfwidth, reverse: false)
+                // 選択されたテキストをカタカナに変換し、半角にする
+                let katakanaText = selectedCandidateRuby.toKatakana().applyingTransform(.fullwidthToHalfwidth, reverse: false)
                 client.insertText(katakanaText, replacementRange: .notFound)
                 self.segmentsManager.submitSelectedCandidate()
             } else {
-                // ComposingText全体をカタカナに変換して確定
-                let katakanaText = segmentsManager.getConvertTarget().applyingTransform(.fullwidthToHalfwidth, reverse: false)
+                // ComposingText全体をカタカナに変換し、半角にする
+                let katakanaText = segmentsManager.getConvertTarget().toKatakana().applyingTransform(.fullwidthToHalfwidth, reverse: false)
                 client.insertText(katakanaText, replacementRange: .notFound)
                 self.segmentsManager.stopComposition()
             }
