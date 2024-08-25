@@ -44,11 +44,10 @@ enum ClientAction {
     }
 }
 
-
 enum ClientActionCallback {
     case `fallthrough`
     case transition(InputState)
-    /// 
+    ///
     case basedOnBackspace(ifIsEmpty: InputState, ifIsNotEmpty: InputState)
     case basedOnSubmitCandidate(ifIsEmpty: InputState, ifIsNotEmpty: InputState)
 }
