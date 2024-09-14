@@ -6,6 +6,9 @@ enum ClientAction {
     case showCandidateWindow
     case hideCandidateWindow
     case appendToMarkedText(String)
+
+    /// Marked Textを経由せずにインサートするコマンド。InputStateがnoneの場合のみ有効
+    case insertWithoutMarkedText(String)
     case removeLastMarkedText
 
     case commitMarkedText

@@ -197,6 +197,9 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.update(requestRichCandidates: true)
         case .appendToMarkedText(let string):
             self.segmentsManager.insertAtCursorPosition(string, inputStyle: .roman2kana)
+        case .insertWithoutMarkedText(let string):
+            assert(self.inputState == .none)
+            client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: 0))
         case .editSegment(let count):
             self.segmentsManager.editSegment(count: count)
         case .commitMarkedText:
