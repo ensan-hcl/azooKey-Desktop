@@ -26,7 +26,14 @@ enum InputState {
                 return (.selectInputMode(.japanese), .transition(.none))
             case .英数:
                 return (.selectInputMode(.roman), .transition(.none))
-            case .unknown, .navigation, .space, .backspace, .enter, .escape, .function:
+            case .space:
+                // Shift+Spaceでは半角スペースを入力
+                if event.modifierFlags.contains(.shift) {
+                    return (.insertWithoutMarkedText(" "), .transition(.none))
+                } else {
+                    return (.insertWithoutMarkedText("　"), .transition(.none))
+                }
+            case .unknown, .navigation, .backspace, .enter, .escape, .function:
                 return (.fallthrough, .fallthrough)
             }
         case .composing:
