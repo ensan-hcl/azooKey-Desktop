@@ -233,6 +233,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.requestSetCandidateWindowState(visible: false)
         case .removeLastMarkedText:
             self.segmentsManager.deleteBackwardFromCursorPosition()
+            self.segmentsManager.requestResettingSelection()
         case .selectPrevCandidate:
             self.segmentsManager.requestSelectingPrevCandidate()
         case .selectNextCandidate:
