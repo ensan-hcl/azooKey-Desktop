@@ -32,6 +32,14 @@ enum InputMode {
             } else {
                 return .unknown
             }
+        case 0x03: // Control + f
+            if event.modifierFlags.contains(.control) {
+                return .navigation(.right)
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
         case 0x22: // Control + i
             if event.modifierFlags.contains(.control) {
                 return .editSegment(-1)  // Shift segment cursor left
