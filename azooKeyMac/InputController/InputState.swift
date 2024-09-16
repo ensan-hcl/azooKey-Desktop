@@ -35,7 +35,7 @@ enum InputState {
                 } else {
                     return (.insertWithoutMarkedText("　"), .transition(.none))
                 }
-            case .unknown, .navigation, .backspace, .enter, .escape, .function:
+            case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:
                 return (.fallthrough, .fallthrough)
             }
         case .composing:
@@ -80,6 +80,8 @@ enum InputState {
                     // ナビゲーションはハンドルしてしまう
                     return (.consume, .fallthrough)
                 }
+            case .editSegment(let count):
+                return (.editSegment(count), .transition(.selecting))
             case .unknown:
                 return (.fallthrough, .fallthrough)
             }
@@ -121,6 +123,8 @@ enum InputState {
                     // ナビゲーションはハンドルしてしまう
                     return (.consume, .fallthrough)
                 }
+            case .editSegment(let count):
+                return (.editSegment(count), .transition(.selecting))
             case .unknown:
                 return (.fallthrough, .fallthrough)
             }
@@ -182,6 +186,8 @@ enum InputState {
                 case .zero:
                     return (.submitSelectedCandidateAndAppendToMarkedText(num.inputString), .transition(.composing))
                 }
+            case .editSegment(let count):
+                return (.editSegment(count), .transition(.selecting))
             case .かな:
                 return (.selectInputMode(.japanese), .fallthrough)
             case .英数:
