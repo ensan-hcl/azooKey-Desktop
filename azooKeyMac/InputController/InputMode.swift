@@ -56,6 +56,22 @@ enum InputMode {
             } else {
                 return .unknown
             }
+        case 0x26: // Control + j
+            if event.modifierFlags.contains(.control) {
+                return .function(.six)
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
+        case 0x28: // Control + k
+            if event.modifierFlags.contains(.control) {
+                return .function(.seven)
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
         case 36: // Enter
             return .enter
         case 48: // Tab
