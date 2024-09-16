@@ -1,6 +1,6 @@
 import InputMethodKit
 
-enum ClientAction {
+enum ClientAction: Sendable, Equatable, Hashable {
     case `consume`
     case `fallthrough`
     case showCandidateWindow
@@ -46,13 +46,13 @@ enum ClientAction {
 
     case stopComposition
 
-    enum InputMode {
+    enum InputMode: Sendable {
         case roman
         case japanese
     }
 }
 
-enum ClientActionCallback {
+enum ClientActionCallback: Sendable {
     case `fallthrough`
     case transition(InputState)
     ///

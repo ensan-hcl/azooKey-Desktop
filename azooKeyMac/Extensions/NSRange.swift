@@ -12,3 +12,5 @@ extension NSRange {
         NSRange(location: NSNotFound, length: NSNotFound)
     }
 }
+
+extension CGPoint: @retroactive @unchecked Sendable {}

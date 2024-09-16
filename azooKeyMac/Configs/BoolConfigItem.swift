@@ -30,36 +30,36 @@ extension Config {
     /// デバッグウィンドウにd/Dで遷移する設定
     struct DebugWindow: BoolConfigItem {
         static let `default` = true
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.debug.enableDebugWindow"
+        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.debug.enableDebugWindow"
     }
     /// ライブ変換を有効化する設定
     struct LiveConversion: BoolConfigItem {
         static let `default` = true
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion"
+        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableLiveConversion"
     }
     /// 英語変換を有効化する設定
     struct EnglishConversion: BoolConfigItem {
         static let `default` = false
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion"
+        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableEnglishConversion"
     }
     /// 円マークの代わりにバックスラッシュを入力する設定
     struct TypeBackSlash: BoolConfigItem {
         static let `default` = false
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.typeBackSlash"
+        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.typeBackSlash"
     }
     /// 「、」「。」の代わりに「,」「.」を入力する設定
     struct TypeCommaAndPeriod: BoolConfigItem {
         static let `default` = false
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.typeCommaAndPeriod"
+        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.typeCommaAndPeriod"
     }
     /// Zenzaiを利用する設定
     struct ZenzaiIntegration: BoolConfigItem {
         static let `default` = true
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzai"
+        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzai"
     }
     /// Zenzaiを利用時、候補ウィンドウを出すタイミングでリッチな候補の要求を行う
     struct ZenzaiRichCandidatesMode: BoolConfigItem {
         static let `default` = true
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzaiRichCandidatesMode"
+        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzaiRichCandidatesMode"
     }
 }

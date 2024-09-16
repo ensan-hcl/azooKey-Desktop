@@ -1,6 +1,6 @@
 import InputMethodKit
 
-enum InputState {
+enum InputState: Sendable {
     case none
     case composing
     case previewing

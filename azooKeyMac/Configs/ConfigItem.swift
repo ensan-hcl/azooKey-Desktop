@@ -11,9 +11,9 @@ import SwiftUI
 /// namespace for `Config`
 enum Config {}
 
-protocol ConfigItem<Value> {
+protocol ConfigItem<Value>: Sendable {
     static var key: String { get }
-    associatedtype Value: Codable
+    associatedtype Value: Codable, Sendable
     var value: Value { get nonmutating set }
 }
 

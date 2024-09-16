@@ -32,6 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var configWindowController: NSWindowController?
     @MainActor var kanaKanjiConverter = KanaKanjiConverter()
 
+    @MainActor
     func openConfigWindow() {
         if let configWindow {
             // Show the window

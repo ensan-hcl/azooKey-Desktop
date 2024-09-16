@@ -11,7 +11,7 @@ import KanaKanjiConverterModule
 class CandidatesViewController: NSViewController {
     private var candidates: [Candidate] = []
     private var tableView: NSTableView!
-    weak var delegate: (any CandidatesViewControllerDelegate)?
+    private weak var delegate: (any CandidatesViewControllerDelegate)?
     private var currentSelectedRow: Int = -1
     private var showedRows: ClosedRange = 0...8
     var showCandidateIndex = false
@@ -32,6 +32,10 @@ class CandidatesViewController: NSViewController {
         self.tableView.addTableColumn(column)
         self.tableView.delegate = self
         self.tableView.dataSource = self
+    }
+
+    func setDelegate(delegate: (any CandidatesViewControllerDelegate)?) {
+        self.delegate = delegate
     }
 
     override func viewDidLoad() {
@@ -70,13 +74,13 @@ class CandidatesViewController: NSViewController {
         configureWindowForRoundedCorners()
     }
 
-    func updateCandidates(_ candidates: [Candidate], selectionIndex: Int?, cursorLocation: CGPoint) {
+    func updateCandidates(_ candidates: [Candidate], selectionIndex: Int?, cursorLocation: CGPoint) async {
         self.showedRows = selectionIndex == nil ? 0...8 : self.showedRows
         self.candidates = candidates
         self.currentSelectedRow = selectionIndex ?? -1
         self.tableView.reloadData()
         self.resizeWindowToFitContent(cursorLocation: cursorLocation)
-        self.updateSelection(to: selectionIndex ?? -1)
+        await self.updateSelection(to: selectionIndex ?? -1)
     }
 
     private func updateVisibleRows() {
@@ -178,13 +182,13 @@ class CandidatesViewController: NSViewController {
     }
 
     // 選択行の移動
-    func updateSelection(to row: Int) {
+    func updateSelection(to row: Int) async {
         if row == -1 {
             return
         }
         self.tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         self.tableView.scrollRowToVisible(row)
-        self.delegate?.candidateSelectionChanged(row)
+        await self.delegate?.candidateSelectionChanged(row)
 
         // 新しい選択行を設定
         self.currentSelectedRow = row
@@ -203,9 +207,9 @@ class CandidatesViewController: NSViewController {
     }
 
     // 表示されているナンバリングでの移動
-    func selectNumberCandidate(num: Int) {
+    func selectNumberCandidate(num: Int) async {
         let nextRow = self.showedRows.lowerBound + num - 1
-        self.updateSelection(to: nextRow)
+        await self.updateSelection(to: nextRow)
     }
 
     func hide() {
@@ -273,6 +277,6 @@ class CandidateTableCellView: NSTableCellView {
 }
 
 protocol CandidatesViewControllerDelegate: AnyObject {
-    func candidateSubmitted()
-    func candidateSelectionChanged(_ row: Int)
+    func candidateSubmitted() async
+    func candidateSelectionChanged(_ row: Int) async
 }

@@ -54,7 +54,7 @@ extension Config {
                 }
             }
         }
-        static var `default`: Value = .inputAndOutput
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.learning"
+        static let `default`: Value = .inputAndOutput
+        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.learning"
     }
 }

@@ -9,10 +9,21 @@ import Foundation
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
 
-final class SegmentsManager {
+private final actor DebugCandidatesManager {
+    var candidates: [Candidate] = []
+
+    func insert(_ candidate: Candidate) {
+        self.candidates.insert(candidate, at: 0)
+        while self.candidates.count > 100 {
+            self.candidates.removeLast()
+        }
+    }
+}
+
+final actor SegmentsManager {
     init() {}
 
-    weak var delegate: (any SegmentManagerDelegate)?
+    private weak var delegate: (any SegmentManagerDelegate)?
 
     private var composingText: ComposingText = ComposingText()
 
@@ -33,7 +44,8 @@ final class SegmentsManager {
     private var shouldShowCandidateWindow = false
 
     private var shouldShowDebugCandidateWindow: Bool = false
-    private var debugCandidates: [Candidate] = []
+//    private var debugCandidates: [Candidate] = []
+    private var debugCandidateManager = DebugCandidatesManager()
 
     private enum Operation: Sendable {
         case insert
@@ -48,19 +60,21 @@ final class SegmentsManager {
         )!.kanaKanjiConverter
     }
 
-    func appendDebugMessage(_ string: String) {
-        self.debugCandidates.insert(
-            Candidate(
-                text: string.replacingOccurrences(of: "\n", with: "\\n"),
-                value: 0,
-                correspondingCount: 0,
-                lastMid: 0,
-                data: []
-            ),
-            at: 0
-        )
-        while self.debugCandidates.count > 100 {
-            self.debugCandidates.removeLast()
+    func setDelegate(delegate: (any SegmentManagerDelegate)?) {
+        self.delegate = delegate
+    }
+
+    nonisolated func appendDebugMessage(_ string: String) {
+        Task {
+            await self.debugCandidateManager.insert(
+                Candidate(
+                    text: string.replacingOccurrences(of: "\n", with: "\\n"),
+                    value: 0,
+                    correspondingCount: 0,
+                    lastMid: 0,
+                    data: []
+                )
+            )
         }
     }
 
@@ -96,7 +110,7 @@ final class SegmentsManager {
         )
     }
 
-    var azooKeyMemoryDir: URL {
+    nonisolated var azooKeyMemoryDir: URL {
         if #available(macOS 13, *) {
             URL.applicationSupportDirectory
                 .appending(path: "azooKey", directoryHint: .isDirectory)
@@ -108,17 +122,17 @@ final class SegmentsManager {
         }
     }
 
-    @MainActor
-    func activate() {
+    func activate() async {
         self.shouldShowCandidateWindow = false
-        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
+        let options = self.options()
+        await self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
     }
 
-    @MainActor
-    func deactivate() {
-        self.kanaKanjiConverter.stopComposition()
-        self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
-        self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+    func deactivate() async {
+        await self.kanaKanjiConverter.stopComposition()
+        let options = self.options()
+        await self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options))
+        await self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
         self.rawCandidates = nil
         self.didExperienceSegmentEdition = false
         self.lastOperation = .other
@@ -127,11 +141,10 @@ final class SegmentsManager {
         self.selectionIndex = nil
     }
 
-    @MainActor
     /// この入力を打ち切る
-    func stopComposition() {
+    func stopComposition() async {
         self.composingText.stopComposition()
-        self.kanaKanjiConverter.stopComposition()
+        await self.kanaKanjiConverter.stopComposition()
         self.rawCandidates = nil
         self.didExperienceSegmentEdition = false
         self.lastOperation = .other
@@ -139,28 +152,25 @@ final class SegmentsManager {
         self.selectionIndex = nil
     }
 
-    @MainActor
     /// 日本語入力自体をやめる
-    func stopJapaneseInput() {
+    func stopJapaneseInput() async {
         self.rawCandidates = nil
         self.didExperienceSegmentEdition = false
         self.lastOperation = .other
-        self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
+        await self.kanaKanjiConverter.sendToDicdataStore(.closeKeyboard)
         self.shouldShowCandidateWindow = false
         self.selectionIndex = nil
     }
 
-    @MainActor
-    func insertAtCursorPosition(_ string: String, inputStyle: InputStyle) {
+    func insertAtCursorPosition(_ string: String, inputStyle: InputStyle) async {
         self.composingText.insertAtCursorPosition(string, inputStyle: inputStyle)
         self.lastOperation = .insert
         // ライブ変換がオフの場合は変換候補ウィンドウを出したい
         self.shouldShowCandidateWindow = !self.liveConversionEnabled
-        self.updateRawCandidate()
+        await self.updateRawCandidate()
     }
 
-    @MainActor
-    func editSegment(count: Int) {
+    func editSegment(count: Int) async {
         // 現在選ばれているprefix candidateが存在する場合、まずそれに合わせてカーソルを移動する
         if let selectionIndex, let candidates, candidates.indices.contains(selectionIndex) {
             var afterComposingText = self.composingText
@@ -187,11 +197,10 @@ final class SegmentsManager {
         self.didExperienceSegmentEdition = true
         self.shouldShowCandidateWindow = true
         self.selectionIndex = nil
-        self.updateRawCandidate()
+        await self.updateRawCandidate()
     }
 
-    @MainActor
-    func deleteBackwardFromCursorPosition(count: Int = 1) {
+    func deleteBackwardFromCursorPosition(count: Int = 1) async {
         if !self.composingText.isAtEndIndex {
             // 右端に持っていく
             _ = self.composingText.moveCursorFromCursorPosition(count: self.composingText.convertTarget.count - self.composingText.convertTargetCursorPosition)
@@ -202,7 +211,7 @@ final class SegmentsManager {
         self.lastOperation = .delete
         // ライブ変換がオフの場合は変換候補ウィンドウを出したい
         self.shouldShowCandidateWindow = !self.liveConversionEnabled
-        self.updateRawCandidate()
+        await self.updateRawCandidate()
     }
 
     private var candidates: [Candidate]? {
@@ -234,16 +243,17 @@ final class SegmentsManager {
         self.composingText.isEmpty
     }
 
-    @MainActor private func updateRawCandidate(requestRichCandidates: Bool = false) {
+    private func updateRawCandidate(requestRichCandidates: Bool = false) async {
         // 不要
         if composingText.isEmpty {
             self.rawCandidates = nil
-            self.kanaKanjiConverter.stopComposition()
+            await self.kanaKanjiConverter.stopComposition()
             return
         }
 
         let prefixComposingText = self.composingText.prefixToCursorPosition()
-        let leftSideContext = self.delegate?.getLeftSideContext(maxCount: 30).map {
+        var leftSideContext = self.delegate?.getLeftSideContext(maxCount: 30)
+        leftSideContext = leftSideContext.map {
             var last = $0.split(separator: "\n", omittingEmptySubsequences: false).last ?? $0[...]
             // 空白を削除する
             while last.first?.isWhitespace ?? false {
@@ -254,18 +264,18 @@ final class SegmentsManager {
             }
             return String(last)
         }
-        let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options(leftSideContext: leftSideContext, requestRichCandidates: requestRichCandidates))
+        let result = await self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options(leftSideContext: leftSideContext, requestRichCandidates: requestRichCandidates))
         self.rawCandidates = result
     }
 
-    @MainActor func update(requestRichCandidates: Bool) {
-        self.updateRawCandidate(requestRichCandidates: requestRichCandidates)
+    func update(requestRichCandidates: Bool) async {
+        await self.updateRawCandidate(requestRichCandidates: requestRichCandidates)
         self.shouldShowCandidateWindow = true
     }
 
-    @MainActor func prefixCandidateCommited(_ candidate: Candidate) {
-        self.kanaKanjiConverter.setCompletedData(candidate)
-        self.kanaKanjiConverter.updateLearningData(candidate)
+    func prefixCandidateCommited(_ candidate: Candidate) async {
+        await self.kanaKanjiConverter.setCompletedData(candidate)
+        await self.kanaKanjiConverter.updateLearningData(candidate)
         self.composingText.prefixComplete(correspondingCount: candidate.correspondingCount)
 
         if !self.composingText.isEmpty {
@@ -274,7 +284,7 @@ final class SegmentsManager {
             self.didExperienceSegmentEdition = false
             self.shouldShowCandidateWindow = true
             self.selectionIndex = nil
-            self.updateRawCandidate()
+            await self.updateRawCandidate()
         }
     }
 
@@ -315,7 +325,7 @@ final class SegmentsManager {
         return nil
     }
 
-    func getCurrentCandidateWindow(inputState: InputState) -> CandidateWindow {
+    func getCurrentCandidateWindow(inputState: InputState) async -> CandidateWindow {
         switch inputState {
         case .none, .previewing:
             return .hidden
@@ -327,6 +337,7 @@ final class SegmentsManager {
             }
         case .selecting:
             if self.shouldShowDebugCandidateWindow {
+                let debugCandidates = await self.debugCandidateManager.candidates
                 self.selectionIndex = max(0, min(self.selectionIndex ?? 0, debugCandidates.count - 1))
                 return .selecting(debugCandidates, selectionIndex: self.selectionIndex)
             } else if self.shouldShowCandidateWindow, let candidates, !candidates.isEmpty {
@@ -358,7 +369,6 @@ final class SegmentsManager {
         }
     }
 
-    @MainActor
     func getModifiedRubyCandidate(_ transform: (String) -> String) -> Candidate {
         let ruby = if let selectedCandidate {
             // `selectedCandidate.data` の全ての `ruby` を連結して返す
@@ -395,14 +405,13 @@ final class SegmentsManager {
         return candidate
     }
 
-    @MainActor
-    func commitMarkedText(inputState: InputState) -> String {
+    func commitMarkedText(inputState: InputState) async -> String {
         let markedText = self.getCurrentMarkedText(inputState: inputState)
         let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
         if let candidate = self.candidates?.first(where: {$0.text == text}) {
-            self.prefixCandidateCommited(candidate)
+            await self.prefixCandidateCommited(candidate)
         }
-        self.stopComposition()
+        await self.stopComposition()
         return text
     }
 

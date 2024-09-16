@@ -1,4 +1,4 @@
-enum UserAction {
+enum UserAction: Sendable {
     case input(String)
     case backspace
     case enter
@@ -11,15 +11,15 @@ enum UserAction {
     case function(Function)
     case number(Number)
 
-    enum NavigationDirection {
+    enum NavigationDirection: Sendable {
         case up, down, right, left
     }
 
-    enum Function {
+    enum Function: Sendable {
         case six, seven, eight
     }
 
-    enum Number {
+    enum Number: Sendable {
         case one, two, three, four, five, six, seven, eight, nine, zero
         var intValue: Int {
             switch self {

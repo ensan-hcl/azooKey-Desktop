@@ -41,7 +41,7 @@ extension azooKeyMacInputController {
         self.liveConversionToggleMenuItem.title = newValue ? "ライブ変換をOFF" : "ライブ変換をON"
     }
 
-    @objc func toggleEnglishConversion(_ sender: Any) {
+    @objc func toggleEnglishConversion(_ sender: Any) async {
         self.segmentsManager.appendDebugMessage("\(#line): toggleEnglishConversion")
         let config = Config.EnglishConversion()
         config.value = !self.englishConversionEnabled
@@ -60,7 +60,9 @@ extension azooKeyMacInputController {
     }
 
     @objc func openConfigWindow(_ sender: Any) {
-        (NSApplication.shared.delegate as? AppDelegate)!.openConfigWindow()
+        Task { @MainActor in
+            (NSApplication.shared.delegate as? AppDelegate)!.openConfigWindow()
+        }
     }
 
     // MARK: - Application Support Directory
