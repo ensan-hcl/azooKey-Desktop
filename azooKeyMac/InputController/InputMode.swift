@@ -16,6 +16,62 @@ enum InputMode {
             } else {
                 return .unknown
             }
+        case 0x23: // Control + p
+            if event.modifierFlags.contains(.control) {
+                return .navigation(.up)
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
+        case 0x2D: // Control + n
+            if event.modifierFlags.contains(.control) {
+                return .navigation(.down)
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
+        case 0x03: // Control + f
+            if event.modifierFlags.contains(.control) {
+                return .navigation(.right)
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
+        case 0x22: // Control + i
+            if event.modifierFlags.contains(.control) {
+                return .editSegment(-1)  // Shift segment cursor left
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
+        case 0x1F: // Control + o
+            if event.modifierFlags.contains(.control) {
+                return .editSegment(1)  // Shift segment cursor right
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
+        case 0x26: // Control + j
+            if event.modifierFlags.contains(.control) {
+                return .function(.six)
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
+        case 0x28: // Control + k
+            if event.modifierFlags.contains(.control) {
+                return .function(.seven)
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
         case 36: // Enter
             return .enter
         case 48: // Tab
