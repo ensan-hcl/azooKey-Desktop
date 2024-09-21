@@ -11,6 +11,7 @@ enum UserAction {
     case function(Function)
     case number(Number)
     case editSegment(Int)
+    case shortCut
 
     enum NavigationDirection {
         case up, down, right, left

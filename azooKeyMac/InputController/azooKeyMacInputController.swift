@@ -33,6 +33,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     private var candidatesWindow: NSWindow
     private var candidatesViewController: CandidatesViewController
 
+    // ChatGPT用のプロパティを追加
+    private var chatGPTWindow: NSWindow?
+    private var chatGPTViewController: ChatGPTViewController?
+
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.segmentsManager = SegmentsManager()
 
@@ -57,6 +61,15 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.candidatesWindow.setIsVisible(false)
         self.candidatesWindow.orderOut(nil)
         super.init(server: server, delegate: delegate, client: inputClient)
+
+        // ChatGPTViewControllerの初期化
+        self.chatGPTViewController = ChatGPTViewController()
+        self.chatGPTWindow = NSWindow(contentViewController: self.chatGPTViewController!)
+        self.chatGPTWindow?.styleMask = [.titled, .closable, .resizable]
+        self.chatGPTWindow?.title = "ChatGPT"
+        self.chatGPTWindow?.setContentSize(NSSize(width: 400, height: 300))
+        self.chatGPTWindow?.center()
+        self.chatGPTWindow?.orderOut(nil)
 
         // デリゲートの設定を super.init の後に移動
         self.candidatesViewController.delegate = self
@@ -259,7 +272,9 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.requestDebugWindowMode(enabled: false)
         case .stopComposition:
             self.segmentsManager.stopComposition()
-        // MARK: 特殊ケース
+        case .requestChatGPT:
+            self.requestChatGPT()
+            // MARK: 特殊ケース
         case .consume:
             return true
         case .fallthrough:
@@ -299,6 +314,13 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.candidatesWindow.orderOut(nil)
             self.candidatesViewController.hide()
         }
+    }
+
+    // requestChatGPT()メソッドの実装
+    func requestChatGPT() {
+        // ChatGPTウィンドウを表示
+        self.chatGPTWindow?.orderFront(nil)
+        self.chatGPTWindow?.makeKeyAndOrderFront(nil)
     }
 
     func refreshMarkedText() {

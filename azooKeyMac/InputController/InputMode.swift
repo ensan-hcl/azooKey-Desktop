@@ -72,6 +72,14 @@ enum InputMode {
             } else {
                 return .unknown
             }
+        case 0x0e: // Control + e
+            if event.modifierFlags.contains(.control) {
+                return .shortCut
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
         case 36: // Enter
             return .enter
         case 48: // Tab
