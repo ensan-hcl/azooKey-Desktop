@@ -34,8 +34,8 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     private var candidatesViewController: CandidatesViewController
 
     // ChatGPT用のプロパティを追加
-    private var chatGPTWindow: NSWindow?
-    private var chatGPTViewController: ChatGPTViewController?
+    private var chatGPTWindow: NSWindow
+    private var chatGPTViewController: ChatGPTViewController
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.segmentsManager = SegmentsManager()
@@ -60,16 +60,19 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         // init直後はこれを表示しない
         self.candidatesWindow.setIsVisible(false)
         self.candidatesWindow.orderOut(nil)
-        super.init(server: server, delegate: delegate, client: inputClient)
 
         // ChatGPTViewControllerの初期化
         self.chatGPTViewController = ChatGPTViewController()
-        self.chatGPTWindow = NSWindow(contentViewController: self.chatGPTViewController!)
-        self.chatGPTWindow?.styleMask = [.titled, .closable, .resizable]
-        self.chatGPTWindow?.title = "ChatGPT"
-        self.chatGPTWindow?.setContentSize(NSSize(width: 400, height: 300))
-        self.chatGPTWindow?.center()
-        self.chatGPTWindow?.orderOut(nil)
+        self.chatGPTWindow = NSWindow(contentViewController: self.chatGPTViewController)
+        self.chatGPTWindow.styleMask = [.titled, .closable, .resizable]
+        self.chatGPTWindow.title = "ChatGPT"
+        self.chatGPTWindow.setContentSize(NSSize(width: 400, height: 300))
+        self.chatGPTWindow.center()
+        self.chatGPTWindow.orderOut(nil)
+        self.chatGPTWindow.styleMask = [.borderless, .resizable]
+        self.chatGPTWindow.level = .popUpMenu
+
+        super.init(server: server, delegate: delegate, client: inputClient)
 
         // デリゲートの設定を super.init の後に移動
         self.candidatesViewController.delegate = self
@@ -319,8 +322,42 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     // requestChatGPT()メソッドの実装
     func requestChatGPT() {
         // ChatGPTウィンドウを表示
-        self.chatGPTWindow?.orderFront(nil)
-        self.chatGPTWindow?.makeKeyAndOrderFront(nil)
+        self.chatGPTWindow.orderFront(nil)
+        self.chatGPTWindow.makeKeyAndOrderFront(nil)
+
+        // getLeftSideContextでテキストを取得
+        guard let prompt = self.getLeftSideContext(maxCount: 1000), !prompt.isEmpty else {
+            // プロンプトが取得できない場合はエラーメッセージを表示
+            self.chatGPTViewController.displayResponse("プロンプトが取得できませんでした。")
+            self.chatGPTWindow.makeKeyAndOrderFront(nil)
+            return
+        }
+
+        // ChatGPTウィンドウを表示
+        self.chatGPTWindow.makeKeyAndOrderFront(nil)
+        self.chatGPTViewController.displayResponse("ChatGPTにリクエスト中...")
+
+        // OpenAI APIキーの取得
+        let apiKey = Config.OpenAiApiKey().value
+
+        // リクエストの作成
+        let request = OpenAIRequest(prompt: prompt)
+
+        // 非同期でAPIリクエストを送信
+        Task {
+            do {
+                let response = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey)
+                // 応答をChatGPTViewに表示
+                await MainActor.run {
+                    self.chatGPTViewController.displayResponse(response)
+                }
+            } catch {
+                // エラーの場合の処理
+                await MainActor.run {
+                    self.chatGPTViewController.displayResponse("エラーが発生しました: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 
     func refreshMarkedText() {

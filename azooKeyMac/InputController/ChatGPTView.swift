@@ -8,27 +8,35 @@
 import Cocoa
 
 class ChatGPTView: NSView {
-    private let label: NSTextField
+    private let textView: NSTextView
 
     override init(frame frameRect: NSRect) {
-        self.label = NSTextField(labelWithString: "ChatGPTへのリクエストを表示します。")
+        self.textView = NSTextView()
         super.init(frame: frameRect)
         self.setupView()
     }
 
     required init?(coder decoder: NSCoder) {
-        self.label = NSTextField(labelWithString: "ChatGPTへのリクエストを表示します。")
+        self.textView = NSTextView()
         super.init(coder: decoder)
         self.setupView()
     }
 
     private func setupView() {
-        self.addSubview(self.label)
-        self.label.translatesAutoresizingMaskIntoConstraints = false
+        self.textView.isEditable = false
+        self.textView.font = NSFont.systemFont(ofSize: 14)
+        self.addSubview(self.textView)
+        self.textView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            self.label.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            self.label.centerYAnchor.constraint(equalTo: self.centerYAnchor)
+            self.textView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10),
+            self.textView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -10),
+            self.textView.topAnchor.constraint(equalTo: self.topAnchor, constant: 10),
+            self.textView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -10)
         ])
+    }
+
+    func displayResponse(_ response: String) {
+        self.textView.string = response
     }
 }
 
@@ -46,7 +54,11 @@ class ChatGPTViewController: NSViewController {
         guard let window = self.view.window else { return }
         window.styleMask = [.titled, .closable, .resizable]
         window.title = "ChatGPT"
-        window.setContentSize(NSSize(width: 400, height: 300))
+        window.setContentSize(NSSize(width: 600, height: 400))
         window.center()
+    }
+
+    func displayResponse(_ response: String) {
+        (self.view as? ChatGPTView)?.displayResponse(response)
     }
 }
