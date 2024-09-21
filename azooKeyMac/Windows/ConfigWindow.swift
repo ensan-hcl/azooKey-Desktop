@@ -14,6 +14,8 @@ struct ConfigWindow: View {
     @ConfigState private var typeCommaAndPeriod = Config.TypeCommaAndPeriod()
     @ConfigState private var zenzai = Config.ZenzaiIntegration()
     @ConfigState private var zenzaiProfile = Config.ZenzaiProfile()
+    @ConfigState private var enableOpenAiApiKey = Config.EnableOpenAiApiKey()
+    @ConfigState private var openAiApiKey = Config.OpenAiApiKey()
     @ConfigState private var learning = Config.Learning()
     @ConfigState private var inferenceLimit = Config.ZenzaiInferenceLimit()
     @ConfigState private var richCandidates = Config.ZenzaiRichCandidatesMode()
@@ -23,6 +25,7 @@ struct ConfigWindow: View {
     @State private var zenzaiRichCandidatesPopover = false
     @State private var zenzaiProfileHelpPopover = false
     @State private var zenzaiInferenceLimitHelpPopover = false
+    @State private var openAiApiKeyPopover = false
 
     @ViewBuilder
     private func helpButton(helpContent: LocalizedStringKey, isPresented: Binding<Bool>) -> some View {
@@ -102,6 +105,14 @@ struct ConfigWindow: View {
                         Toggle("「、」「。」の代わりに「，」「．」を入力", isOn: $typeCommaAndPeriod)
                         Divider()
                         Toggle("（開発者用）デバッグウィンドウを有効化", isOn: $debugWindow)
+                        Toggle("OpenAI APIキーの利用", isOn: $enableOpenAiApiKey)
+                        HStack {
+                            TextField("OpenAI API", text: $openAiApiKey, prompt: Text("例:sk-xxxxxxxxxxx"))
+                            helpButton(
+                                helpContent: "OpenAPIキーはローカルのみで管理され、外部に公開されることはありません。生成の際にAPIを利用するため、課金が発生します。",
+                                isPresented: $openAiApiKeyPopover
+                            )
+                        }
                     }
                 }
                 Spacer()

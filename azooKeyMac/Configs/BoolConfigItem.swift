@@ -62,4 +62,9 @@ extension Config {
         static let `default` = true
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzaiRichCandidatesMode"
     }
+    /// OpenAI APIキー
+    struct EnableOpenAiApiKey: BoolConfigItem {
+        static let `default` = false
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableOpenAiApiKey"
+    }
 }
