@@ -16,8 +16,12 @@ protocol CustomCodableConfigItem: ConfigItem {
 extension CustomCodableConfigItem {
     var value: Value {
         get {
+            guard let data = UserDefaults.standard.data(forKey: Self.key) else {
+                print(#file, #line, "data is not set yet")
+                return Self.default
+            }
             do {
-                let decoded = try JSONDecoder().decode(Value.self, from: UserDefaults.standard.data(forKey: Self.key) ?? Data())
+                let decoded = try JSONDecoder().decode(Value.self, from: data)
                 return decoded
             } catch {
                 print(#file, #line, error)
@@ -57,4 +61,47 @@ extension Config {
         static var `default`: Value = .inputAndOutput
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.learning"
     }
+}
+
+extension Config {
+    struct UserDictionary: CustomCodableConfigItem {
+        var items: Value = Self.default
+
+        struct Value: Codable {
+            var items: [Item]
+        }
+
+        struct Item: Codable, Identifiable {
+            init(word: String, reading: String, hint: String? = nil) {
+                self.id = UUID()
+                self.word = word
+                self.reading = reading
+                self.hint = hint
+            }
+
+            var id: UUID
+            var word: String
+            var reading: String
+            var hint: String?
+
+            var nonNullHint: String {
+                get {
+                    hint ?? ""
+                }
+                set {
+                    if newValue.isEmpty {
+                        hint = nil
+                    } else {
+                        hint = newValue
+                    }
+                }
+            }
+        }
+
+        static let `default`: Value = .init(items: [
+            .init(word: "azooKey", reading: "あずーきー", hint: "アプリ")
+        ])
+        static let key: String = "dev.ensan.inputmethod.azooKeyMac.preference.user_dictionary_temporal2"
+    }
+
 }
