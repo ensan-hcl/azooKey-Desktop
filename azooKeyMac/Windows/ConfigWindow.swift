@@ -18,6 +18,7 @@ struct ConfigWindow: View {
     @ConfigState private var inferenceLimit = Config.ZenzaiInferenceLimit()
     @ConfigState private var richCandidates = Config.ZenzaiRichCandidatesMode()
     @ConfigState private var debugWindow = Config.DebugWindow()
+    @ConfigState private var userDictionary = Config.UserDictionary()
 
     @State private var zenzaiHelpPopover = false
     @State private var zenzaiRichCandidatesPopover = false
@@ -100,6 +101,10 @@ struct ConfigWindow: View {
                         Toggle("英単語変換を有効化", isOn: $englishConversion)
                         Toggle("円記号の代わりにバックスラッシュを入力", isOn: $typeBackSlash)
                         Toggle("「、」「。」の代わりに「，」「．」を入力", isOn: $typeCommaAndPeriod)
+                        Divider()
+                        Button("ユーザ辞書を編集する") {
+                            (NSApplication.shared.delegate as? AppDelegate)!.openUserDictionaryEditorWindow()
+                        }
                         Divider()
                         Toggle("（開発者用）デバッグウィンドウを有効化", isOn: $debugWindow)
                     }
