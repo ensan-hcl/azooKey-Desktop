@@ -326,16 +326,20 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.chatGPTWindow.makeKeyAndOrderFront(nil)
 
         // getLeftSideContextでテキストを取得
-        guard let prompt = self.getLeftSideContext(maxCount: 1000), !prompt.isEmpty else {
+        guard let backText = self.getLeftSideContext(maxCount: 1000), !backText.isEmpty else {
             // プロンプトが取得できない場合はエラーメッセージを表示
             self.chatGPTViewController.displayResponse("プロンプトが取得できませんでした。")
             self.chatGPTWindow.makeKeyAndOrderFront(nil)
             return
         }
+        let prompt = "「" + backText + "」この続きを予測し回答しなさい"
+        self.segmentsManager.appendDebugMessage("prompt \(prompt)")
 
         // ChatGPTウィンドウを表示
+
         self.chatGPTWindow.makeKeyAndOrderFront(nil)
         self.chatGPTViewController.displayResponse("ChatGPTにリクエスト中...")
+        self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
 
         // OpenAI APIキーの取得
         let apiKey = Config.OpenAiApiKey().value
@@ -346,7 +350,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         // 非同期でAPIリクエストを送信
         Task {
             do {
-                let response = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey)
+                let response = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
                 // 応答をChatGPTViewに表示
                 await MainActor.run {
                     self.chatGPTViewController.displayResponse(response)
@@ -355,6 +359,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                 // エラーの場合の処理
                 await MainActor.run {
                     self.chatGPTViewController.displayResponse("エラーが発生しました: \(error.localizedDescription)")
+                    self.segmentsManager.appendDebugMessage("エラーが発生しました: \(error.localizedDescription)")
                 }
             }
         }
