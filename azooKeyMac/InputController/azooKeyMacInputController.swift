@@ -332,7 +332,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.chatGPTWindow.makeKeyAndOrderFront(nil)
             return
         }
-        let prompt = "「" + backText + "」この続きを予測し回答しなさい"
+        let prompt = backText + "\nこの続きの短い文章を5つ予測して箇条書きで回答しなさい。箇条書きはMarkdown記法に則りなさい。"
         self.segmentsManager.appendDebugMessage("prompt \(prompt)")
 
         // ChatGPTウィンドウを表示
