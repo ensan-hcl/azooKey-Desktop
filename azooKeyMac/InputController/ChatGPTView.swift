@@ -11,6 +11,8 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     private let tableView: NSTableView
     private let scrollView: NSScrollView
     private var candidates: [String] = [] // 候補のリスト
+    private var currentSelectedRow: Int = -1
+    private let maxVisibleRows = 8 // 最大表示行数
 
     override init(frame frameRect: NSRect) {
         self.tableView = NSTableView()
@@ -32,38 +34,71 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
 
     private func setupView() {
         // TableViewのセットアップ
-        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(rawValue: "CandidateColumn"))
-        column.title = "Candidates"
+        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("CandidateColumn"))
         self.tableView.addTableColumn(column)
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.headerView = nil // ヘッダーを非表示
+        self.tableView.style = .plain
+        self.tableView.gridStyleMask = .solidHorizontalGridLineMask // グリッド線を表示
+        self.tableView.allowsEmptySelection = false // 必ず1つは選択されているようにする
+        self.tableView.allowsMultipleSelection = false // 複数選択を無効化
+        self.tableView.rowHeight = 22 // 行の高さを設定
 
         // ScrollViewのセットアップ
         self.scrollView.documentView = self.tableView
-        self.scrollView.hasVerticalScroller = true
+        self.scrollView.hasVerticalScroller = false // スクロールバーを非表示
+        self.scrollView.hasHorizontalScroller = false
+        self.scrollView.verticalScrollElasticity = .none
+        self.scrollView.horizontalScrollElasticity = .none
         self.scrollView.translatesAutoresizingMaskIntoConstraints = false
 
         self.addSubview(self.scrollView)
 
         // ScrollViewのレイアウト
         NSLayoutConstraint.activate([
-            self.scrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10),
-            self.scrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -10),
-            self.scrollView.topAnchor.constraint(equalTo: self.topAnchor, constant: 10),
-            self.scrollView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -10)
+            self.scrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            self.scrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            self.scrollView.topAnchor.constraint(equalTo: self.topAnchor)
         ])
     }
 
     // 候補を表示し、最初のセルを選択状態にする
     func displayCandidates(_ candidates: [String]) {
         self.candidates = candidates
+        self.currentSelectedRow = candidates.isEmpty ? -1 : 0
         self.tableView.reloadData()
-        if !candidates.isEmpty {
-            self.tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
-            self.tableView.scrollRowToVisible(0)
-        }
+        self.updateSelection(to: currentSelectedRow)
+        self.updateTableHeight() // 表示行数に応じて高さを調整
     }
+
+    // テーブルの高さを候補数に合わせて更新
+    private func updateTableHeight() {
+        // 表示する行数を決定（最大行数を超えないように）
+        let numberOfRowsToShow = min(candidates.count, maxVisibleRows)
+        let tableHeight = CGFloat(numberOfRowsToShow) * self.tableView.rowHeight
+
+        // ScrollViewの高さをテーブルに合わせて調整
+        if let scrollHeightConstraint = self.scrollView.constraints.first(where: { $0.firstAttribute == .height }) {
+            scrollHeightConstraint.constant = tableHeight
+        } else {
+            let heightConstraint = self.scrollView.heightAnchor.constraint(equalToConstant: tableHeight)
+            heightConstraint.isActive = true
+        }
+
+        // ウィンドウの高さをスクロールビューに合わせて調整
+        if let window = self.window {
+            var windowFrame = window.frame
+            let newHeight = tableHeight
+            windowFrame.size.height = newHeight
+            window.setFrame(windowFrame, display: true, animate: true)
+        }
+
+        // レイアウトを更新
+        self.needsLayout = true
+        self.layoutSubtreeIfNeeded()
+    }
+
 
     // MARK: - NSTableViewDataSource
 
@@ -72,27 +107,18 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     }
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "CandidateCell")
+        let cellIdentifier = NSUserInterfaceItemIdentifier("CandidateCell")
         var cell = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView
 
         if cell == nil {
-            cell = NSTableCellView()
-            let textField = NSTextField(labelWithString: "")
-            textField.translatesAutoresizingMaskIntoConstraints = false
-            cell?.addSubview(textField)
-            cell?.textField = textField
-
-            NSLayoutConstraint.activate([
-                textField.leadingAnchor.constraint(equalTo: cell!.leadingAnchor, constant: 5),
-                textField.trailingAnchor.constraint(equalTo: cell!.trailingAnchor, constant: -5),
-                textField.topAnchor.constraint(equalTo: cell!.topAnchor, constant: 5),
-                textField.bottomAnchor.constraint(equalTo: cell!.bottomAnchor, constant: -5)
-            ])
-
+            cell = CandidateTableCellView() // カスタムセルビューを使用
             cell?.identifier = cellIdentifier
         }
 
-        cell?.textField?.stringValue = candidates[row]
+        if let cellView = cell as? CandidateTableCellView {
+            updateCellView(cellView, forRow: row)
+        }
+
         return cell
     }
 
@@ -101,7 +127,45 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     func tableViewSelectionDidChange(_ notification: Notification) {
         let selectedRow = tableView.selectedRow
         if selectedRow >= 0 {
+            self.currentSelectedRow = selectedRow
             print("Selected candidate: \(candidates[selectedRow])")
+        }
+    }
+
+    // セルの内容を更新
+    private func updateCellView(_ cellView: CandidateTableCellView, forRow row: Int) {
+        let displayText = "\(row + 1). \(candidates[row])"
+
+        let attributedString = NSMutableAttributedString(string: displayText)
+        let numberRange = (displayText as NSString).range(of: "\(row + 1).")
+
+        if numberRange.location != NSNotFound {
+            attributedString.addAttributes([
+                .font: NSFont.monospacedSystemFont(ofSize: 8, weight: .regular),
+                .foregroundColor: currentSelectedRow == row ? NSColor.white : NSColor.gray,
+                .baselineOffset: 2
+            ], range: numberRange)
+        }
+
+        cellView.candidateTextField.attributedStringValue = attributedString
+    }
+
+    // 選択行の移動
+    private func updateSelection(to row: Int) {
+        guard row >= 0 else { return }
+        self.tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+        self.tableView.scrollRowToVisible(row)
+        self.currentSelectedRow = row
+        self.updateVisibleRows()
+    }
+
+    // 表示行の更新
+    private func updateVisibleRows() {
+        let visibleRows = self.tableView.rows(in: self.tableView.visibleRect)
+        for row in visibleRows.lowerBound..<visibleRows.upperBound {
+            if let cellView = self.tableView.view(atColumn: 0, row: row, makeIfNecessary: false) as? CandidateTableCellView {
+                self.updateCellView(cellView, forRow: row)
+            }
         }
     }
 }
@@ -113,20 +177,28 @@ class ChatGPTViewController: NSViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.configureWindowForAppearance()
+        self.configureWindowForRoundedCorners()
         // サンプルのデータを設定
         if let chatGPTView = self.view as? ChatGPTView {
             chatGPTView.displayCandidates(["Option 1", "Option 2", "Option 3"])
         }
     }
 
-    private func configureWindowForAppearance() {
+    // ウィンドウの角丸設定
+    private func configureWindowForRoundedCorners() {
         guard let window = self.view.window else {
             return
         }
+        window.contentView?.wantsLayer = true
+        window.contentView?.layer?.masksToBounds = true
         window.styleMask = [.borderless, .resizable]
-        window.isOpaque = false
+        window.isMovable = true
+        window.hasShadow = true
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.contentView?.layer?.cornerRadius = 10
         window.backgroundColor = .clear
+        window.isOpaque = false
     }
 
     func displayCandidates(_ candidates: [String], cursorPosition: NSPoint) {
@@ -141,7 +213,7 @@ class ChatGPTViewController: NSViewController {
         let windowSize = self.view.frame.size
         let screenFrame = NSScreen.main?.frame ?? .zero
         let position = NSPoint(x: min(cursorPosition.x, screenFrame.width - windowSize.width),
-                               y: max(cursorPosition.y - windowSize.height, 0))
+                               y: max(cursorPosition.y - windowSize.height + 22, 0))
         window.setFrameOrigin(position)
     }
 }

@@ -48,7 +48,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         // Initialize the candidates window
         self.candidatesViewController = CandidatesViewController()
         self.candidatesWindow = NSWindow(contentViewController: self.candidatesViewController)
-        self.candidatesWindow.styleMask = [.borderless, .resizable]
+        self.candidatesWindow.styleMask = [.borderless]
         self.candidatesWindow.level = .popUpMenu
 
         var rect: NSRect = .zero
@@ -327,7 +327,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.chatGPTWindow.makeKeyAndOrderFront(nil)
 
         // Get the text from getLeftSideContext
-        guard let prompt = self.getLeftSideContext(maxCount: 1000), !prompt.isEmpty else {
+        guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
             // Display an error message if the prompt cannot be retrieved
             self.chatGPTViewController.displayCandidates(["プロンプトが取得できませんでした。"], cursorPosition: .zero)
             self.chatGPTWindow.makeKeyAndOrderFront(nil)
