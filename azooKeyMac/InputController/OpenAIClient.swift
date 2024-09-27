@@ -14,10 +14,14 @@ struct OpenAIRequest {
     // リクエストをJSON形式に変換する関数
     func toJSON() -> [String: Any] {
         [
-            "model": "gpt-4o-2024-08-06", // Structured Outputs対応モデル
+            "model": "gpt-4o-mini", // Structured Outputs対応モデル
             "messages": [
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
-                ["role": "user", "content": prompt]
+                ["role": "user", "content": """
+                I want you to generate possible sentence completions for a given sentence fragment. The output should be a list of different possible endings for the fragment. For example, if I provide "りんごは", you should respond with a list of three possible sentence completions in Japanese, like ["赤いです。", "美味しいです。", "果物です。"]. Keep the completions short and natural. Here is the sentence fragment:
+
+            `\(prompt)`
+            """]
             ],
             "response_format": [
                 "type": "json_schema",

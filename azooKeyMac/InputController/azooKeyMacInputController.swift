@@ -319,51 +319,58 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         }
     }
 
-    // requestChatGPT()メソッドの実装
+    // azooKeyMacInputController.swift
+
     func requestChatGPT() {
-        // ChatGPTウィンドウを表示
+        // Show ChatGPT window
         self.chatGPTWindow.orderFront(nil)
         self.chatGPTWindow.makeKeyAndOrderFront(nil)
 
-        // getLeftSideContextでテキストを取得
+        // Get the text from getLeftSideContext
         guard let prompt = self.getLeftSideContext(maxCount: 1000), !prompt.isEmpty else {
-            // プロンプトが取得できない場合はエラーメッセージを表示
-            self.chatGPTViewController.displayResponse("プロンプトが取得できませんでした。")
+            // Display an error message if the prompt cannot be retrieved
+            self.chatGPTViewController.displayResponse("プロンプトが取得できませんでした。", cursorPosition: .zero)
             self.chatGPTWindow.makeKeyAndOrderFront(nil)
             return
         }
 
         self.segmentsManager.appendDebugMessage("prompt \(prompt)")
 
-        // ChatGPTウィンドウを表示
+        // Show ChatGPT window
         self.chatGPTWindow.makeKeyAndOrderFront(nil)
-        self.chatGPTViewController.displayResponse("ChatGPTにリクエスト中...")
+        self.chatGPTViewController.displayResponse("ChatGPTにリクエスト中...", cursorPosition: .zero)
         self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
 
-        // OpenAI APIキーの取得
+        // Get the OpenAI API key
         let apiKey = Config.OpenAiApiKey().value
 
-        // リクエストの作成
+        // Create the request
         let request = OpenAIRequest(prompt: prompt)
 
-        // 非同期でAPIリクエストを送信
+        // Asynchronously send API request
         Task {
             do {
-                // APIリクエストの送信
+                // Send API request
                 let predictions = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
 
-                // 構造化出力の整形と表示
+                // Format and display structured output
                 let formattedResponse = formatResponseAsMarkdown(predictions.joined(separator: "\n"))
 
-                // 応答をChatGPTViewに表示
+                // Display response in ChatGPTView
                 await MainActor.run {
-                    self.chatGPTViewController.displayResponse(formattedResponse)
+                    var rect: NSRect = .zero
+                    self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+                    let cursorPosition = rect.origin
+                    self.chatGPTViewController.displayResponse(formattedResponse, cursorPosition: cursorPosition)
                 }
             } catch {
-                // エラーの場合の処理
+                // Handle errors
                 await MainActor.run {
                     let errorMessage = "エラーが発生しました: \(error.localizedDescription)"
-                    self.chatGPTViewController.displayResponse(errorMessage)
+                    var rect: NSRect = .zero
+                    self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+                    let cursorPosition = rect.origin
+                    self.chatGPTViewController.displayResponse(errorMessage, cursorPosition: cursorPosition)
                     self.segmentsManager.appendDebugMessage(errorMessage)
                 }
             }
