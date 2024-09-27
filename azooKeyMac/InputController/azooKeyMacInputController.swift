@@ -329,7 +329,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         // Get the text from getLeftSideContext
         guard let prompt = self.getLeftSideContext(maxCount: 1000), !prompt.isEmpty else {
             // Display an error message if the prompt cannot be retrieved
-            self.chatGPTViewController.displayResponse("プロンプトが取得できませんでした。", cursorPosition: .zero)
+            self.chatGPTViewController.displayCandidates(["プロンプトが取得できませんでした。"], cursorPosition: .zero)
             self.chatGPTWindow.makeKeyAndOrderFront(nil)
             return
         }
@@ -338,7 +338,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
 
         // Show ChatGPT window
         self.chatGPTWindow.makeKeyAndOrderFront(nil)
-        self.chatGPTViewController.displayResponse("ChatGPTにリクエスト中...", cursorPosition: .zero)
+        self.chatGPTViewController.displayCandidates(["ChatGPTにリクエスト中..."], cursorPosition: .zero)
         self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
 
         // Get the OpenAI API key
@@ -354,14 +354,14 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                 let predictions = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
 
                 // Format and display structured output
-                let formattedResponse = formatResponseAsMarkdown(predictions.joined(separator: "\n"))
+                let formattedResponse = predictions
 
                 // Display response in ChatGPTView
                 await MainActor.run {
                     var rect: NSRect = .zero
                     self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
                     let cursorPosition = rect.origin
-                    self.chatGPTViewController.displayResponse(formattedResponse, cursorPosition: cursorPosition)
+                    self.chatGPTViewController.displayCandidates(formattedResponse, cursorPosition: cursorPosition)
                 }
             } catch {
                 // Handle errors
@@ -370,7 +370,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                     var rect: NSRect = .zero
                     self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
                     let cursorPosition = rect.origin
-                    self.chatGPTViewController.displayResponse(errorMessage, cursorPosition: cursorPosition)
+                    self.chatGPTViewController.displayCandidates([errorMessage], cursorPosition: cursorPosition)
                     self.segmentsManager.appendDebugMessage(errorMessage)
                 }
             }

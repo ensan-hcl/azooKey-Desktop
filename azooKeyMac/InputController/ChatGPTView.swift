@@ -7,69 +7,102 @@
 
 import Cocoa
 
-class ChatGPTView: NSView {
-    private let textView: NSTextView
+class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
+    private let tableView: NSTableView
+    private let scrollView: NSScrollView
+    private var candidates: [String] = [] // 候補のリスト
 
     override init(frame frameRect: NSRect) {
-        self.textView = NSTextView()
+        self.tableView = NSTableView()
+        self.scrollView = NSScrollView()
         super.init(frame: frameRect)
         self.wantsLayer = true
-        self.layer?.backgroundColor = NSColor.clear.cgColor // Set the background to clear
+        self.layer?.backgroundColor = NSColor.clear.cgColor
         self.setupView()
     }
 
     required init?(coder decoder: NSCoder) {
-        self.textView = NSTextView()
+        self.tableView = NSTableView()
+        self.scrollView = NSScrollView()
         super.init(coder: decoder)
         self.wantsLayer = true
-        self.layer?.backgroundColor = NSColor.clear.cgColor // Set the background to clear
+        self.layer?.backgroundColor = NSColor.clear.cgColor
         self.setupView()
     }
 
     private func setupView() {
-        self.textView.isEditable = false
-        self.textView.font = NSFont.systemFont(ofSize: 14)
-        self.textView.backgroundColor = .clear // Make textView background clear
-        self.textView.isVerticallyResizable = true
-        self.textView.isHorizontallyResizable = false
-        self.textView.textContainerInset = NSSize(width: 5, height: 5)
-        self.textView.textContainer?.widthTracksTextView = false
-        self.textView.textContainer?.containerSize = NSSize(width: 380, height: CGFloat.greatestFiniteMagnitude) // Set a max height
-        self.textView.translatesAutoresizingMaskIntoConstraints = false
+        // TableViewのセットアップ
+        let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(rawValue: "CandidateColumn"))
+        column.title = "Candidates"
+        self.tableView.addTableColumn(column)
+        self.tableView.delegate = self
+        self.tableView.dataSource = self
+        self.tableView.headerView = nil // ヘッダーを非表示
 
-        self.addSubview(self.textView)
+        // ScrollViewのセットアップ
+        self.scrollView.documentView = self.tableView
+        self.scrollView.hasVerticalScroller = true
+        self.scrollView.translatesAutoresizingMaskIntoConstraints = false
 
-        // Set constraints for textView to expand fully within ChatGPTView
+        self.addSubview(self.scrollView)
+
+        // ScrollViewのレイアウト
         NSLayoutConstraint.activate([
-            self.textView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10),
-            self.textView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -10),
-            self.textView.topAnchor.constraint(equalTo: self.topAnchor, constant: 10),
-            self.textView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -10)
+            self.scrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10),
+            self.scrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -10),
+            self.scrollView.topAnchor.constraint(equalTo: self.topAnchor, constant: 10),
+            self.scrollView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -10)
         ])
     }
 
-    func displayResponse(_ response: String) {
-        self.textView.string = response
-        self.adjustSizeToFitContent()
+    // 候補を表示し、最初のセルを選択状態にする
+    func displayCandidates(_ candidates: [String]) {
+        self.candidates = candidates
+        self.tableView.reloadData()
+        if !candidates.isEmpty {
+            self.tableView.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+            self.tableView.scrollRowToVisible(0)
+        }
     }
 
-    private func adjustSizeToFitContent() {
-        guard let layoutManager = textView.layoutManager, let textContainer = textView.textContainer else {
-            return
+    // MARK: - NSTableViewDataSource
+
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        candidates.count
+    }
+
+    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        let cellIdentifier = NSUserInterfaceItemIdentifier(rawValue: "CandidateCell")
+        var cell = tableView.makeView(withIdentifier: cellIdentifier, owner: self) as? NSTableCellView
+
+        if cell == nil {
+            cell = NSTableCellView()
+            let textField = NSTextField(labelWithString: "")
+            textField.translatesAutoresizingMaskIntoConstraints = false
+            cell?.addSubview(textField)
+            cell?.textField = textField
+
+            NSLayoutConstraint.activate([
+                textField.leadingAnchor.constraint(equalTo: cell!.leadingAnchor, constant: 5),
+                textField.trailingAnchor.constraint(equalTo: cell!.trailingAnchor, constant: -5),
+                textField.topAnchor.constraint(equalTo: cell!.topAnchor, constant: 5),
+                textField.bottomAnchor.constraint(equalTo: cell!.bottomAnchor, constant: -5)
+            ])
+
+            cell?.identifier = cellIdentifier
         }
 
-        // Force layout manager to update the layout for the content
-        layoutManager.ensureLayout(for: textContainer)
+        cell?.textField?.stringValue = candidates[row]
+        return cell
+    }
 
-        // Calculate the bounding rect needed to display all the text
-        let textBoundingRect = layoutManager.boundingRect(forGlyphRange: layoutManager.glyphRange(for: textContainer), in: textContainer)
+    // MARK: - NSTableViewDelegate
 
-        // Update the frame size based on the text content size, with some padding
-        let newSize = NSSize(width: textBoundingRect.width + 20, height: textBoundingRect.height + 20)
-        self.setFrameSize(newSize)
-
-        // Update the window size if this view is inside a window
-        self.window?.setContentSize(newSize)
+    func tableViewSelectionDidChange(_ notification: Notification) {
+        let selectedRow = tableView.selectedRow
+        if selectedRow >= 0 {
+            print("Selected candidate: \(candidates[selectedRow])")
+        }
     }
 }
 
@@ -81,6 +114,10 @@ class ChatGPTViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureWindowForAppearance()
+        // サンプルのデータを設定
+        if let chatGPTView = self.view as? ChatGPTView {
+            chatGPTView.displayCandidates(["Option 1", "Option 2", "Option 3"])
+        }
     }
 
     private func configureWindowForAppearance() {
@@ -89,12 +126,11 @@ class ChatGPTViewController: NSViewController {
         }
         window.styleMask = [.borderless, .resizable]
         window.isOpaque = false
-        window.backgroundColor = .clear // Set window background to clear
+        window.backgroundColor = .clear
     }
 
-    func displayResponse(_ response: String, cursorPosition: NSPoint) {
-        (self.view as? ChatGPTView)?.displayResponse(response)
-        // Adjust window size and position
+    func displayCandidates(_ candidates: [String], cursorPosition: NSPoint) {
+        (self.view as? ChatGPTView)?.displayCandidates(candidates)
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
     }
 
