@@ -199,7 +199,7 @@ enum InputState {
             case .英数:
                 return (.commitMarkedTextAndSelectInputMode(.roman), .transition(.none))
             case .shortCut:
-//                return (.requestChatGPT, .transition(.none))
+                //                return (.requestChatGPT, .transition(.none))
                 return (.submitKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
             case .unknown:
                 return (.fallthrough, .fallthrough)

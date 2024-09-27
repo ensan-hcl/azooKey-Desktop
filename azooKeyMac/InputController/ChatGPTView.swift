@@ -51,7 +51,9 @@ class ChatGPTViewController: NSViewController {
     }
 
     private func configureWindowForAppearance() {
-        guard let window = self.view.window else { return }
+        guard let window = self.view.window else {
+            return
+        }
         window.styleMask = [.titled, .closable, .resizable]
         window.title = "ChatGPT"
         window.setContentSize(NSSize(width: 600, height: 400))

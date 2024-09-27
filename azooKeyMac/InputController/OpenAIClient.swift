@@ -13,7 +13,7 @@ struct OpenAIRequest {
 
     // リクエストをJSON形式に変換する関数
     func toJSON() -> [String: Any] {
-        return [
+        [
             "model": "gpt-4o-2024-08-06", // Structured Outputs対応モデル
             "messages": [
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
@@ -36,21 +36,19 @@ struct OpenAIRequest {
                         ],
                         "required": ["predictions"],
                         "additionalProperties": false
-                              ]
+                    ]
                 ]
-            ],
+            ]
         ]
     }
 }
-
 // OpenAI APIクライアントクラス
 class OpenAIClient {
     static let shared = OpenAIClient() // シングルトンのインスタンス
 
     private init() {} // プライベートな初期化子で外部からのインスタンス化を防止
 
-
-    // APIリクエストを送信するメソッドの一部修正版
+    // APIリクエストを送信するメソッド
     func sendRequest(_ request: OpenAIRequest, apiKey: String, segmentsManager: SegmentsManager) async throws -> [String] {
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
             throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
@@ -78,10 +76,15 @@ class OpenAIClient {
             throw NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Invalid response from server. Status code: \(httpResponse.statusCode), Response body: \(responseBody)"])
         }
 
-        // レスポンスデータの解析とデバッグのための出力
+        // レスポンスデータの解析
+        return try parseResponseData(data, segmentsManager: segmentsManager)
+    }
+
+    // レスポンスデータのパースを行う関数
+    private func parseResponseData(_ data: Data, segmentsManager: SegmentsManager) throws -> [String] {
+        segmentsManager.appendDebugMessage("Received JSON response") // レスポンスの中身を確認するためのデバッグ出力
         do {
             let json = try JSONSerialization.jsonObject(with: data, options: [])
-            segmentsManager.appendDebugMessage("Received JSON response") // レスポンスの中身を確認するためのデバッグ出力
 
             guard let jsonObject = json as? [String: Any],
                   let choices = jsonObject["choices"] as? [[String: Any]] else {
@@ -95,7 +98,7 @@ class OpenAIClient {
                    let contentString = message["content"] as? String {
 
                     segmentsManager.appendDebugMessage("Raw content string: \(contentString)") // 受け取ったcontentの生データを表示
-                    
+
                     // `content`をJSON文字列としてパース
                     // contentString = {"prediction" : [String]}
                     if let contentData = contentString.data(using: .utf8) {
@@ -118,7 +121,6 @@ class OpenAIClient {
                     } else {
                         segmentsManager.appendDebugMessage("Failed to convert `content` string to data")
                     }
-
                 }
             }
 
@@ -130,7 +132,6 @@ class OpenAIClient {
         }
     }
 }
-
 
 enum ErrorUnion: Error {
     case nullError
@@ -162,14 +163,14 @@ struct ChatSuccessResponse: Codable {
     struct Choice: Codable {
         var index: Int
         var logprobs: Double?
-        var finish_reason: String
+        var finishReason: String
         var message: Message
     }
 
     struct Usage: Codable {
-        var prompt_tokens: Int
-        var completion_tokens: Int
-        var total_tokens: Int
+        var promptTokens: Int
+        var completionTokens: Int
+        var totalTokens: Int
     }
 }
 

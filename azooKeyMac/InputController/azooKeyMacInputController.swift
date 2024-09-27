@@ -277,7 +277,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.stopComposition()
         case .requestChatGPT:
             self.requestChatGPT()
-            // MARK: 特殊ケース
+        // MARK: 特殊ケース
         case .consume:
             return true
         case .fallthrough:
@@ -370,14 +370,12 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         }
     }
 
-
     // レスポンスをMarkdown形式の箇条書きに整形する関数
     private func formatResponseAsMarkdown(_ response: String) -> String {
         // レスポンスを分割して箇条書きに整形
         let lines = response.split(separator: "\n").map { "\($0)" }
         return lines.joined(separator: "\n")
     }
-
 
     func refreshMarkedText() {
         let highlight = self.mark(
