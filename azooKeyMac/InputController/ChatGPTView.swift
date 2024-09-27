@@ -213,7 +213,8 @@ class ChatGPTViewController: NSViewController {
         let windowSize = self.view.frame.size
         let screenFrame = NSScreen.main?.frame ?? .zero
         let position = NSPoint(x: min(cursorPosition.x, screenFrame.width - windowSize.width),
-                               y: max(cursorPosition.y - windowSize.height + 22, 0))
+                               y: max(cursorPosition.y - windowSize.height + 22
+                                      , 0))
         window.setFrameOrigin(position)
     }
 }
