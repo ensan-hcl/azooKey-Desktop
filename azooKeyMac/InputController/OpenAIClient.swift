@@ -72,7 +72,7 @@ class OpenAIClient {
         }
 
         guard httpResponse.statusCode == 200 else {
-            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+            let responseBody = String(decoding: data, as: UTF8.self)
             throw NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Invalid response from server. Status code: \(httpResponse.statusCode), Response body: \(responseBody)"])
         }
 
