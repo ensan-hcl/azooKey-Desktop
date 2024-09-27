@@ -7,88 +7,128 @@
 
 import Foundation
 
+// OpenAIへのリクエストを表す構造体
 struct OpenAIRequest {
     let prompt: String
+
+    // リクエストをJSON形式に変換する関数
+    func toJSON() -> [String: Any] {
+        return [
+            "model": "gpt-4o-2024-08-06", // Structured Outputs対応モデル
+            "messages": [
+                ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
+                ["role": "user", "content": prompt]
+            ],
+            "response_format": [
+                "type": "json_schema",
+                "json_schema": [
+                    "name": "PredictionResponse", // 必須のnameフィールド
+                    "schema": [ // 必須のschemaフィールド
+                        "type": "object",
+                        "properties": [
+                            "predictions": [
+                                "type": "array",
+                                "items": [
+                                    "type": "string",
+                                    "description": "Predicted continuation of the given text."
+                                ]
+                            ]
+                        ],
+                        "required": ["predictions"],
+                        "additionalProperties": false
+                              ]
+                ]
+            ],
+        ]
+    }
 }
 
+// OpenAI APIクライアントクラス
 class OpenAIClient {
-    static let shared = OpenAIClient()
+    static let shared = OpenAIClient() // シングルトンのインスタンス
 
-    private init() {}
+    private init() {} // プライベートな初期化子で外部からのインスタンス化を防止
 
-    func sendRequest(_ request: OpenAIRequest, apiKey: String, segmentsManager: SegmentsManager) async throws -> String {
-        // ChatRequest の作成
-        let chatRequest = ChatRequest(
-            model: "gpt-4o-mini", // 必要に応じて正しいモデル名を設定
-            messages: [Message(role: .user, content: request.prompt)]
-        )
 
-        // リクエスト送信
-        return try await withCheckedThrowingContinuation { continuation in
-            performChatRequest(chatRequest, apiKey: apiKey, segmentsManager: segmentsManager) { result in
-                switch result {
-                case .success(let response):
-                    // 成功レスポンスからメッセージを取得
-                    if let messageContent = response.choices.first?.message.content {
-                        continuation.resume(returning: messageContent.trimmingCharacters(in: .whitespacesAndNewlines))
+    // APIリクエストを送信するメソッドの一部修正版
+    func sendRequest(_ request: OpenAIRequest, apiKey: String, segmentsManager: SegmentsManager) async throws -> [String] {
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
+
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // JSONボディの設定
+        let body = request.toJSON()
+        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+
+        // 非同期でリクエストを送信
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+
+        // レスポンスの検証
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No response from server"])
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+            throw NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Invalid response from server. Status code: \(httpResponse.statusCode), Response body: \(responseBody)"])
+        }
+
+        // レスポンスデータの解析とデバッグのための出力
+        do {
+            let json = try JSONSerialization.jsonObject(with: data, options: [])
+            segmentsManager.appendDebugMessage("Received JSON response") // レスポンスの中身を確認するためのデバッグ出力
+
+            guard let jsonObject = json as? [String: Any],
+                  let choices = jsonObject["choices"] as? [[String: Any]] else {
+                throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response structure. Received: \(json)"])
+            }
+
+            // `content`をJSONとしてパースして`predictions`を抽出
+            var allPredictions: [String] = []
+            for choice in choices {
+                if let message = choice["message"] as? [String: Any],
+                   let contentString = message["content"] as? String {
+
+                    segmentsManager.appendDebugMessage("Raw content string: \(contentString)") // 受け取ったcontentの生データを表示
+                    
+                    // `content`をJSON文字列としてパース
+                    // contentString = {"prediction" : [String]}
+                    if let contentData = contentString.data(using: .utf8) {
+                        do {
+                            // JSONオブジェクトをパースし、辞書型[String: [String]]として抽出
+                            if let jsonObject = try JSONSerialization.jsonObject(with: contentData, options: []) as? [String: [String]] {
+                                // "prediction"キーから予測リストを取得
+                                if let predictions = jsonObject["predictions"] {
+                                    segmentsManager.appendDebugMessage("Parsed predictions: \(predictions)") // パース成功時のpredictionsを表示
+                                    allPredictions.append(contentsOf: predictions)
+                                } else {
+                                    segmentsManager.appendDebugMessage("Key 'predictions' not found in JSON: \(contentString)")
+                                }
+                            } else {
+                                segmentsManager.appendDebugMessage("Failed to parse `content` as expected JSON dictionary: \(contentString)")
+                            }
+                        } catch {
+                            segmentsManager.appendDebugMessage("Error parsing JSON from `content`: \(error.localizedDescription)")
+                        }
                     } else {
-                        continuation.resume(throwing: NSError(domain: "OpenAIClient", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid Response"]))
+                        segmentsManager.appendDebugMessage("Failed to convert `content` string to data")
                     }
-                case .failure(let error):
-                    continuation.resume(throwing: error)
+
                 }
             }
+
+            // 予測結果を返す
+            return allPredictions
+        } catch {
+            segmentsManager.appendDebugMessage("Failed to parse JSON response") // エラーメッセージにレスポンスの内容を含める
+            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
         }
     }
-}
-
-func performChatRequest(_ request: ChatRequest, apiKey: String, segmentsManager: SegmentsManager, handler: @escaping (Result<ChatSuccessResponse, any Error>) -> ()) {
-    let encodeResult = Result { try JSONEncoder().encode(request) }
-    guard case let .success(encoded) = encodeResult else {
-        handler(.failure(NSError(domain: "OpenAIClient", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to encode request"])))
-        return
-    }
-
-    guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
-        handler(.failure(NSError(domain: "OpenAIClient", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
-        return
-    }
-
-    var urlRequest = URLRequest(url: url)
-    urlRequest.httpBody = encoded
-    urlRequest.httpMethod = "POST"
-    urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-    URLSession.shared.dataTask(with: urlRequest) { data, response, error in
-           if let error = error {
-               segmentsManager.appendDebugMessage("Error: \(error.localizedDescription)")
-               handler(.failure(error))
-               return
-           }
-
-           if let httpResponse = response as? HTTPURLResponse {
-               segmentsManager.appendDebugMessage("Status code: \(httpResponse.statusCode)")
-           }
-
-           if let data = data {
-               let responseString = String(data: data, encoding: .utf8) ?? "Unable to decode response"
-               segmentsManager.appendDebugMessage("Response: \(responseString)")
-            do {
-                let response = try JSONDecoder().decode(ChatSuccessResponse.self, from: data)
-                handler(.success(response))
-            } catch let firstError {
-                do {
-                    let response = try JSONDecoder().decode(ChatFailureResponse.self, from: data)
-                    handler(.failure(response))
-                } catch let secondError {
-                    print("Decoding errors: \(firstError.localizedDescription), \(secondError.localizedDescription)")
-                    handler(.failure(ErrorUnion.double(firstError, secondError)))
-                }
-            }
-        } else {
-            handler(.failure(ErrorUnion.nullError))
-        }
-    }.resume()
 }
 
 
@@ -98,7 +138,7 @@ enum ErrorUnion: Error {
 }
 
 struct ChatRequest: Codable {
-    var model: String = "gpt-4"
+    var model: String = "gpt-4o"
     var messages: [Message] = []
 }
 

@@ -55,7 +55,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         if let client = inputClient as? IMKTextInput {
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
         }
-        rect.size = .init(width: 400, height: 200)
+        rect.size = .init(width: 400, height: 1000)
         self.candidatesWindow.setFrame(rect, display: true)
         // init直後はこれを表示しない
         self.candidatesWindow.setIsVisible(false)
@@ -66,7 +66,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.chatGPTWindow = NSWindow(contentViewController: self.chatGPTViewController)
         self.chatGPTWindow.styleMask = [.titled, .closable, .resizable]
         self.chatGPTWindow.title = "ChatGPT"
-        self.chatGPTWindow.setContentSize(NSSize(width: 400, height: 300))
+        self.chatGPTWindow.setContentSize(NSSize(width: 400, height: 1000))
         self.chatGPTWindow.center()
         self.chatGPTWindow.orderOut(nil)
         self.chatGPTWindow.styleMask = [.borderless, .resizable]
@@ -326,17 +326,16 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.chatGPTWindow.makeKeyAndOrderFront(nil)
 
         // getLeftSideContextでテキストを取得
-        guard let backText = self.getLeftSideContext(maxCount: 1000), !backText.isEmpty else {
+        guard let prompt = self.getLeftSideContext(maxCount: 1000), !prompt.isEmpty else {
             // プロンプトが取得できない場合はエラーメッセージを表示
             self.chatGPTViewController.displayResponse("プロンプトが取得できませんでした。")
             self.chatGPTWindow.makeKeyAndOrderFront(nil)
             return
         }
-        let prompt = backText + "\nこの続きの短い文章を5つ予測して箇条書きで回答しなさい。箇条書きはMarkdown記法に則りなさい。"
+
         self.segmentsManager.appendDebugMessage("prompt \(prompt)")
 
         // ChatGPTウィンドウを表示
-
         self.chatGPTWindow.makeKeyAndOrderFront(nil)
         self.chatGPTViewController.displayResponse("ChatGPTにリクエスト中...")
         self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
@@ -350,20 +349,35 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         // 非同期でAPIリクエストを送信
         Task {
             do {
-                let response = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
+                // APIリクエストの送信
+                let predictions = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
+
+                // 構造化出力の整形と表示
+                let formattedResponse = formatResponseAsMarkdown(predictions.joined(separator: "\n"))
+
                 // 応答をChatGPTViewに表示
                 await MainActor.run {
-                    self.chatGPTViewController.displayResponse(response)
+                    self.chatGPTViewController.displayResponse(formattedResponse)
                 }
             } catch {
                 // エラーの場合の処理
                 await MainActor.run {
-                    self.chatGPTViewController.displayResponse("エラーが発生しました: \(error.localizedDescription)")
-                    self.segmentsManager.appendDebugMessage("エラーが発生しました: \(error.localizedDescription)")
+                    let errorMessage = "エラーが発生しました: \(error.localizedDescription)"
+                    self.chatGPTViewController.displayResponse(errorMessage)
+                    self.segmentsManager.appendDebugMessage(errorMessage)
                 }
             }
         }
     }
+
+
+    // レスポンスをMarkdown形式の箇条書きに整形する関数
+    private func formatResponseAsMarkdown(_ response: String) -> String {
+        // レスポンスを分割して箇条書きに整形
+        let lines = response.split(separator: "\n").map { "\($0)" }
+        return lines.joined(separator: "\n")
+    }
+
 
     func refreshMarkedText() {
         let highlight = self.mark(
