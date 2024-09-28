@@ -276,7 +276,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         case .stopComposition:
             self.segmentsManager.stopComposition()
         case .requestChatGPT:
-            self.requestChatGPT()
+            // configの有効化をチェック
+            if Config.EnableOpenAiApiKey().value && Config.OpenAiApiKey().value.isEmpty == false{
+                self.requestChatGPT()
+            }
         // MARK: 特殊ケース
         case .consume:
             return true
