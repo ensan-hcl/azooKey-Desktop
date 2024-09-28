@@ -35,6 +35,7 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     private func setupView() {
         // TableViewのセットアップ
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("CandidateColumn"))
+        column.resizingMask = .autoresizingMask
         self.tableView.addTableColumn(column)
         self.tableView.delegate = self
         self.tableView.dataSource = self
@@ -69,16 +70,24 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         self.currentSelectedRow = candidates.isEmpty ? -1 : 0
         self.tableView.reloadData()
         self.updateSelection(to: currentSelectedRow)
-        self.updateTableHeight() // 表示行数に応じて高さを調整
+        self.updateTableSize() // 表示行数に応じて高さを調整
     }
 
     // テーブルの高さを候補数に合わせて更新
-    private func updateTableHeight() {
+    private func updateTableSize() {
         // 表示する行数を決定（最大行数を超えないように）
         let numberOfRowsToShow = min(candidates.count, maxVisibleRows)
         let tableHeight = CGFloat(numberOfRowsToShow) * self.tableView.rowHeight
 
-        // ScrollViewの高さをテーブルに合わせて調整
+        // 最長の候補文字列の幅を計算
+        let maxContentWidth = candidates.map { candidate in
+            NSString(string: candidate).size(withAttributes: [.font: NSFont.systemFont(ofSize: 13)]).width
+        }.max() ?? 100 // 幅の最低値
+
+        // 必要に応じてパディングを加えて幅を調整
+        let adjustedWidth = maxContentWidth + 60
+
+        // ScrollViewの高さと幅を更新
         if let scrollHeightConstraint = self.scrollView.constraints.first(where: { $0.firstAttribute == .height }) {
             scrollHeightConstraint.constant = tableHeight
         } else {
@@ -86,18 +95,24 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
             heightConstraint.isActive = true
         }
 
-        // ウィンドウの高さをスクロールビューに合わせて調整
+        if let scrollWidthConstraint = self.scrollView.constraints.first(where: { $0.firstAttribute == .width }) {
+            scrollWidthConstraint.constant = adjustedWidth
+        } else {
+            let widthConstraint = self.scrollView.widthAnchor.constraint(equalToConstant: adjustedWidth)
+            widthConstraint.isActive = true
+        }
+
+        // ウィンドウのサイズも調整
         if let window = self.window {
             var windowFrame = window.frame
-            let newHeight = tableHeight
-            windowFrame.size.height = newHeight
+            windowFrame.size = CGSize(width: adjustedWidth, height: tableHeight)
             window.setFrame(windowFrame, display: true, animate: true)
         }
 
-        // レイアウトを更新
         self.needsLayout = true
         self.layoutSubtreeIfNeeded()
     }
+
 
 
     // MARK: - NSTableViewDataSource
@@ -134,19 +149,9 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
 
     // セルの内容を更新
     private func updateCellView(_ cellView: CandidateTableCellView, forRow row: Int) {
-        let displayText = "\(row + 1). \(candidates[row])"
+        let displayText = "\(candidates[row])"
 
         let attributedString = NSMutableAttributedString(string: displayText)
-        let numberRange = (displayText as NSString).range(of: "\(row + 1).")
-
-        if numberRange.location != NSNotFound {
-            attributedString.addAttributes([
-                .font: NSFont.monospacedSystemFont(ofSize: 8, weight: .regular),
-                .foregroundColor: currentSelectedRow == row ? NSColor.white : NSColor.gray,
-                .baselineOffset: 2
-            ], range: numberRange)
-        }
-
         cellView.candidateTextField.attributedStringValue = attributedString
     }
 
