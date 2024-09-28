@@ -84,9 +84,7 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .shortCut:
-                return (.requestChatGPT, .transition(.none))
-            case .unknown:
+            case .unknown, .shortCut:
                 return (.fallthrough, .fallthrough)
             }
         case .previewing:
@@ -129,9 +127,7 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .shortCut:
-                return (.requestChatGPT, .transition(.none))
-            case .unknown:
+            case .unknown, .shortCut:
                 return (.fallthrough, .fallthrough)
             }
         case .selecting:
@@ -198,10 +194,7 @@ enum InputState {
                 return (.selectInputMode(.japanese), .fallthrough)
             case .英数:
                 return (.commitMarkedTextAndSelectInputMode(.roman), .transition(.none))
-            case .shortCut:
-                //                return (.requestChatGPT, .transition(.none))
-                return (.submitKatakanaCandidate, .basedOnSubmitCandidate(ifIsEmpty: .none, ifIsNotEmpty: .selecting))
-            case .unknown:
+            case .unknown, .shortCut:
                 return (.fallthrough, .fallthrough)
             }
         }
