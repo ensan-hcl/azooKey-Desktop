@@ -248,6 +248,7 @@ final class SegmentsManager {
         self.kanaKanjiConverter.sendToDicdataStore(.importDynamicUserDict(userDictionary.items.map {
             .init(word: $0.word, ruby: $0.reading.toKatakana(), cid: CIDData.固有名詞.cid, mid: MIDData.一般.mid, value: -5)
         }))
+        self.appendDebugMessage("userDictionaryCount: \(self.userDictionary.items.count)")
 
         let prefixComposingText = self.composingText.prefixToCursorPosition()
         let leftSideContext = self.delegate?.getLeftSideContext(maxCount: 30).map {
