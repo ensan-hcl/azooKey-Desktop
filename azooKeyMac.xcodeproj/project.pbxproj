@@ -33,10 +33,12 @@
 		55E0A5C02BA8AE3200FACF50 /* SwiftUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BF2BA8AE3200FACF50 /* SwiftUtils */; };
 		55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */; };
 		E916C20B2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E916C20A2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift */; };
+		E92E50732CA83F9B00403D75 /* OpenAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92E50722CA83F9B00403D75 /* OpenAIClient.swift */; };
 		E96A5BC72BF4B28400AEAB72 /* InputState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96A5BC62BF4B28400AEAB72 /* InputState.swift */; };
 		E97406CE2C5E546200696C66 /* CandidateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97406CD2C5E546200696C66 /* CandidateView.swift */; };
 		E989B4562BF4B1130085AF6D /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4552BF4B1130085AF6D /* UserAction.swift */; };
 		E989B4582BF4B1550085AF6D /* ClientAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4572BF4B1550085AF6D /* ClientAction.swift */; };
+		E9B127FB2CA90775007AFF33 /* ChatGPTView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B127FA2CA90775007AFF33 /* ChatGPTView.swift */; };
 		E9C0C6F32BF5E8AE00E0EA50 /* InputMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */; };
 /* End PBXBuildFile section */
 
@@ -241,9 +243,11 @@
 				E989B4542BF4B0920085AF6D /* Actions */,
 				E96A5BC62BF4B28400AEAB72 /* InputState.swift */,
 				E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */,
+				E92E50722CA83F9B00403D75 /* OpenAIClient.swift */,
 				E916C20A2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift */,
 				E97406CD2C5E546200696C66 /* CandidateView.swift */,
 				5502D79B2C66FE23002AAEF7 /* SegmentsManager.swift */,
+				E9B127FA2CA90775007AFF33 /* ChatGPTView.swift */,
 			);
 			path = InputController;
 			sourceTree = "<group>";
@@ -400,7 +404,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E92E50732CA83F9B00403D75 /* OpenAIClient.swift in Sources */,
 				551398D92BDD38B700F1DB82 /* BoolConfigItem.swift in Sources */,
+				E9B127FB2CA90775007AFF33 /* ChatGPTView.swift in Sources */,
 				E97406CE2C5E546200696C66 /* CandidateView.swift in Sources */,
 				E916C20B2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift in Sources */,
 				557D35E12BB1C22100877564 /* KeyMap.swift in Sources */,
