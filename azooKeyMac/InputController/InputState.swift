@@ -8,7 +8,13 @@ enum InputState {
 
     // この種のコードは複雑にしかならないので、lintを無効にする
     // swiftlint:disable:next cyclomatic_complexity
-    func event(_ event: NSEvent!, userAction: UserAction, liveConversionEnabled: Bool, enableDebugWindow: Bool) -> (ClientAction, ClientActionCallback) {
+    func event(
+        _ event: NSEvent!,
+        userAction: UserAction,
+        liveConversionEnabled: Bool,
+        enableDebugWindow: Bool,
+        isChatGPTViewDisplayed: Bool
+    ) -> (ClientAction, ClientActionCallback) {
         if event.modifierFlags.contains(.command) {
             return (.fallthrough, .fallthrough)
         }
@@ -38,7 +44,11 @@ enum InputState {
             case .shortCut:
                 return (.requestChatGPT, .transition(.none))
             case .tab:
-                return (.submitChatGPT, .transition(.none))
+                if isChatGPTViewDisplayed {
+                    return (.submitChatGPT, .transition(.none))
+                } else {
+                    return (.fallthrough, .fallthrough)
+                }
             case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:
                 return (.fallthrough, .fallthrough)
             }

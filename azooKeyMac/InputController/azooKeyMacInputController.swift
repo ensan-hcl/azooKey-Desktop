@@ -24,6 +24,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     var englishConversionEnabled: Bool {
         Config.EnglishConversion().value
     }
+    var isChatGPTViewDisplayed: Bool {
+        return self.chatGPTWindow.isVisible
+    }
+
 
     var appMenu: NSMenu
     var zenzaiToggleMenuItem: NSMenuItem
@@ -158,8 +162,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             event,
             userAction: userAction,
             liveConversionEnabled: Config.LiveConversion().value,
-            enableDebugWindow: Config.DebugWindow().value
+            enableDebugWindow: Config.DebugWindow().value,
+            isChatGPTViewDisplayed: self.isChatGPTViewDisplayed
         )
+
         return handleClientAction(clientAction, clientActionCallback: clientActionCallback, client: client)
     }
 
