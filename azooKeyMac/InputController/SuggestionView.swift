@@ -1,5 +1,5 @@
 //
-//  ChatGPTView.swift
+//  Suggestion.swift
 //  azooKeyMac
 //
 //  Created by 高橋直希 on 2024/09/21.
@@ -7,7 +7,7 @@
 
 import Cocoa
 
-class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
+class Suggestion: NSView, NSTableViewDataSource, NSTableViewDelegate {
     private let tableView: NSTableView
     private let scrollView: NSScrollView
     private var candidates: [String] = [] // 候補のリスト
@@ -113,8 +113,6 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
         self.layoutSubtreeIfNeeded()
     }
 
-
-
     // MARK: - NSTableViewDataSource
 
     func numberOfRows(in tableView: NSTableView) -> Int {
@@ -157,7 +155,9 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
 
     // 選択行の移動
     private func updateSelection(to row: Int) {
-        guard row >= 0 else { return }
+        guard row >= 0 else {
+            return
+        }
         self.tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         self.tableView.scrollRowToVisible(row)
         self.currentSelectedRow = row
@@ -183,29 +183,29 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     }
 
     // 選択行を一つ下に移動
-      private func moveSelectionDown() {
-          let newRow = min(currentSelectedRow + 1, candidates.count - 1)
-          updateSelection(to: newRow)
-      }
+    private func moveSelectionDown() {
+        let newRow = min(currentSelectedRow + 1, candidates.count - 1)
+        updateSelection(to: newRow)
+    }
 
-      // 選択行を一つ上に移動
-      private func moveSelectionUp() {
-          let newRow = max(currentSelectedRow - 1, 0)
-          updateSelection(to: newRow)
-      }
+    // 選択行を一つ上に移動
+    private func moveSelectionUp() {
+        let newRow = max(currentSelectedRow - 1, 0)
+        updateSelection(to: newRow)
+    }
 }
 
-class ChatGPTViewController: NSViewController {
+class SuggestionController: NSViewController {
     override func loadView() {
-        self.view = ChatGPTView()
+        self.view = Suggestion()
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureWindowForRoundedCorners()
         // サンプルのデータを設定
-        if let chatGPTView = self.view as? ChatGPTView {
-            chatGPTView.displayCandidates(["Option 1", "Option 2", "Option 3"])
+        if let suggestion = self.view as? Suggestion {
+            suggestion.displayCandidates(["Option 1", "Option 2", "Option 3"])
         }
     }
 
@@ -227,7 +227,7 @@ class ChatGPTViewController: NSViewController {
     }
 
     func displayCandidates(_ candidates: [String], cursorPosition: NSPoint) {
-        (self.view as? ChatGPTView)?.displayCandidates(candidates)
+        (self.view as? Suggestion)?.displayCandidates(candidates)
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
     }
 
@@ -244,7 +244,7 @@ class ChatGPTViewController: NSViewController {
     }
 
     // 選択された候補を取得するメソッドを追加
-       func getSelectedCandidate() -> String? {
-           return (self.view as? ChatGPTView)?.getSelectedCandidate()
-       }
+    func getSelectedCandidate() -> String? {
+        (self.view as? Suggestion)?.getSelectedCandidate()
+    }
 }

@@ -13,7 +13,7 @@ enum InputState {
         userAction: UserAction,
         liveConversionEnabled: Bool,
         enableDebugWindow: Bool,
-        isChatGPTViewDisplayed: Bool
+        isSuggestionDisplayed: Bool
     ) -> (ClientAction, ClientActionCallback) {
         if event.modifierFlags.contains(.command) {
             return (.fallthrough, .fallthrough)
@@ -44,7 +44,7 @@ enum InputState {
             case .shortCut:
                 return (.requestChatGPT, .transition(.none))
             case .tab:
-                if isChatGPTViewDisplayed {
+                if isSuggestionDisplayed {
                     return (.submitChatGPT, .transition(.none))
                 } else {
                     return (.fallthrough, .fallthrough)
