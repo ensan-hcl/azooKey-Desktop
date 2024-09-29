@@ -383,7 +383,8 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                         var rect: NSRect = .zero
                         self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
                         let cursorPosition = rect.origin
-                        self.chatGPTViewController.displayCandidates(formattedResponse, cursorPosition: cursorPosition)
+                        // 一番の候補のみ
+                        self.chatGPTViewController.displayCandidates([formattedResponse[0]], cursorPosition: cursorPosition)
                     }
                 } catch {
                     // Handle errors
