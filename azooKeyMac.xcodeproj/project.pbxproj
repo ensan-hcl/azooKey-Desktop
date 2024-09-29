@@ -89,10 +89,12 @@
 		55A9C54D2BA84951007F6F02 /* NSRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSRange.swift; sourceTree = "<group>"; };
 		55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigWindow.swift; sourceTree = "<group>"; };
 		E916C20A2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = azooKeyMacInputControllerHelper.swift; sourceTree = "<group>"; };
+		E92E50722CA83F9B00403D75 /* OpenAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIClient.swift; sourceTree = "<group>"; };
 		E96A5BC62BF4B28400AEAB72 /* InputState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputState.swift; sourceTree = "<group>"; };
 		E97406CD2C5E546200696C66 /* CandidateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandidateView.swift; sourceTree = "<group>"; };
 		E989B4552BF4B1130085AF6D /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
 		E989B4572BF4B1550085AF6D /* ClientAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientAction.swift; sourceTree = "<group>"; };
+		E9B127FA2CA90775007AFF33 /* ChatGPTView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGPTView.swift; sourceTree = "<group>"; };
 		E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputMode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
