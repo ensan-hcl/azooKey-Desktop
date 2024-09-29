@@ -291,6 +291,9 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         case .fallthrough:
             break
         case .transition(let inputState):
+            if self.inputState != inputState {
+                hideChatGPTView()
+            }
             self.inputState = inputState
         case .basedOnBackspace(let ifIsEmpty, let ifIsNotEmpty), .basedOnSubmitCandidate(let ifIsEmpty, let ifIsNotEmpty):
             self.inputState = self.segmentsManager.isEmpty ? ifIsEmpty : ifIsNotEmpty
@@ -323,6 +326,11 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     }
 
     // azooKeyMacInputController.swift
+    @MainActor
+    func hideChatGPTView() {
+        self.chatGPTWindow.setIsVisible(false)
+        self.chatGPTWindow.orderOut(nil)
+    }
 
     func requestChatGPT() {
         // Show ChatGPT window
