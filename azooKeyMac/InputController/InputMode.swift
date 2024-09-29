@@ -83,7 +83,7 @@ enum InputMode {
         case 36: // Enter
             return .enter
         case 48: // Tab
-            return .unknown
+            return .tab
         case 49: // Space
             return .space
         case 51: // Delete

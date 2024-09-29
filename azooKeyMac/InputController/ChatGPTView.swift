@@ -173,6 +173,26 @@ class ChatGPTView: NSView, NSTableViewDataSource, NSTableViewDelegate {
             }
         }
     }
+
+    // 選択された候補を取得するメソッドを追加
+    func getSelectedCandidate() -> String? {
+        guard currentSelectedRow >= 0 && currentSelectedRow < candidates.count else {
+            return nil
+        }
+        return candidates[currentSelectedRow]
+    }
+
+    // 選択行を一つ下に移動
+      private func moveSelectionDown() {
+          let newRow = min(currentSelectedRow + 1, candidates.count - 1)
+          updateSelection(to: newRow)
+      }
+
+      // 選択行を一つ上に移動
+      private func moveSelectionUp() {
+          let newRow = max(currentSelectedRow - 1, 0)
+          updateSelection(to: newRow)
+      }
 }
 
 class ChatGPTViewController: NSViewController {
@@ -222,4 +242,9 @@ class ChatGPTViewController: NSViewController {
                                       , 0))
         window.setFrameOrigin(position)
     }
+
+    // 選択された候補を取得するメソッドを追加
+       func getSelectedCandidate() -> String? {
+           return (self.view as? ChatGPTView)?.getSelectedCandidate()
+       }
 }

@@ -37,6 +37,8 @@ enum InputState {
                 }
             case .shortCut:
                 return (.requestChatGPT, .transition(.none))
+            case .tab:
+                return (.submitChatGPT, .transition(.none))
             case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:
                 return (.fallthrough, .fallthrough)
             }
@@ -84,7 +86,7 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .unknown, .shortCut:
+            case .unknown, .shortCut, .tab:
                 return (.fallthrough, .fallthrough)
             }
         case .previewing:
@@ -127,7 +129,7 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .unknown, .shortCut:
+            case .unknown, .shortCut, .tab:
                 return (.fallthrough, .fallthrough)
             }
         case .selecting:
@@ -194,7 +196,7 @@ enum InputState {
                 return (.selectInputMode(.japanese), .fallthrough)
             case .英数:
                 return (.commitMarkedTextAndSelectInputMode(.roman), .transition(.none))
-            case .unknown, .shortCut:
+            case .unknown, .shortCut, .tab:
                 return (.fallthrough, .fallthrough)
             }
         }

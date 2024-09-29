@@ -46,6 +46,7 @@ enum ClientAction {
 
     // ChatGPT
     case requestChatGPT
+    case submitChatGPT
 
     case stopComposition
 

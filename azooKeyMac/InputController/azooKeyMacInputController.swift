@@ -280,6 +280,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             if Config.EnableOpenAiApiKey().value && Config.OpenAiApiKey().value.isEmpty == false{
                 self.requestChatGPT()
             }
+        case .submitChatGPT:
+            if Config.EnableOpenAiApiKey().value && Config.OpenAiApiKey().value.isEmpty == false{
+                self.submitSelectedComplement()
+            }
         // MARK: 特殊ケース
         case .consume:
             return true
@@ -425,6 +429,20 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             replacementRange: NSRange(location: NSNotFound, length: 0)
         )
     }
+
+    @MainActor
+    func submitSelectedComplement() {
+        // ChatGPTViewControllerから選択された候補を取得
+        if let selectedCandidate = chatGPTViewController.getSelectedCandidate() {
+            if let client = self.client() {
+                // 選択された候補をテキスト入力に挿入
+                client.insertText(selectedCandidate, replacementRange: NSRange(location: NSNotFound, length: 0))
+                // ChatGPTウィンドウを非表示にする
+                self.hideChatGPTView()
+            }
+        }
+    }
+
 
     @MainActor
     func submitCandidate(_ candidate: Candidate) {
