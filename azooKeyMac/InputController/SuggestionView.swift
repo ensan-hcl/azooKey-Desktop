@@ -31,7 +31,7 @@ class Suggestion: NSView {
         self.textField.isEditable = false
         self.textField.isBordered = false
         self.textField.backgroundColor = NSColor.clear
-        self.textField.font = NSFont.systemFont(ofSize: 13)
+        self.textField.font = NSFont.systemFont(ofSize: 16)
         self.textField.alignment = .left
         self.textField.translatesAutoresizingMaskIntoConstraints = false
 
@@ -46,10 +46,18 @@ class Suggestion: NSView {
         ])
     }
 
-    // 候補を表示するメソッド
     func displayCandidate(_ candidate: String) {
         self.currentCandidate = candidate
-        self.textField.stringValue = candidate
+
+        // 下線を追加したNSAttributedStringを作成
+        let attributes: [NSAttributedString.Key: Any] = [
+            .underlineStyle: NSUnderlineStyle.single.rawValue, // 下線のスタイルを指定
+            .font: NSFont.systemFont(ofSize: 16) // フォントを適用
+        ]
+        let attributedString = NSAttributedString(string: candidate, attributes: attributes)
+
+        // attributedStringをtextFieldに設定
+        self.textField.attributedStringValue = attributedString
     }
 
     // 選択された候補を取得するメソッドを追加

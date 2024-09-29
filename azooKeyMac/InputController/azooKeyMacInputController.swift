@@ -369,7 +369,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
 
             // Show ChatGPT window
             self.suggestionWindow.makeKeyAndOrderFront(nil)
-            self.suggestionController.displayCandidate("ChatGPTにリクエスト中...", cursorPosition: cursorPosition)
+            self.suggestionController.displayCandidate("...", cursorPosition: cursorPosition)
             self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
 
             // Get the OpenAI API key
