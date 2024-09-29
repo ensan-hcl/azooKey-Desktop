@@ -67,12 +67,18 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         // SuggestionControllerの初期化
         self.suggestionController = SuggestionController()
         self.suggestionWindow = NSWindow(contentViewController: self.suggestionController)
-        self.suggestionWindow.styleMask = [.titled, .closable, .resizable]
+
+        // 背景を透過させる設定
+        self.suggestionWindow.isOpaque = false
+        self.suggestionWindow.backgroundColor = NSColor.clear
+        self.suggestionWindow.hasShadow = false
+
+        // その他のウィンドウスタイル設定
+        self.suggestionWindow.styleMask = [.borderless, .resizable]
         self.suggestionWindow.title = "Suggestion"
         self.suggestionWindow.setContentSize(NSSize(width: 400, height: 1000))
         self.suggestionWindow.center()
         self.suggestionWindow.orderOut(nil)
-        self.suggestionWindow.styleMask = [.borderless, .resizable]
         self.suggestionWindow.level = .popUpMenu
 
         super.init(server: server, delegate: delegate, client: inputClient)
@@ -347,10 +353,14 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.suggestionWindow.orderFront(nil)
             self.suggestionWindow.makeKeyAndOrderFront(nil)
 
+            var rect: NSRect = .zero
+            self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+            let cursorPosition = rect.origin
+
             // Get the text from getLeftSideContext
             guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
                 // Display an error message if the prompt cannot be retrieved
-                self.suggestionController.displayCandidates(["プロンプトが取得できませんでした。"], cursorPosition: .zero)
+                self.suggestionController.displayCandidate("プロンプトが取得できませんでした。", cursorPosition: cursorPosition)
                 self.suggestionWindow.makeKeyAndOrderFront(nil)
                 return
             }
@@ -359,7 +369,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
 
             // Show ChatGPT window
             self.suggestionWindow.makeKeyAndOrderFront(nil)
-            self.suggestionController.displayCandidates(["ChatGPTにリクエスト中..."], cursorPosition: .zero)
+            self.suggestionController.displayCandidate("ChatGPTにリクエスト中...", cursorPosition: cursorPosition)
             self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
 
             // Get the OpenAI API key
@@ -379,11 +389,8 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
 
                     // Display response in Suggestion
                     await MainActor.run {
-                        var rect: NSRect = .zero
-                        self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-                        let cursorPosition = rect.origin
-                        // 一番の候補のみ
-                        self.suggestionController.displayCandidates([formattedResponse[0]], cursorPosition: cursorPosition)
+                        // 一番の候補のみ表示
+                        self.suggestionController.displayCandidate(formattedResponse[0], cursorPosition: cursorPosition)
                     }
                 } catch {
                     // Handle errors
@@ -392,7 +399,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                         var rect: NSRect = .zero
                         self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
                         let cursorPosition = rect.origin
-                        self.suggestionController.displayCandidates([errorMessage], cursorPosition: cursorPosition)
+                        self.suggestionController.displayCandidate(errorMessage, cursorPosition: cursorPosition)
                         self.segmentsManager.appendDebugMessage(errorMessage)
                     }
                 }
