@@ -337,56 +337,58 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     }
 
     func requestChatGPT() {
-        // Show ChatGPT window
-        self.chatGPTWindow.orderFront(nil)
-        self.chatGPTWindow.makeKeyAndOrderFront(nil)
-
-        // Get the text from getLeftSideContext
-        guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
-            // Display an error message if the prompt cannot be retrieved
-            self.chatGPTViewController.displayCandidates(["プロンプトが取得できませんでした。"], cursorPosition: .zero)
+        if Config.EnableOpenAiApiKey().value{
+            // Show ChatGPT window
+            self.chatGPTWindow.orderFront(nil)
             self.chatGPTWindow.makeKeyAndOrderFront(nil)
-            return
-        }
 
-        self.segmentsManager.appendDebugMessage("prompt \(prompt)")
+            // Get the text from getLeftSideContext
+            guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
+                // Display an error message if the prompt cannot be retrieved
+                self.chatGPTViewController.displayCandidates(["プロンプトが取得できませんでした。"], cursorPosition: .zero)
+                self.chatGPTWindow.makeKeyAndOrderFront(nil)
+                return
+            }
 
-        // Show ChatGPT window
-        self.chatGPTWindow.makeKeyAndOrderFront(nil)
-        self.chatGPTViewController.displayCandidates(["ChatGPTにリクエスト中..."], cursorPosition: .zero)
-        self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
+            self.segmentsManager.appendDebugMessage("prompt \(prompt)")
 
-        // Get the OpenAI API key
-        let apiKey = Config.OpenAiApiKey().value
+            // Show ChatGPT window
+            self.chatGPTWindow.makeKeyAndOrderFront(nil)
+            self.chatGPTViewController.displayCandidates(["ChatGPTにリクエスト中..."], cursorPosition: .zero)
+            self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
 
-        // Create the request
-        let request = OpenAIRequest(prompt: prompt)
+            // Get the OpenAI API key
+            let apiKey = Config.OpenAiApiKey().value
 
-        // Asynchronously send API request
-        Task {
-            do {
-                // Send API request
-                let predictions = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
+            // Create the request
+            let request = OpenAIRequest(prompt: prompt)
 
-                // Format and display structured output
-                let formattedResponse = predictions
+            // Asynchronously send API request
+            Task {
+                do {
+                    // Send API request
+                    let predictions = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
 
-                // Display response in ChatGPTView
-                await MainActor.run {
-                    var rect: NSRect = .zero
-                    self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-                    let cursorPosition = rect.origin
-                    self.chatGPTViewController.displayCandidates(formattedResponse, cursorPosition: cursorPosition)
-                }
-            } catch {
-                // Handle errors
-                await MainActor.run {
-                    let errorMessage = "エラーが発生しました: \(error.localizedDescription)"
-                    var rect: NSRect = .zero
-                    self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-                    let cursorPosition = rect.origin
-                    self.chatGPTViewController.displayCandidates([errorMessage], cursorPosition: cursorPosition)
-                    self.segmentsManager.appendDebugMessage(errorMessage)
+                    // Format and display structured output
+                    let formattedResponse = predictions
+
+                    // Display response in ChatGPTView
+                    await MainActor.run {
+                        var rect: NSRect = .zero
+                        self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+                        let cursorPosition = rect.origin
+                        self.chatGPTViewController.displayCandidates(formattedResponse, cursorPosition: cursorPosition)
+                    }
+                } catch {
+                    // Handle errors
+                    await MainActor.run {
+                        let errorMessage = "エラーが発生しました: \(error.localizedDescription)"
+                        var rect: NSRect = .zero
+                        self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+                        let cursorPosition = rect.origin
+                        self.chatGPTViewController.displayCandidates([errorMessage], cursorPosition: cursorPosition)
+                        self.segmentsManager.appendDebugMessage(errorMessage)
+                    }
                 }
             }
         }
