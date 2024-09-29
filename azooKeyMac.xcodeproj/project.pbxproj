@@ -249,7 +249,7 @@
 				E916C20A2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift */,
 				E97406CD2C5E546200696C66 /* CandidateView.swift */,
 				5502D79B2C66FE23002AAEF7 /* SegmentsManager.swift */,
-				E9B127FA2CA90775007AFF33 /* ChatGPTView.swift */,
+				E9B127FA2CA90775007AFF33 /* SuggestionView.swift */,
 			);
 			path = InputController;
 			sourceTree = "<group>";
