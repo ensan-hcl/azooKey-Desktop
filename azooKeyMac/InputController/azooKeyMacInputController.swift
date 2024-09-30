@@ -36,7 +36,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     private var candidatesWindow: NSWindow
     private var candidatesViewController: CandidatesViewController
 
-    // ChatGPT用のプロパティを追加
     private var suggestionWindow: NSWindow
     private var suggestionController: SuggestionController
 
@@ -286,16 +285,16 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.requestDebugWindowMode(enabled: false)
         case .stopComposition:
             self.segmentsManager.stopComposition()
-        case .requestChatGPT:
+        case .requestSuggestion:
             // configの有効化をチェック
             if Config.EnableOpenAiApiKey().value && Config.OpenAiApiKey().value.isEmpty == false {
                 self.requestChatGPT()
             }
-        case .submitChatGPT:
+        case .submitSuggestion:
             if Config.EnableOpenAiApiKey().value && Config.OpenAiApiKey().value.isEmpty == false {
-                self.submitSelectedComplement()
+                self.submitSelectedSuggestion()
             }
-        // MARK: 特殊ケース
+            // MARK: 特殊ケース
         case .consume:
             return true
         case .fallthrough:
@@ -306,17 +305,15 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         case .fallthrough:
             break
         case .transition(let inputState):
+            // 遷移した時にSuggestionViewをhideする
             if self.inputState != inputState {
                 hideSuggestion()
             }
             self.inputState = inputState
-            if self.inputState != .none {
-                self.hideChatGPTView()
-            }
         case .basedOnBackspace(let ifIsEmpty, let ifIsNotEmpty), .basedOnSubmitCandidate(let ifIsEmpty, let ifIsNotEmpty):
             self.inputState = self.segmentsManager.isEmpty ? ifIsEmpty : ifIsNotEmpty
             if self.inputState != .none {
-                self.hideChatGPTView()
+                self.hideSuggestion()
             }
         }
 
@@ -354,70 +351,62 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     }
 
     func requestChatGPT() {
-        if Config.EnableOpenAiApiKey().value {
-            // Show ChatGPT window
-            self.suggestionWindow.orderFront(nil)
+        // Show ChatGPT window
+        self.suggestionWindow.orderFront(nil)
+        self.suggestionWindow.makeKeyAndOrderFront(nil)
+
+        var rect: NSRect = .zero
+        self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+        let cursorPosition = rect.origin
+
+        // Get the text from getLeftSideContext
+        guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
+            // Display an error message if the prompt cannot be retrieved
+            self.suggestionController.displayCandidate("プロンプトが取得できませんでした。", cursorPosition: cursorPosition)
             self.suggestionWindow.makeKeyAndOrderFront(nil)
+            return
+        }
 
-            var rect: NSRect = .zero
-            self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-            let cursorPosition = rect.origin
+        self.segmentsManager.appendDebugMessage("prompt \(prompt)")
 
-            // Get the text from getLeftSideContext
-            guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
-                // Display an error message if the prompt cannot be retrieved
-                self.suggestionController.displayCandidate("プロンプトが取得できませんでした。", cursorPosition: cursorPosition)
-                self.suggestionWindow.makeKeyAndOrderFront(nil)
-                return
-            }
+        // Show ChatGPT window
+        self.suggestionWindow.makeKeyAndOrderFront(nil)
+        self.suggestionController.displayCandidate("...", cursorPosition: cursorPosition)
+        self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
 
-            self.segmentsManager.appendDebugMessage("prompt \(prompt)")
+        // Get the OpenAI API key
+        let apiKey = Config.OpenAiApiKey().value
 
-            // Show ChatGPT window
-            self.suggestionWindow.makeKeyAndOrderFront(nil)
-            self.suggestionController.displayCandidate("...", cursorPosition: cursorPosition)
-            self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
+        // Create the request
+        let request = OpenAIRequest(prompt: prompt)
 
-            // Get the OpenAI API key
-            let apiKey = Config.OpenAiApiKey().value
+        // Asynchronously send API request
+        Task {
+            do {
+                // Send API request
+                let predictions = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
 
-            // Create the request
-            let request = OpenAIRequest(prompt: prompt)
+                // Format and display structured output
+                let formattedResponse = predictions
 
-            // Asynchronously send API request
-            Task {
-                do {
-                    // Send API request
-                    let predictions = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
-
-                    // Format and display structured output
-                    let formattedResponse = predictions
-
-                    // Display response in Suggestion
-                    await MainActor.run {
-                        // 一番の候補のみ表示
-                        self.suggestionController.displayCandidate(formattedResponse[0], cursorPosition: cursorPosition)
-                    }
-                } catch {
-                    // Handle errors
-                    await MainActor.run {
-                        let errorMessage = "エラーが発生しました: \(error.localizedDescription)"
-                        var rect: NSRect = .zero
-                        self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-                        let cursorPosition = rect.origin
-                        self.suggestionController.displayCandidate(errorMessage, cursorPosition: cursorPosition)
-                        self.segmentsManager.appendDebugMessage(errorMessage)
-                    }
+                // Display response in Suggestion
+                await MainActor.run {
+                    // 一番の候補のみ表示
+                    self.suggestionController.displayCandidate(formattedResponse[0], cursorPosition: cursorPosition)
+                }
+            } catch {
+                // Handle errors
+                await MainActor.run {
+                    let errorMessage = "エラーが発生しました: \(error.localizedDescription)"
+                    var rect: NSRect = .zero
+                    self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+                    let cursorPosition = rect.origin
+                    self.suggestionController.displayCandidate(errorMessage, cursorPosition: cursorPosition)
+                    self.segmentsManager.appendDebugMessage(errorMessage)
                 }
             }
-        }
-    }
 
-    // レスポンスをMarkdown形式の箇条書きに整形する関数
-    private func formatResponseAsMarkdown(_ response: String) -> String {
-        // レスポンスを分割して箇条書きに整形
-        let lines = response.split(separator: "\n").map { "\($0)" }
-        return lines.joined(separator: "\n")
+        }
     }
 
     func refreshMarkedText() {
@@ -452,7 +441,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     }
 
     @MainActor
-    func submitSelectedComplement() {
+    func submitSelectedSuggestion() {
         // SuggestionControllerから選択された候補を取得
         if let selectedCandidate = suggestionController.getSelectedCandidate() {
             if let client = self.client() {
@@ -480,17 +469,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.requestResettingSelection()
         }
     }
-
-    @MainActor
-    func showChatGPTView() {
-
-    }
-
-    @MainActor
-    func hideChatGPTView() {
-
-    }
-
 }
 
 extension azooKeyMacInputController: CandidatesViewControllerDelegate {

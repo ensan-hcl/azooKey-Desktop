@@ -42,10 +42,10 @@ enum InputState {
                     return (.insertWithoutMarkedText("　"), .transition(.none))
                 }
             case .shortcut:
-                return (.requestChatGPT, .transition(.none))
+                return (.requestSuggestion, .transition(.none))
             case .tab:
                 if isSuggestionDisplayed {
-                    return (.submitChatGPT, .transition(.none))
+                    return (.submitSuggestion, .transition(.none))
                 } else {
                     return (.fallthrough, .fallthrough)
                 }

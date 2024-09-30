@@ -44,9 +44,9 @@ enum ClientAction {
     case submitHiraganaCandidate
     case submitHankakuKatakanaCandidate
 
-    // ChatGPT
-    case requestChatGPT
-    case submitChatGPT
+    // Suggestion
+    case requestSuggestion
+    case submitSuggestion
 
     case stopComposition
 
