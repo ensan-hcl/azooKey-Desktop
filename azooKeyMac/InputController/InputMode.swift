@@ -74,7 +74,7 @@ enum InputMode {
             }
         case 0x0e: // Control + e
             if event.modifierFlags.contains(.control) {
-                return .shortCut
+                return .shortcut
             } else if let text = event.characters, isPrintable(text) {
                 return .input(KeyMap.h2zMap(text))
             } else {
