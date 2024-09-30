@@ -41,7 +41,7 @@ enum InputState {
                 } else {
                     return (.insertWithoutMarkedText("　"), .transition(.none))
                 }
-            case .shortcut:
+            case .suggest:
                 return (.requestSuggestion, .transition(.none))
             case .tab:
                 if isSuggestionDisplayed {
@@ -96,7 +96,7 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .unknown, .shortcut, .tab:
+            case .unknown, .suggest, .tab:
                 return (.fallthrough, .fallthrough)
             }
         case .previewing:
@@ -139,7 +139,7 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .unknown, .shortcut, .tab:
+            case .unknown, .suggest, .tab:
                 return (.fallthrough, .fallthrough)
             }
         case .selecting:
@@ -206,7 +206,7 @@ enum InputState {
                 return (.selectInputMode(.japanese), .fallthrough)
             case .英数:
                 return (.commitMarkedTextAndSelectInputMode(.roman), .transition(.none))
-            case .unknown, .shortcut, .tab:
+            case .unknown, .suggest, .tab:
                 return (.fallthrough, .fallthrough)
             }
         }
