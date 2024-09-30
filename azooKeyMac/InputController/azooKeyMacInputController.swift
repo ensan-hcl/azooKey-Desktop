@@ -288,13 +288,13 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         case .requestSuggestion:
             // configの有効化をチェック
             if Config.EnableOpenAiApiKey().value && Config.OpenAiApiKey().value.isEmpty == false {
-                self.requestChatGPT()
+                self.requestSuggestion()
             }
         case .submitSuggestion:
             if Config.EnableOpenAiApiKey().value && Config.OpenAiApiKey().value.isEmpty == false {
                 self.submitSelectedSuggestion()
             }
-            // MARK: 特殊ケース
+        // MARK: 特殊ケース
         case .consume:
             return true
         case .fallthrough:
@@ -350,8 +350,8 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.suggestionWindow.orderOut(nil)
     }
 
-    func requestChatGPT() {
-        // Show ChatGPT window
+    func requestSuggestion() {
+        // Show Suggestion window
         self.suggestionWindow.orderFront(nil)
         self.suggestionWindow.makeKeyAndOrderFront(nil)
 
@@ -369,10 +369,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
 
         self.segmentsManager.appendDebugMessage("prompt \(prompt)")
 
-        // Show ChatGPT window
+        // Show Suggestion window
         self.suggestionWindow.makeKeyAndOrderFront(nil)
         self.suggestionController.displayCandidate("...", cursorPosition: cursorPosition)
-        self.segmentsManager.appendDebugMessage("ChatGPTにリクエスト中...")
+        self.segmentsManager.appendDebugMessage("リクエスト中...")
 
         // Get the OpenAI API key
         let apiKey = Config.OpenAiApiKey().value
@@ -447,7 +447,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             if let client = self.client() {
                 // 選択された候補をテキスト入力に挿入
                 client.insertText(selectedCandidate, replacementRange: NSRange(location: NSNotFound, length: 0))
-                // ChatGPTウィンドウを非表示にする
+                // ウィンドウを非表示にする
                 self.hideSuggestion()
             }
         }
