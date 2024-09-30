@@ -137,17 +137,17 @@ final class OpenAIClient {
     }
 }
 
-enum ErrorUnion: Error {
+private enum ErrorUnion: Error {
     case nullError
     case double(any Error, any Error)
 }
 
-struct ChatRequest: Codable {
-    var model: String = "gpt-4o"
+private struct ChatRequest: Codable {
+    var model: String = "gpt-4o-mini"
     var messages: [Message] = []
 }
 
-struct Message: Codable {
+private struct Message: Codable {
     enum Role: String, Codable {
         case user
         case system
@@ -157,7 +157,7 @@ struct Message: Codable {
     var content: String
 }
 
-struct ChatSuccessResponse: Codable {
+private struct ChatSuccessResponse: Codable {
     var id: String
     var object: String
     var created: Int
@@ -178,7 +178,7 @@ struct ChatSuccessResponse: Codable {
     }
 }
 
-struct ChatFailureResponse: Codable, Error {
+private struct ChatFailureResponse: Codable, Error {
     var error: ErrorResponse
     struct ErrorResponse: Codable {
         var message: String
