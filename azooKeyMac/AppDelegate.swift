@@ -29,8 +29,34 @@ class NSManualApplication: NSApplication {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var server = IMKServer()
     weak var configWindow: NSWindow?
+    weak var userDictionaryEditorWindow: NSWindow?
     var configWindowController: NSWindowController?
+    var userDictionaryEditorWindowController: NSWindowController?
     @MainActor var kanaKanjiConverter = KanaKanjiConverter()
+
+    private static func buildSwiftUIWindow(
+        _ view: some View,
+        contentRect: NSRect = NSRect(x: 0, y: 0, width: 400, height: 300),
+        styleMask: NSWindow.StyleMask = [.titled, .closable, .resizable, .borderless],
+        title: String = ""
+    ) -> (window: NSWindow, windowController: NSWindowController) {
+        // Create a new window
+        let window = NSWindow(
+            contentRect: contentRect,
+            styleMask: styleMask,
+            backing: .buffered,
+            defer: false
+        )
+        // Set the window title
+        window.title = title
+        window.contentViewController = NSHostingController(rootView: view)
+        // Keep window with in a controller
+        let windowController = NSWindowController(window: window)
+        // Show the window
+        window.level = .modalPanel
+        window.makeKeyAndOrderFront(nil)
+        return (window, windowController)
+    }
 
     func openConfigWindow() {
         if let configWindow {
@@ -39,22 +65,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             configWindow.makeKeyAndOrderFront(nil)
         } else {
             // Create a new window
-            let configWindow = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 400, height: 300),
-                styleMask: [.titled, .closable, .resizable, .borderless],
-                backing: .buffered,
-                defer: false
-            )
-            // Set the window title
-            configWindow.title = "設定"
-            configWindow.contentViewController = NSHostingController(rootView: ConfigWindow())
-            // Keep window with in a controller
-            self.configWindowController = NSWindowController(window: configWindow)
+            (self.configWindow, self.configWindowController) = Self.buildSwiftUIWindow(ConfigWindow(), title: "設定")
+        }
+    }
+
+    func openUserDictionaryEditorWindow() {
+        if let userDictionaryEditorWindow {
             // Show the window
-            configWindow.level = .modalPanel
-            configWindow.makeKeyAndOrderFront(nil)
-            // Assign the new window to the property to keep it in memory
-            self.configWindow = configWindow
+            userDictionaryEditorWindow.level = .modalPanel
+            userDictionaryEditorWindow.makeKeyAndOrderFront(nil)
+        } else {
+            (self.userDictionaryEditorWindow, self.userDictionaryEditorWindowController) = Self.buildSwiftUIWindow(UserDictionaryEditorWindow(), title: "設定")
         }
     }
 

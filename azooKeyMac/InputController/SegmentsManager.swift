@@ -25,6 +25,9 @@ final class SegmentsManager {
     private var englishConversionEnabled: Bool {
         Config.EnglishConversion().value
     }
+    private var userDictionary: Config.UserDictionary.Value {
+        Config.UserDictionary().value
+    }
     private var rawCandidates: ConversionResult?
 
     private var selectionIndex: Int?
@@ -241,6 +244,10 @@ final class SegmentsManager {
             self.kanaKanjiConverter.stopComposition()
             return
         }
+        // ユーザ辞書情報の更新
+        self.kanaKanjiConverter.sendToDicdataStore(.importDynamicUserDict(userDictionary.items.map {
+            .init(word: $0.word, ruby: $0.reading.toKatakana(), cid: CIDData.固有名詞.cid, mid: MIDData.一般.mid, value: -5)
+        }))
 
         let prefixComposingText = self.composingText.prefixToCursorPosition()
         let leftSideContext = self.delegate?.getLeftSideContext(maxCount: 30).map {

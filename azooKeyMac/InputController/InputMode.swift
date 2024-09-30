@@ -72,7 +72,7 @@ enum InputMode {
             } else {
                 return .unknown
             }
-        case 0x0e: // Control + e
+        case 0x0E: // Control + e
             if event.modifierFlags.contains(.control) {
                 return .shortcut
             } else if let text = event.characters, isPrintable(text) {

@@ -310,8 +310,14 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                 hideSuggestion()
             }
             self.inputState = inputState
+            if self.inputState != .none {
+                self.hideChatGPTView()
+            }
         case .basedOnBackspace(let ifIsEmpty, let ifIsNotEmpty), .basedOnSubmitCandidate(let ifIsEmpty, let ifIsNotEmpty):
             self.inputState = self.segmentsManager.isEmpty ? ifIsEmpty : ifIsNotEmpty
+            if self.inputState != .none {
+                self.hideChatGPTView()
+            }
         }
 
         self.refreshMarkedText()
@@ -474,6 +480,17 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.requestResettingSelection()
         }
     }
+
+    @MainActor
+    func showChatGPTView() {
+
+    }
+
+    @MainActor
+    func hideChatGPTView() {
+
+    }
+
 }
 
 extension azooKeyMacInputController: CandidatesViewControllerDelegate {
