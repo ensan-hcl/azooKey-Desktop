@@ -47,7 +47,7 @@ struct OpenAIRequest {
     }
 }
 // OpenAI APIクライアントクラス
-class OpenAIClient {
+final class OpenAIClient {
     static let shared = OpenAIClient() // シングルトンのインスタンス
 
     private init() {} // プライベートな初期化子で外部からのインスタンス化を防止
