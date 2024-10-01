@@ -113,6 +113,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     override func deactivateServer(_ sender: Any!) {
         self.segmentsManager.deactivate()
         self.candidatesWindow.orderOut(nil)
+        self.suggestionWindow.orderOut(nil)
         self.candidatesViewController.updateCandidates([], selectionIndex: nil, cursorLocation: .zero)
         if let client = sender as? IMKTextInput {
             client.insertText("", replacementRange: .notFound)
@@ -360,6 +361,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         var rect: NSRect = .zero
         self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
         let cursorPosition = rect.origin
+        self.suggestionController.displayStatusText("...", cursorPosition: cursorPosition)
 
         // Get the text from getLeftSideContext
         guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
@@ -370,14 +372,13 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             if retryCount < maxRetries {
                 retryCount += 1
                 // 再実行
-                self.suggestionController.displayCandidate("." + String(repeating: ".", count: 5), cursorPosition: cursorPosition)
+                self.suggestionController.displayStatusText("." + String(repeating: ".", count: 5), cursorPosition: cursorPosition)
                 self.segmentsManager.appendDebugMessage("再試行中... (\(retryCount)回目)")
                 requestSuggestion()
             } else {
                 self.segmentsManager.appendDebugMessage("再試行上限に達しました。")
             }
-            self.hideSuggestion()
-            assert(inputState == .none)
+            self.suggestionController.displayStatusText("failed to request", cursorPosition: cursorPosition)
             return
         }
 
@@ -385,7 +386,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
 
         // Show Suggestion window
         self.suggestionWindow.makeKeyAndOrderFront(nil)
-        self.suggestionController.displayCandidate("...", cursorPosition: cursorPosition)
+        self.suggestionController.displayStatusText("...", cursorPosition: cursorPosition)
         self.segmentsManager.appendDebugMessage("リクエスト中...")
 
         // Get the OpenAI API key

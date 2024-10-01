@@ -8,10 +8,12 @@ import Cocoa
 
 class SuggestionView: NSView {
     private let textField: NSTextField
+    private let statusLabel: NSTextField // 状態表示用のラベル
     private var currentCandidate: String = "" // 現在表示中の候補
 
     override init(frame frameRect: NSRect) {
         self.textField = NSTextField()
+        self.statusLabel = NSTextField() // statusLabelの初期化
         super.init(frame: frameRect)
         self.wantsLayer = true
         self.layer?.backgroundColor = NSColor.clear.cgColor
@@ -20,6 +22,7 @@ class SuggestionView: NSView {
 
     required init?(coder decoder: NSCoder) {
         self.textField = NSTextField()
+        self.statusLabel = NSTextField() // statusLabelの初期化
         super.init(coder: decoder)
         self.wantsLayer = true
         self.layer?.backgroundColor = NSColor.clear.cgColor
@@ -35,29 +38,54 @@ class SuggestionView: NSView {
         self.textField.alignment = .left
         self.textField.translatesAutoresizingMaskIntoConstraints = false
 
+        self.statusLabel.isEditable = false
+        self.statusLabel.isBordered = false
+        self.statusLabel.backgroundColor = NSColor.clear
+        self.statusLabel.font = NSFont.systemFont(ofSize: 16)
+        self.statusLabel.textColor = NSColor.white
+        self.statusLabel.alignment = .left
+        self.statusLabel.translatesAutoresizingMaskIntoConstraints = false
+
         self.addSubview(self.textField)
+        self.addSubview(self.statusLabel)
 
         // TextFieldのレイアウト
         NSLayoutConstraint.activate([
             self.textField.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             self.textField.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             self.textField.topAnchor.constraint(equalTo: self.topAnchor),
-            self.textField.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            self.textField.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+
+            self.statusLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            self.statusLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            self.statusLabel.topAnchor.constraint(equalTo: self.topAnchor),
+            self.statusLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ])
     }
 
     func displayCandidate(_ candidate: String) {
         self.currentCandidate = candidate
 
+        // StatusTextを空にする
+        self.statusLabel.stringValue = ""
+
         // 下線を追加したNSAttributedStringを作成
         let attributes: [NSAttributedString.Key: Any] = [
-            .underlineStyle: NSUnderlineStyle.single.rawValue, // 下線のスタイルを指定
-            .font: NSFont.systemFont(ofSize: 16) // フォントを適用
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .font: NSFont.systemFont(ofSize: 16)
         ]
         let attributedString = NSAttributedString(string: candidate, attributes: attributes)
 
         // attributedStringをtextFieldに設定
         self.textField.attributedStringValue = attributedString
+    }
+
+    func displayStatusText(_ statusText: String) {
+        // Candidateを空にする
+        self.textField.stringValue = ""
+
+        // 状態表示テキストをstatusLabelに設定
+        self.statusLabel.stringValue = statusText
     }
 
     // 選択された候補を取得するメソッドを追加
@@ -76,7 +104,8 @@ class SuggestionViewController: NSViewController {
         self.configureWindowForRoundedCorners()
         // サンプルのデータを設定
         if let suggestion = self.view as? SuggestionView {
-            suggestion.displayCandidate("Sample Option")
+            suggestion.displayCandidate("...")
+            suggestion.displayStatusText("..")
         }
     }
 
@@ -99,6 +128,11 @@ class SuggestionViewController: NSViewController {
 
     func displayCandidate(_ candidate: String, cursorPosition: NSPoint) {
         (self.view as? SuggestionView)?.displayCandidate(candidate)
+        self.positionWindowAtCursor(cursorPosition: cursorPosition)
+    }
+
+    func displayStatusText(_ statusText: String, cursorPosition: NSPoint) {
+        (self.view as? SuggestionView)?.displayStatusText(statusText)
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
     }
 
