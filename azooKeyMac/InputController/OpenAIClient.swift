@@ -46,14 +46,11 @@ struct OpenAIRequest {
         ]
     }
 }
-// OpenAI APIクライアントクラス
-final class OpenAIClient {
-    static let shared = OpenAIClient() // シングルトンのインスタンス
 
-    private init() {} // プライベートな初期化子で外部からのインスタンス化を防止
-
-    // APIリクエストを送信するメソッド
-    func sendRequest(_ request: OpenAIRequest, apiKey: String, segmentsManager: SegmentsManager) async throws -> [String] {
+// OpenAI APIクライアントをenumで実装
+enum OpenAIClient {
+    // APIリクエストを送信する静的メソッド
+    static func sendRequest(_ request: OpenAIRequest, apiKey: String, segmentsManager: SegmentsManager) async throws -> [String] {
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
             throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
@@ -84,8 +81,8 @@ final class OpenAIClient {
         return try parseResponseData(data, segmentsManager: segmentsManager)
     }
 
-    // レスポンスデータのパースを行う関数
-    private func parseResponseData(_ data: Data, segmentsManager: SegmentsManager) throws -> [String] {
+    // レスポンスデータのパースを行う静的メソッド
+    private static func parseResponseData(_ data: Data, segmentsManager: SegmentsManager) throws -> [String] {
         segmentsManager.appendDebugMessage("Received JSON response") // レスポンスの中身を確認するためのデバッグ出力
         do {
             let json = try JSONSerialization.jsonObject(with: data, options: [])

@@ -402,7 +402,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         Task {
             do {
                 // Send API request
-                let predictions = try await OpenAIClient.shared.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
+                let predictions = try await OpenAIClient.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
 
                 // Format and display structured output
                 let formattedResponse = predictions
