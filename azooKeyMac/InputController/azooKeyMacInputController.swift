@@ -166,8 +166,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             event,
             userAction: userAction,
             liveConversionEnabled: Config.LiveConversion().value,
-            enableDebugWindow: Config.DebugWindow().value,
-            isSuggestionDisplayed: self.isSuggestionDisplayed
+            enableDebugWindow: Config.DebugWindow().value
         )
 
         return handleClientAction(clientAction, clientActionCallback: clientActionCallback, client: client)
@@ -306,7 +305,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             break
         case .transition(let inputState):
             // 遷移した時にSuggestionViewをhideする
-            if self.inputState != inputState {
+            if inputState != .suggestion {
                 hideSuggestion()
             }
             self.inputState = inputState
