@@ -349,7 +349,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.suggestionWindow.orderOut(nil)
     }
 
-    func requestSuggestion() {
+    var retryCount = 0
+    let maxRetries = 3
+
+    @MainActor func requestSuggestion() {
         // Show Suggestion window
         self.suggestionWindow.orderFront(nil)
         self.suggestionWindow.makeKeyAndOrderFront(nil)
@@ -361,8 +364,20 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         // Get the text from getLeftSideContext
         guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
             // Display an error message if the prompt cannot be retrieved
-            self.suggestionController.displayCandidate("プロンプトが取得できませんでした。", cursorPosition: cursorPosition)
-            self.suggestionWindow.makeKeyAndOrderFront(nil)
+            self.segmentsManager.appendDebugMessage("プロンプト取得失敗")
+
+            // 再実行の上限をチェック
+            if retryCount < maxRetries {
+                retryCount += 1
+                // 再実行
+                self.suggestionController.displayCandidate("." + String(repeating: ".", count: 5), cursorPosition: cursorPosition)
+                self.segmentsManager.appendDebugMessage("再試行中... (\(retryCount)回目)")
+                requestSuggestion()
+            } else {
+                self.segmentsManager.appendDebugMessage("再試行上限に達しました。")
+            }
+            self.hideSuggestion()
+            assert(inputState == .none)
             return
         }
 
