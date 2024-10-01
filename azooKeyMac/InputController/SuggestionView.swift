@@ -63,7 +63,7 @@ class SuggestionView: NSView {
         ])
     }
 
-    func displayCandidate(_ candidate: String) {
+    func displayCandidate(_ candidate: String, fontSize: CGFloat = 16) {
         self.currentCandidate = candidate
 
         // StatusTextを空にする
@@ -72,7 +72,7 @@ class SuggestionView: NSView {
         // 下線を追加したNSAttributedStringを作成
         let attributes: [NSAttributedString.Key: Any] = [
             .underlineStyle: NSUnderlineStyle.single.rawValue,
-            .font: NSFont.systemFont(ofSize: 16)
+            .font: NSFont.systemFont(ofSize: fontSize)
         ]
         let attributedString = NSAttributedString(string: candidate, attributes: attributes)
 
@@ -80,11 +80,12 @@ class SuggestionView: NSView {
         self.textField.attributedStringValue = attributedString
     }
 
-    func displayStatusText(_ statusText: String) {
+    func displayStatusText(_ statusText: String, fontSize: CGFloat = 16) {
         // Candidateを空にする
         self.textField.stringValue = ""
 
         // 状態表示テキストをstatusLabelに設定
+        self.statusLabel.font = NSFont.systemFont(ofSize: fontSize)
         self.statusLabel.stringValue = statusText
     }
 
@@ -126,13 +127,13 @@ class SuggestionViewController: NSViewController {
         window.isOpaque = false
     }
 
-    func displayCandidate(_ candidate: String, cursorPosition: NSPoint) {
-        (self.view as? SuggestionView)?.displayCandidate(candidate)
+    func displayCandidate(_ candidate: String, cursorPosition: NSPoint, fontSize: CGFloat = 16) {
+        (self.view as? SuggestionView)?.displayCandidate(candidate, fontSize: fontSize)
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
     }
 
-    func displayStatusText(_ statusText: String, cursorPosition: NSPoint) {
-        (self.view as? SuggestionView)?.displayStatusText(statusText)
+    func displayStatusText(_ statusText: String, cursorPosition: NSPoint, fontSize: CGFloat = 16) {
+        (self.view as? SuggestionView)?.displayStatusText(statusText, fontSize: fontSize)
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
     }
 

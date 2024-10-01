@@ -410,7 +410,8 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                 // Display response in Suggestion
                 await MainActor.run {
                     // 一番の候補のみ表示
-                    self.suggestionController.displayCandidate(formattedResponse[0], cursorPosition: cursorPosition)
+                    self.segmentsManager.appendDebugMessage("frame \(rect.size)")
+                    self.suggestionController.displayCandidate(formattedResponse[0], cursorPosition: cursorPosition, fontSize: rect.size.height)
                 }
             } catch {
                 // Handle errors
@@ -419,7 +420,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                     var rect: NSRect = .zero
                     self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
                     let cursorPosition = rect.origin
-                    self.suggestionController.displayCandidate(errorMessage, cursorPosition: cursorPosition)
+                    self.suggestionController.displayStatusText(errorMessage, cursorPosition: cursorPosition)
                     self.segmentsManager.appendDebugMessage(errorMessage)
                 }
             }
