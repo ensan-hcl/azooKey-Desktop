@@ -37,7 +37,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     private var candidatesViewController: CandidatesViewController
 
     private var suggestionWindow: NSWindow
-    private var suggestionController: SuggestionController
+    private var suggestionController: SuggestionViewController
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.segmentsManager = SegmentsManager()
@@ -64,7 +64,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.candidatesWindow.orderOut(nil)
 
         // SuggestionControllerの初期化
-        self.suggestionController = SuggestionController()
+        self.suggestionController = SuggestionViewController()
         self.suggestionWindow = NSWindow(contentViewController: self.suggestionController)
 
         // 背景を透過させる設定

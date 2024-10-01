@@ -6,7 +6,7 @@
 //
 import Cocoa
 
-class Suggestion: NSView {
+class SuggestionView: NSView {
     private let textField: NSTextField
     private var currentCandidate: String = "" // 現在表示中の候補
 
@@ -66,16 +66,16 @@ class Suggestion: NSView {
     }
 }
 
-class SuggestionController: NSViewController {
+class SuggestionViewController: NSViewController {
     override func loadView() {
-        self.view = Suggestion()
+        self.view = SuggestionView()
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureWindowForRoundedCorners()
         // サンプルのデータを設定
-        if let suggestion = self.view as? Suggestion {
+        if let suggestion = self.view as? SuggestionView {
             suggestion.displayCandidate("Sample Option")
         }
     }
@@ -98,7 +98,7 @@ class SuggestionController: NSViewController {
     }
 
     func displayCandidate(_ candidate: String, cursorPosition: NSPoint) {
-        (self.view as? Suggestion)?.displayCandidate(candidate)
+        (self.view as? SuggestionView)?.displayCandidate(candidate)
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
     }
 
@@ -115,6 +115,6 @@ class SuggestionController: NSViewController {
 
     // 選択された候補を取得するメソッドを追加
     func getSelectedCandidate() -> String? {
-        (self.view as? Suggestion)?.getSelectedCandidate()
+        (self.view as? SuggestionView)?.getSelectedCandidate()
     }
 }
