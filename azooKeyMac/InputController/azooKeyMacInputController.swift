@@ -381,7 +381,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             } else {
                 self.segmentsManager.appendDebugMessage("再試行上限に達しました。")
             }
-            self.suggestionController.displayStatusText("failed to request", cursorPosition: cursorPosition)
+            retryCount = 0
             return
         }
 
