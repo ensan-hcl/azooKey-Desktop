@@ -8,12 +8,13 @@ import Cocoa
 
 class SuggestionView: NSView {
     private let textField: NSTextField
-    private let statusLabel: NSTextField // 状態表示用のラベル
-    private var currentCandidate: String = "" // 現在表示中の候補
+    private let statusLabel: NSTextField
+    private var currentCandidate: String = ""
+    private var rectHeight: CGFloat = 16 // デフォルト値
 
     override init(frame frameRect: NSRect) {
         self.textField = NSTextField()
-        self.statusLabel = NSTextField() // statusLabelの初期化
+        self.statusLabel = NSTextField()
         super.init(frame: frameRect)
         self.wantsLayer = true
         self.layer?.backgroundColor = NSColor.clear.cgColor
@@ -22,7 +23,7 @@ class SuggestionView: NSView {
 
     required init?(coder decoder: NSCoder) {
         self.textField = NSTextField()
-        self.statusLabel = NSTextField() // statusLabelの初期化
+        self.statusLabel = NSTextField()
         super.init(coder: decoder)
         self.wantsLayer = true
         self.layer?.backgroundColor = NSColor.clear.cgColor
@@ -49,7 +50,7 @@ class SuggestionView: NSView {
         self.addSubview(self.textField)
         self.addSubview(self.statusLabel)
 
-        // TextFieldのレイアウト
+        // 制約から余白を削除
         NSLayoutConstraint.activate([
             self.textField.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             self.textField.trailingAnchor.constraint(equalTo: self.trailingAnchor),
@@ -63,38 +64,49 @@ class SuggestionView: NSView {
         ])
     }
 
-    func displayCandidate(_ candidate: String, fontSize: CGFloat = 16) {
+    // intrinsicContentSize を rectHeight に合わせる
+    override var intrinsicContentSize: NSSize {
+        let width = max(self.textField.intrinsicContentSize.width, self.statusLabel.intrinsicContentSize.width)
+        return NSSize(width: width, height: self.rectHeight)
+    }
+
+    func displayCandidate(_ candidate: String, rectHeight: CGFloat = 16) {
+        self.rectHeight = rectHeight
         self.currentCandidate = candidate
 
-        // StatusTextを空にする
+        // ステータスラベルをクリア
         self.statusLabel.stringValue = ""
 
-        // 下線を追加したNSAttributedStringを作成
+        // 属性付き文字列を設定
         let attributes: [NSAttributedString.Key: Any] = [
             .underlineStyle: NSUnderlineStyle.single.rawValue,
-            .font: NSFont.systemFont(ofSize: fontSize)
+            .font: NSFont.systemFont(ofSize: rectHeight * 0.9)
         ]
         let attributedString = NSAttributedString(string: candidate, attributes: attributes)
-
-        // attributedStringをtextFieldに設定
         self.textField.attributedStringValue = attributedString
+
+        // intrinsicContentSize を更新
+        self.invalidateIntrinsicContentSize()
     }
 
-    func displayStatusText(_ statusText: String, fontSize: CGFloat = 16) {
-        // Candidateを空にする
+    func displayStatusText(_ statusText: String, rectHeight: CGFloat = 16) {
+        self.rectHeight = rectHeight
+
+        // テキストフィールドをクリア
         self.textField.stringValue = ""
 
-        // 状態表示テキストをstatusLabelに設定
-        self.statusLabel.font = NSFont.systemFont(ofSize: fontSize)
+        // ステータスラベルにテキストを設定
+        self.statusLabel.font = NSFont.systemFont(ofSize: rectHeight * 0.9)
         self.statusLabel.stringValue = statusText
+
+        // intrinsicContentSize を更新
+        self.invalidateIntrinsicContentSize()
     }
 
-    // 選択された候補を取得するメソッドを追加
     func getSelectedCandidate() -> String? {
         self.currentCandidate.isEmpty ? nil : self.currentCandidate
     }
 }
-
 class SuggestionViewController: NSViewController {
     override func loadView() {
         self.view = SuggestionView()
@@ -128,12 +140,26 @@ class SuggestionViewController: NSViewController {
     }
 
     func displayCandidate(_ candidate: String, cursorPosition: NSPoint, fontSize: CGFloat = 16) {
-        (self.view as? SuggestionView)?.displayCandidate(candidate, fontSize: fontSize)
+        if let suggestionView = self.view as? SuggestionView {
+            suggestionView.displayCandidate(candidate, rectHeight: fontSize)
+
+            // ウィンドウのサイズを更新
+            if let window = self.view.window {
+                window.setContentSize(suggestionView.intrinsicContentSize)
+            }
+        }
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
     }
 
     func displayStatusText(_ statusText: String, cursorPosition: NSPoint, fontSize: CGFloat = 16) {
-        (self.view as? SuggestionView)?.displayStatusText(statusText, fontSize: fontSize)
+        if let suggestionView = self.view as? SuggestionView {
+            suggestionView.displayStatusText(statusText, rectHeight: fontSize)
+
+            // ウィンドウのサイズを更新
+            if let window = self.view.window {
+                window.setContentSize(suggestionView.intrinsicContentSize)
+            }
+        }
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
     }
 
@@ -141,14 +167,17 @@ class SuggestionViewController: NSViewController {
         guard let window = self.view.window else {
             return
         }
-        let windowSize = self.view.frame.size
+        let windowSize = window.frame.size
         let screenFrame = NSScreen.main?.frame ?? .zero
-        let position = NSPoint(x: min(cursorPosition.x, screenFrame.width - windowSize.width),
-                               y: max(cursorPosition.y - windowSize.height + 22, 0))
+
+        // ウィンドウの位置をカーソルに合わせる
+        let position = NSPoint(
+            x: min(cursorPosition.x, screenFrame.width - windowSize.width),
+            y: max(cursorPosition.y, 0)
+        )
         window.setFrameOrigin(position)
     }
 
-    // 選択された候補を取得するメソッドを追加
     func getSelectedCandidate() -> String? {
         (self.view as? SuggestionView)?.getSelectedCandidate()
     }
