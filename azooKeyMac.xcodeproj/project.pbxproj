@@ -38,6 +38,7 @@
 		E97406CE2C5E546200696C66 /* CandidateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97406CD2C5E546200696C66 /* CandidateView.swift */; };
 		E989B4562BF4B1130085AF6D /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4552BF4B1130085AF6D /* UserAction.swift */; };
 		E989B4582BF4B1550085AF6D /* ClientAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4572BF4B1550085AF6D /* ClientAction.swift */; };
+		E98E5A0C2CABD2440046FB40 /* UserDictionaryEditorWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98E5A0B2CABD2440046FB40 /* UserDictionaryEditorWindow.swift */; };
 		E9B127FB2CA90775007AFF33 /* SuggestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B127FA2CA90775007AFF33 /* SuggestionView.swift */; };
 		E9C0C6F32BF5E8AE00E0EA50 /* InputMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */; };
 /* End PBXBuildFile section */
@@ -94,6 +95,7 @@
 		E97406CD2C5E546200696C66 /* CandidateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandidateView.swift; sourceTree = "<group>"; };
 		E989B4552BF4B1130085AF6D /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
 		E989B4572BF4B1550085AF6D /* ClientAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientAction.swift; sourceTree = "<group>"; };
+		E98E5A0B2CABD2440046FB40 /* UserDictionaryEditorWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDictionaryEditorWindow.swift; sourceTree = "<group>"; };
 		E9B127FA2CA90775007AFF33 /* SuggestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionView.swift; sourceTree = "<group>"; };
 		E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputMode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -233,6 +235,7 @@
 		55EA62E02BD6BF890056B5BA /* Windows */ = {
 			isa = PBXGroup;
 			children = (
+				E98E5A0B2CABD2440046FB40 /* UserDictionaryEditorWindow.swift */,
 				55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */,
 			);
 			path = Windows;
@@ -407,6 +410,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E92E50732CA83F9B00403D75 /* OpenAIClient.swift in Sources */,
+				E98E5A0C2CABD2440046FB40 /* UserDictionaryEditorWindow.swift in Sources */,
 				551398D92BDD38B700F1DB82 /* BoolConfigItem.swift in Sources */,
 				E9B127FB2CA90775007AFF33 /* SuggestionView.swift in Sources */,
 				E97406CE2C5E546200696C66 /* CandidateView.swift in Sources */,
