@@ -4,6 +4,7 @@ enum UserAction {
     case enter
     case space
     case escape
+    case tab
     case unknown
     case 英数
     case かな
@@ -11,6 +12,7 @@ enum UserAction {
     case function(Function)
     case number(Number)
     case editSegment(Int)
+    case suggest
 
     enum NavigationDirection {
         case up, down, right, left

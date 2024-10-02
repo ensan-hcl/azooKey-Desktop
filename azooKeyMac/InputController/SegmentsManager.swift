@@ -324,7 +324,7 @@ final class SegmentsManager {
 
     func getCurrentCandidateWindow(inputState: InputState) -> CandidateWindow {
         switch inputState {
-        case .none, .previewing:
+        case .none, .previewing, .suggestion:
             return .hidden
         case .composing:
             if !self.liveConversionEnabled, let firstCandidate = self.rawCandidates?.mainResults.first {
@@ -415,7 +415,7 @@ final class SegmentsManager {
 
     func getCurrentMarkedText(inputState: InputState) -> MarkedText {
         switch inputState {
-        case .none, .composing:
+        case .none, .composing, .suggestion:
             let text = if self.lastOperation == .delete {
                 // 削除のあとは常にひらがなを示す
                 self.composingText.convertTarget

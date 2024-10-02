@@ -44,6 +44,10 @@ enum ClientAction {
     case submitHiraganaCandidate
     case submitHankakuKatakanaCandidate
 
+    // Suggestion
+    case requestSuggestion
+    case submitSuggestion
+
     case stopComposition
 
     enum InputMode {

@@ -5,10 +5,16 @@ enum InputState {
     case composing
     case previewing
     case selecting
+    case suggestion
 
     // この種のコードは複雑にしかならないので、lintを無効にする
     // swiftlint:disable:next cyclomatic_complexity
-    func event(_ event: NSEvent!, userAction: UserAction, liveConversionEnabled: Bool, enableDebugWindow: Bool) -> (ClientAction, ClientActionCallback) {
+    func event(
+        _ event: NSEvent!,
+        userAction: UserAction,
+        liveConversionEnabled: Bool,
+        enableDebugWindow: Bool
+    ) -> (ClientAction, ClientActionCallback) {
         if event.modifierFlags.contains(.command) {
             return (.fallthrough, .fallthrough)
         }
@@ -35,7 +41,9 @@ enum InputState {
                 } else {
                     return (.insertWithoutMarkedText("　"), .transition(.none))
                 }
-            case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:
+            case .suggest:
+                return (.requestSuggestion, .transition(.suggestion))
+            case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment, .tab:
                 return (.fallthrough, .fallthrough)
             }
         case .composing:
@@ -82,7 +90,7 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .unknown:
+            case .unknown, .suggest, .tab:
                 return (.fallthrough, .fallthrough)
             }
         case .previewing:
@@ -125,7 +133,7 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .unknown:
+            case .unknown, .suggest, .tab:
                 return (.fallthrough, .fallthrough)
             }
         case .selecting:
@@ -192,7 +200,33 @@ enum InputState {
                 return (.selectInputMode(.japanese), .fallthrough)
             case .英数:
                 return (.commitMarkedTextAndSelectInputMode(.roman), .transition(.none))
-            case .unknown:
+            case .unknown, .suggest, .tab:
+                return (.fallthrough, .fallthrough)
+            }
+        case .suggestion:
+            // tab以外は.none同様にそのまま入力できる
+            switch userAction {
+            case .input(let string):
+                return (.appendToMarkedText(string), .transition(.composing))
+            case .number(let number):
+                return (.appendToMarkedText(number.inputString), .transition(.composing))
+            case .かな:
+                return (.selectInputMode(.japanese), .transition(.none))
+            case .英数:
+                return (.selectInputMode(.roman), .transition(.none))
+            case .space:
+                // Shift+Spaceでは半角スペースを入力
+                if event.modifierFlags.contains(.shift) {
+                    return (.insertWithoutMarkedText(" "), .transition(.none))
+                } else {
+                    return (.insertWithoutMarkedText("　"), .transition(.none))
+                }
+            case .suggest:
+                // 再度リクエスト
+                return (.requestSuggestion, .transition(.none))
+            case .tab:
+                return (.submitSuggestion, .transition(.none))
+            case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:
                 return (.fallthrough, .fallthrough)
             }
         }

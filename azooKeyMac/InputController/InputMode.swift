@@ -72,10 +72,18 @@ enum InputMode {
             } else {
                 return .unknown
             }
+        case 0x0E: // Control + e
+            if event.modifierFlags.contains(.control) {
+                return .suggest
+            } else if let text = event.characters, isPrintable(text) {
+                return .input(KeyMap.h2zMap(text))
+            } else {
+                return .unknown
+            }
         case 36: // Enter
             return .enter
         case 48: // Tab
-            return .unknown
+            return .tab
         case 49: // Space
             return .space
         case 51: // Delete

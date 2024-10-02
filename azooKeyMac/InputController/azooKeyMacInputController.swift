@@ -33,6 +33,9 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     private var candidatesWindow: NSWindow
     private var candidatesViewController: CandidatesViewController
 
+    private var suggestionWindow: NSWindow
+    private var suggestionController: SuggestionViewController
+
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.segmentsManager = SegmentsManager()
 
@@ -44,18 +47,36 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         // Initialize the candidates window
         self.candidatesViewController = CandidatesViewController()
         self.candidatesWindow = NSWindow(contentViewController: self.candidatesViewController)
-        self.candidatesWindow.styleMask = [.borderless, .resizable]
+        self.candidatesWindow.styleMask = [.borderless]
         self.candidatesWindow.level = .popUpMenu
 
         var rect: NSRect = .zero
         if let client = inputClient as? IMKTextInput {
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
         }
-        rect.size = .init(width: 400, height: 200)
+        rect.size = .init(width: 400, height: 1000)
         self.candidatesWindow.setFrame(rect, display: true)
         // init直後はこれを表示しない
         self.candidatesWindow.setIsVisible(false)
         self.candidatesWindow.orderOut(nil)
+
+        // SuggestionControllerの初期化
+        self.suggestionController = SuggestionViewController()
+        self.suggestionWindow = NSWindow(contentViewController: self.suggestionController)
+
+        // 背景を透過させる設定
+        self.suggestionWindow.isOpaque = false
+        self.suggestionWindow.backgroundColor = NSColor.clear
+        self.suggestionWindow.hasShadow = false
+
+        // その他のウィンドウスタイル設定
+        self.suggestionWindow.styleMask = [.borderless, .resizable]
+        self.suggestionWindow.title = "Suggestion"
+        self.suggestionWindow.setContentSize(NSSize(width: 400, height: 1000))
+        self.suggestionWindow.center()
+        self.suggestionWindow.orderOut(nil)
+        self.suggestionWindow.level = .popUpMenu
+
         super.init(server: server, delegate: delegate, client: inputClient)
 
         // デリゲートの設定を super.init の後に移動
@@ -89,6 +110,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     override func deactivateServer(_ sender: Any!) {
         self.segmentsManager.deactivate()
         self.candidatesWindow.orderOut(nil)
+        self.suggestionWindow.orderOut(nil)
         self.candidatesViewController.updateCandidates([], selectionIndex: nil, cursorLocation: .zero)
         if let client = sender as? IMKTextInput {
             client.insertText("", replacementRange: .notFound)
@@ -259,6 +281,15 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.requestDebugWindowMode(enabled: false)
         case .stopComposition:
             self.segmentsManager.stopComposition()
+        case .requestSuggestion:
+            // configの有効化をチェック
+            if Config.EnableOpenAiApiKey().value && Config.OpenAiApiKey().value.isEmpty == false {
+                self.requestSuggestion()
+            }
+        case .submitSuggestion:
+            if Config.EnableOpenAiApiKey().value && Config.OpenAiApiKey().value.isEmpty == false {
+                self.submitSelectedSuggestion()
+            }
         // MARK: 特殊ケース
         case .consume:
             return true
@@ -270,9 +301,16 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         case .fallthrough:
             break
         case .transition(let inputState):
+            // 遷移した時にSuggestionViewをhideする
+            if inputState != .suggestion {
+                hideSuggestion()
+            }
             self.inputState = inputState
         case .basedOnBackspace(let ifIsEmpty, let ifIsNotEmpty), .basedOnSubmitCandidate(let ifIsEmpty, let ifIsNotEmpty):
             self.inputState = self.segmentsManager.isEmpty ? ifIsEmpty : ifIsNotEmpty
+            if self.inputState != .none {
+                self.hideSuggestion()
+            }
         }
 
         self.refreshMarkedText()
@@ -298,6 +336,91 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.candidatesWindow.setIsVisible(false)
             self.candidatesWindow.orderOut(nil)
             self.candidatesViewController.hide()
+        }
+    }
+
+    // azooKeyMacInputController.swift
+    @MainActor
+    func hideSuggestion() {
+        self.suggestionWindow.setIsVisible(false)
+        self.suggestionWindow.orderOut(nil)
+    }
+
+    var retryCount = 0
+    let maxRetries = 3
+
+    @MainActor func requestSuggestion() {
+        // Show Suggestion window
+        self.suggestionWindow.orderFront(nil)
+        self.suggestionWindow.makeKeyAndOrderFront(nil)
+
+        var rect: NSRect = .zero
+        self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+        let cursorPosition = rect.origin
+        self.suggestionController.displayStatusText("...", cursorPosition: cursorPosition)
+
+        // Get the text from getLeftSideContext
+        guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
+            // Display an error message if the prompt cannot be retrieved
+            self.segmentsManager.appendDebugMessage("プロンプト取得失敗")
+
+            // 再実行の上限をチェック
+            if retryCount < maxRetries {
+                retryCount += 1
+                // 再実行
+                self.suggestionController.displayStatusText("." + String(repeating: ".", count: 5), cursorPosition: cursorPosition)
+                self.segmentsManager.appendDebugMessage("再試行中... (\(retryCount)回目)")
+                // 0.5秒待って再実行する
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self.requestSuggestion()
+                }
+            } else {
+                self.segmentsManager.appendDebugMessage("再試行上限に達しました。")
+            }
+            retryCount = 0
+            return
+        }
+
+        self.segmentsManager.appendDebugMessage("prompt \(prompt)")
+
+        // Show Suggestion window
+        self.suggestionWindow.makeKeyAndOrderFront(nil)
+        self.suggestionController.displayStatusText("...", cursorPosition: cursorPosition)
+        self.segmentsManager.appendDebugMessage("リクエスト中...")
+
+        // Get the OpenAI API key
+        let apiKey = Config.OpenAiApiKey().value
+
+        // Create the request
+        let request = OpenAIRequest(prompt: prompt)
+
+        // Asynchronously send API request
+        Task {
+            do {
+                // Send API request
+                let predictions = try await OpenAIClient.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
+
+                // Format and display structured output
+                let formattedResponse = predictions
+
+                // Display response in Suggestion
+                await MainActor.run {
+                    // 一番の候補のみ表示
+                    self.segmentsManager.appendDebugMessage("frame \(rect.size)")
+                    self.suggestionController.displayCandidate(formattedResponse[0], cursorPosition: cursorPosition, fontSize: rect.size.height)
+                }
+            } catch {
+                // Handle errors
+                await MainActor.run {
+                    let errorMessage = "エラーが発生しました: \(error.localizedDescription)"
+                    var rect: NSRect = .zero
+                    self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+                    let cursorPosition = rect.origin
+                    self.suggestionController.displayStatusText(errorMessage, cursorPosition: cursorPosition)
+                    self.segmentsManager.appendDebugMessage(errorMessage)
+                }
+            }
+
         }
     }
 
@@ -330,6 +453,19 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             selectionRange: currentMarkedText.selectionRange,
             replacementRange: NSRange(location: NSNotFound, length: 0)
         )
+    }
+
+    @MainActor
+    func submitSelectedSuggestion() {
+        // SuggestionControllerから選択された候補を取得
+        if let selectedCandidate = suggestionController.getSelectedCandidate() {
+            if let client = self.client() {
+                // 選択された候補をテキスト入力に挿入
+                client.insertText(selectedCandidate, replacementRange: NSRange(location: NSNotFound, length: 0))
+                // ウィンドウを非表示にする
+                self.hideSuggestion()
+            }
+        }
     }
 
     @MainActor
