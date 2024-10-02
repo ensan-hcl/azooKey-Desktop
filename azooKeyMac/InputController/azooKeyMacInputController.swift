@@ -24,9 +24,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     var englishConversionEnabled: Bool {
         Config.EnglishConversion().value
     }
-    var isSuggestionDisplayed: Bool {
-        self.suggestionWindow.isVisible
-    }
 
     var appMenu: NSMenu
     var zenzaiToggleMenuItem: NSMenuItem
