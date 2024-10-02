@@ -114,7 +114,7 @@ struct ConfigWindow: View {
                         HStack {
                             TextField("OpenAI API", text: $openAiApiKey, prompt: Text("例:sk-xxxxxxxxxxx"))
                             helpButton(
-                                helpContent: "OpenAPIキーはローカルのみで管理され、外部に公開されることはありません。生成の際にAPIを利用するため、課金が発生します。",
+                                helpContent: "OpenAI APIキーはローカルのみで管理され、外部に公開されることはありません。生成の際にAPIを利用するため、課金が発生します。",
                                 isPresented: $openAiApiKeyPopover
                             )
                         }
