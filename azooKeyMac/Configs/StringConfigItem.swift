@@ -23,6 +23,16 @@ extension StringConfigItem {
 extension Config {
     struct OpenAiApiKey: StringConfigItem {
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.OpenAiApiKey"
+
+        // keychainで保存
+        var value: String {
+            get {
+                KeychainHelper.shared.read(key: Self.key) ?? ""
+            }
+            nonmutating set {
+                KeychainHelper.shared.save(key: Self.key, value: newValue)
+            }
+        }
     }
 }
 
