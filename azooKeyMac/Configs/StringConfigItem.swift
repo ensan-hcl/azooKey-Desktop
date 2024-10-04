@@ -27,10 +27,10 @@ extension Config {
         // keychainで保存
         var value: String {
             get {
-                KeychainHelper.shared.read(key: Self.key) ?? ""
+                KeychainHelper.read(key: Self.key) ?? ""
             }
             nonmutating set {
-                KeychainHelper.shared.save(key: Self.key, value: newValue)
+                KeychainHelper.save(key: Self.key, value: newValue)
             }
         }
     }

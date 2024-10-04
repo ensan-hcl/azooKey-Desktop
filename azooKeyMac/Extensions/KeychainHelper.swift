@@ -8,12 +8,8 @@
 import Foundation
 import Security
 
-class KeychainHelper {
-    static let shared = KeychainHelper()
-
-    private init() {}
-
-    func save(key: String, value: String) {
+enum KeychainHelper {
+    static func save(key: String, value: String) {
         guard let data = value.data(using: .utf8) else {
             print("StringをDataに変換する際にエラーが発生しました")
             return
@@ -32,7 +28,7 @@ class KeychainHelper {
         SecItemAdd(query as CFDictionary, nil)
     }
 
-    func read(key: String) -> String? {
+    static func read(key: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
@@ -44,14 +40,13 @@ class KeychainHelper {
         let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
 
         if status == errSecSuccess, let data = dataTypeRef as? Data {
-
             return String(decoding: data, as: UTF8.self)
         }
 
         return nil
     }
 
-    func delete(key: String) {
+    static func delete(key: String) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key
