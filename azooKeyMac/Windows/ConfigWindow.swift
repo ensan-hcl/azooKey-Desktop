@@ -112,7 +112,7 @@ struct ConfigWindow: View {
                         Toggle("（開発者用）デバッグウィンドウを有効化", isOn: $debugWindow)
                         Toggle("OpenAI APIキーの利用", isOn: $enableOpenAiApiKey)
                         HStack {
-                            TextField("OpenAI API", text: $openAiApiKey, prompt: Text("例:sk-xxxxxxxxxxx"))
+                            SecureField("OpenAI API", text: $openAiApiKey, prompt: Text("例:sk-xxxxxxxxxxx"))
                             helpButton(
                                 helpContent: "OpenAI APIキーはローカルのみで管理され、外部に公開されることはありません。生成の際にAPIを利用するため、課金が発生します。",
                                 isPresented: $openAiApiKeyPopover
