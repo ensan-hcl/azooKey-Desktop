@@ -3,45 +3,20 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		1A41E61C26E745DD009B65D7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E61B26E745DD009B65D7 /* Assets.xcassets */; };
-		1A41E61F26E745DD009B65D7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E61E26E745DD009B65D7 /* Preview Assets.xcassets */; };
-		1A41E62926E745DD009B65D7 /* azooKeyMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E62826E745DD009B65D7 /* azooKeyMacTests.swift */; };
-		1A41E63326E745DD009B65D7 /* azooKeyMacUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E63226E745DD009B65D7 /* azooKeyMacUITests.swift */; };
-		1A41E63526E745DD009B65D7 /* azooKeyMacUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E63426E745DD009B65D7 /* azooKeyMacUITestsLaunchTests.swift */; };
 		1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64126E74627009B65D7 /* AppDelegate.swift */; };
-		1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */; };
 		1A41E64726E74937009B65D7 /* main.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E64626E74937009B65D7 /* main.tiff */; };
-		5502D79C2C66FE23002AAEF7 /* SegmentsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5502D79B2C66FE23002AAEF7 /* SegmentsManager.swift */; };
-		551398D72BDD376800F1DB82 /* ConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398D62BDD376800F1DB82 /* ConfigItem.swift */; };
-		551398D92BDD38B700F1DB82 /* BoolConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */; };
-		551398DB2BDD39B700F1DB82 /* StringConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */; };
-		551398DD2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */; };
-		5523B1A42BF116CC0051DAA8 /* IntConfigItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5523B1A32BF116CB0051DAA8 /* IntConfigItem.swift */; };
 		5557C42C2BF3C9140048F976 /* zenz-v2-Q5_K_M.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */; };
 		556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52F92BAAAF7D00EB343F /* en.tiff */; };
 		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
-		557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */; };
-		557D35E12BB1C22100877564 /* KeyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557D35E02BB1C22100877564 /* KeyMap.swift */; };
 		55A27D022BAAADDB00512DCD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 55A27D002BAAADDB00512DCD /* InfoPlist.strings */; };
 		55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 55A9C54A2BA847A1007F6F02 /* main@2x.tiff */; };
-		55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A9C54D2BA84951007F6F02 /* NSRange.swift */; };
-		55CE92532C9FC08100C38E1B /* UserDictionaryEditorWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55CE92522C9FC08100C38E1B /* UserDictionaryEditorWindow.swift */; };
 		55E0A5BE2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BD2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary */; };
 		55E0A5C02BA8AE3200FACF50 /* SwiftUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BF2BA8AE3200FACF50 /* SwiftUtils */; };
-		55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */; };
-		E916C20B2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E916C20A2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift */; };
-		E92B825A2CAE4B6A00D3C2D6 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92B82592CAE4B6A00D3C2D6 /* KeychainHelper.swift */; };
-		E92E50732CA83F9B00403D75 /* OpenAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E92E50722CA83F9B00403D75 /* OpenAIClient.swift */; };
-		E96A5BC72BF4B28400AEAB72 /* InputState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96A5BC62BF4B28400AEAB72 /* InputState.swift */; };
-		E97406CE2C5E546200696C66 /* CandidateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97406CD2C5E546200696C66 /* CandidateView.swift */; };
-		E989B4562BF4B1130085AF6D /* UserAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4552BF4B1130085AF6D /* UserAction.swift */; };
-		E989B4582BF4B1550085AF6D /* ClientAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E989B4572BF4B1550085AF6D /* ClientAction.swift */; };
-		E9B127FB2CA90775007AFF33 /* SuggestionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B127FA2CA90775007AFF33 /* SuggestionView.swift */; };
-		E9C0C6F32BF5E8AE00E0EA50 /* InputMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,43 +39,29 @@
 /* Begin PBXFileReference section */
 		1A41E61426E745D9009B65D7 /* azooKeyMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = azooKeyMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A41E61B26E745DD009B65D7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		1A41E61E26E745DD009B65D7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1A41E62426E745DD009B65D7 /* azooKeyMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = azooKeyMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1A41E62826E745DD009B65D7 /* azooKeyMacTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = azooKeyMacTests.swift; sourceTree = "<group>"; };
 		1A41E62E26E745DD009B65D7 /* azooKeyMacUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = azooKeyMacUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		1A41E63226E745DD009B65D7 /* azooKeyMacUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = azooKeyMacUITests.swift; sourceTree = "<group>"; };
-		1A41E63426E745DD009B65D7 /* azooKeyMacUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = azooKeyMacUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		1A41E64126E74627009B65D7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = azooKeyMacInputController.swift; sourceTree = "<group>"; };
 		1A41E64526E7470D009B65D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1A41E64626E74937009B65D7 /* main.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = main.tiff; path = azooKeyMac/main.tiff; sourceTree = SOURCE_ROOT; };
 		1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = azooKeyMac.entitlements; sourceTree = "<group>"; };
-		5502D79B2C66FE23002AAEF7 /* SegmentsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentsManager.swift; sourceTree = "<group>"; };
-		551398D62BDD376800F1DB82 /* ConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigItem.swift; sourceTree = "<group>"; };
-		551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoolConfigItem.swift; sourceTree = "<group>"; };
-		551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringConfigItem.swift; sourceTree = "<group>"; };
-		551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCodableConfigItem.swift; sourceTree = "<group>"; };
-		5523B1A32BF116CB0051DAA8 /* IntConfigItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntConfigItem.swift; sourceTree = "<group>"; };
 		5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "zenz-v2-Q5_K_M.gguf"; path = "zenz-v2-gguf/zenz-v2-Q5_K_M.gguf"; sourceTree = "<group>"; };
 		556C52F92BAAAF7D00EB343F /* en.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = en.tiff; sourceTree = "<group>"; };
 		556C52FA2BAAAF7D00EB343F /* en@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "en@2x.tiff"; sourceTree = "<group>"; };
-		557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyMap+hankaku2zenkaku.swift"; sourceTree = "<group>"; };
-		557D35E02BB1C22100877564 /* KeyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMap.swift; sourceTree = "<group>"; };
 		55A27D012BAAADDB00512DCD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		55A9C54A2BA847A1007F6F02 /* main@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "main@2x.tiff"; sourceTree = "<group>"; };
-		55A9C54D2BA84951007F6F02 /* NSRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSRange.swift; sourceTree = "<group>"; };
-		55CE92522C9FC08100C38E1B /* UserDictionaryEditorWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDictionaryEditorWindow.swift; sourceTree = "<group>"; };
-		55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigWindow.swift; sourceTree = "<group>"; };
-		E916C20A2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = azooKeyMacInputControllerHelper.swift; sourceTree = "<group>"; };
-		E92B82592CAE4B6A00D3C2D6 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
-		E92E50722CA83F9B00403D75 /* OpenAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIClient.swift; sourceTree = "<group>"; };
-		E96A5BC62BF4B28400AEAB72 /* InputState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputState.swift; sourceTree = "<group>"; };
-		E97406CD2C5E546200696C66 /* CandidateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandidateView.swift; sourceTree = "<group>"; };
-		E989B4552BF4B1130085AF6D /* UserAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAction.swift; sourceTree = "<group>"; };
-		E989B4572BF4B1550085AF6D /* ClientAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientAction.swift; sourceTree = "<group>"; };
-		E9B127FA2CA90775007AFF33 /* SuggestionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionView.swift; sourceTree = "<group>"; };
-		E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputMode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		55CE06C72CB01F000002DAF1 /* InputController */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = InputController; sourceTree = "<group>"; };
+		55CE06D72CB01F080002DAF1 /* Configs */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Configs; sourceTree = "<group>"; };
+		55CE06DF2CB01F130002DAF1 /* KeyMap */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = KeyMap; sourceTree = "<group>"; };
+		55CE06E42CB01F130002DAF1 /* Extensions */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Extensions; sourceTree = "<group>"; };
+		55CE06E92CB01F130002DAF1 /* Windows */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Windows; sourceTree = "<group>"; };
+		55CE06ED2CB01F160002DAF1 /* azooKeyMacTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = azooKeyMacTests; sourceTree = "<group>"; };
+		55CE06F12CB01F160002DAF1 /* azooKeyMacUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = azooKeyMacUITests; sourceTree = "<group>"; };
+		55CE06F52CB01F180002DAF1 /* Preview Content */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Preview Content"; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		1A41E61126E745D9009B65D7 /* Frameworks */ = {
@@ -133,8 +94,8 @@
 			isa = PBXGroup;
 			children = (
 				1A41E61626E745D9009B65D7 /* azooKeyMac */,
-				1A41E62726E745DD009B65D7 /* azooKeyMacTests */,
-				1A41E63126E745DD009B65D7 /* azooKeyMacUITests */,
+				55CE06ED2CB01F160002DAF1 /* azooKeyMacTests */,
+				55CE06F12CB01F160002DAF1 /* azooKeyMacUITests */,
 				1A41E61526E745D9009B65D7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -152,79 +113,24 @@
 		1A41E61626E745D9009B65D7 /* azooKeyMac */ = {
 			isa = PBXGroup;
 			children = (
-				E989B4532BF4B0890085AF6D /* InputController */,
+				55CE06C72CB01F000002DAF1 /* InputController */,
 				1A41E64526E7470D009B65D7 /* Info.plist */,
 				55A27D002BAAADDB00512DCD /* InfoPlist.strings */,
 				1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */,
 				1A41E64126E74627009B65D7 /* AppDelegate.swift */,
-				551398D52BDD375700F1DB82 /* Configs */,
-				55EA62E02BD6BF890056B5BA /* Windows */,
-				557D35DD2BB1C1EE00877564 /* KeyMap */,
-				55A9C54C2BA84945007F6F02 /* Extensions */,
+				55CE06D72CB01F080002DAF1 /* Configs */,
+				55CE06E92CB01F130002DAF1 /* Windows */,
+				55CE06DF2CB01F130002DAF1 /* KeyMap */,
+				55CE06E42CB01F130002DAF1 /* Extensions */,
 				55E1E7412BEF63AE0084A069 /* Resources */,
 				1A41E61B26E745DD009B65D7 /* Assets.xcassets */,
 				1A41E64626E74937009B65D7 /* main.tiff */,
 				55A9C54A2BA847A1007F6F02 /* main@2x.tiff */,
 				556C52F92BAAAF7D00EB343F /* en.tiff */,
 				556C52FA2BAAAF7D00EB343F /* en@2x.tiff */,
-				1A41E61D26E745DD009B65D7 /* Preview Content */,
+				55CE06F52CB01F180002DAF1 /* Preview Content */,
 			);
 			path = azooKeyMac;
-			sourceTree = "<group>";
-		};
-		1A41E61D26E745DD009B65D7 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				1A41E61E26E745DD009B65D7 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		1A41E62726E745DD009B65D7 /* azooKeyMacTests */ = {
-			isa = PBXGroup;
-			children = (
-				1A41E62826E745DD009B65D7 /* azooKeyMacTests.swift */,
-			);
-			path = azooKeyMacTests;
-			sourceTree = "<group>";
-		};
-		1A41E63126E745DD009B65D7 /* azooKeyMacUITests */ = {
-			isa = PBXGroup;
-			children = (
-				1A41E63226E745DD009B65D7 /* azooKeyMacUITests.swift */,
-				1A41E63426E745DD009B65D7 /* azooKeyMacUITestsLaunchTests.swift */,
-			);
-			path = azooKeyMacUITests;
-			sourceTree = "<group>";
-		};
-		551398D52BDD375700F1DB82 /* Configs */ = {
-			isa = PBXGroup;
-			children = (
-				551398D62BDD376800F1DB82 /* ConfigItem.swift */,
-				5523B1A32BF116CB0051DAA8 /* IntConfigItem.swift */,
-				551398D82BDD38B700F1DB82 /* BoolConfigItem.swift */,
-				551398DA2BDD39B700F1DB82 /* StringConfigItem.swift */,
-				551398DC2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift */,
-			);
-			path = Configs;
-			sourceTree = "<group>";
-		};
-		557D35DD2BB1C1EE00877564 /* KeyMap */ = {
-			isa = PBXGroup;
-			children = (
-				557D35DE2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift */,
-				557D35E02BB1C22100877564 /* KeyMap.swift */,
-			);
-			path = KeyMap;
-			sourceTree = "<group>";
-		};
-		55A9C54C2BA84945007F6F02 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-				E92B82592CAE4B6A00D3C2D6 /* KeychainHelper.swift */,
-				55A9C54D2BA84951007F6F02 /* NSRange.swift */,
-			);
-			path = Extensions;
 			sourceTree = "<group>";
 		};
 		55E1E7412BEF63AE0084A069 /* Resources */ = {
@@ -233,40 +139,6 @@
 				5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		55EA62E02BD6BF890056B5BA /* Windows */ = {
-			isa = PBXGroup;
-			children = (
-				55CE92522C9FC08100C38E1B /* UserDictionaryEditorWindow.swift */,
-				55EA62E12BD6BF900056B5BA /* ConfigWindow.swift */,
-			);
-			path = Windows;
-			sourceTree = "<group>";
-		};
-		E989B4532BF4B0890085AF6D /* InputController */ = {
-			isa = PBXGroup;
-			children = (
-				1A41E64326E74669009B65D7 /* azooKeyMacInputController.swift */,
-				E989B4542BF4B0920085AF6D /* Actions */,
-				E96A5BC62BF4B28400AEAB72 /* InputState.swift */,
-				E9C0C6F22BF5E8AE00E0EA50 /* InputMode.swift */,
-				E92E50722CA83F9B00403D75 /* OpenAIClient.swift */,
-				E916C20A2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift */,
-				E97406CD2C5E546200696C66 /* CandidateView.swift */,
-				5502D79B2C66FE23002AAEF7 /* SegmentsManager.swift */,
-				E9B127FA2CA90775007AFF33 /* SuggestionView.swift */,
-			);
-			path = InputController;
-			sourceTree = "<group>";
-		};
-		E989B4542BF4B0920085AF6D /* Actions */ = {
-			isa = PBXGroup;
-			children = (
-				E989B4552BF4B1130085AF6D /* UserAction.swift */,
-				E989B4572BF4B1550085AF6D /* ClientAction.swift */,
-			);
-			path = Actions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -283,6 +155,14 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				55CE06C72CB01F000002DAF1 /* InputController */,
+				55CE06D72CB01F080002DAF1 /* Configs */,
+				55CE06DF2CB01F130002DAF1 /* KeyMap */,
+				55CE06E42CB01F130002DAF1 /* Extensions */,
+				55CE06E92CB01F130002DAF1 /* Windows */,
+				55CE06F52CB01F180002DAF1 /* Preview Content */,
 			);
 			name = azooKeyMac;
 			packageProductDependencies = (
@@ -306,6 +186,9 @@
 			dependencies = (
 				1A41E62626E745DD009B65D7 /* PBXTargetDependency */,
 			);
+			fileSystemSynchronizedGroups = (
+				55CE06ED2CB01F160002DAF1 /* azooKeyMacTests */,
+			);
 			name = azooKeyMacTests;
 			productName = azooKeyMacTests;
 			productReference = 1A41E62426E745DD009B65D7 /* azooKeyMacTests.xctest */;
@@ -323,6 +206,9 @@
 			);
 			dependencies = (
 				1A41E63026E745DD009B65D7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				55CE06F12CB01F160002DAF1 /* azooKeyMacUITests */,
 			);
 			name = azooKeyMacUITests;
 			productName = azooKeyMacUITests;
@@ -381,7 +267,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A41E64726E74937009B65D7 /* main.tiff in Resources */,
-				1A41E61F26E745DD009B65D7 /* Preview Assets.xcassets in Resources */,
 				556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */,
 				55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */,
 				556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */,
@@ -412,28 +297,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E92E50732CA83F9B00403D75 /* OpenAIClient.swift in Sources */,
-				551398D92BDD38B700F1DB82 /* BoolConfigItem.swift in Sources */,
-				E9B127FB2CA90775007AFF33 /* SuggestionView.swift in Sources */,
-				E97406CE2C5E546200696C66 /* CandidateView.swift in Sources */,
-				E916C20B2BF5F81600548B7A /* azooKeyMacInputControllerHelper.swift in Sources */,
-				E92B825A2CAE4B6A00D3C2D6 /* KeychainHelper.swift in Sources */,
-				557D35E12BB1C22100877564 /* KeyMap.swift in Sources */,
-				E96A5BC72BF4B28400AEAB72 /* InputState.swift in Sources */,
-				55EA62E22BD6BF900056B5BA /* ConfigWindow.swift in Sources */,
-				5523B1A42BF116CC0051DAA8 /* IntConfigItem.swift in Sources */,
-				55CE92532C9FC08100C38E1B /* UserDictionaryEditorWindow.swift in Sources */,
-				551398DD2BDD3ABF00F1DB82 /* CustomCodableConfigItem.swift in Sources */,
 				1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */,
-				55A9C54E2BA84951007F6F02 /* NSRange.swift in Sources */,
-				557D35DF2BB1C21900877564 /* KeyMap+hankaku2zenkaku.swift in Sources */,
-				E989B4562BF4B1130085AF6D /* UserAction.swift in Sources */,
-				551398D72BDD376800F1DB82 /* ConfigItem.swift in Sources */,
-				1A41E64426E74669009B65D7 /* azooKeyMacInputController.swift in Sources */,
-				E9C0C6F32BF5E8AE00E0EA50 /* InputMode.swift in Sources */,
-				5502D79C2C66FE23002AAEF7 /* SegmentsManager.swift in Sources */,
-				E989B4582BF4B1550085AF6D /* ClientAction.swift in Sources */,
-				551398DB2BDD39B700F1DB82 /* StringConfigItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,7 +305,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1A41E62926E745DD009B65D7 /* azooKeyMacTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -449,8 +312,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1A41E63326E745DD009B65D7 /* azooKeyMacUITests.swift in Sources */,
-				1A41E63526E745DD009B65D7 /* azooKeyMacUITestsLaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -674,7 +535,6 @@
 		1A41E63C26E745DD009B65D7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -699,7 +559,6 @@
 		1A41E63D26E745DD009B65D7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -724,7 +583,6 @@
 		1A41E63F26E745DD009B65D7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -747,7 +605,6 @@
 		1A41E64026E745DD009B65D7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
