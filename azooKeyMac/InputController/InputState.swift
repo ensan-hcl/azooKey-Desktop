@@ -42,9 +42,9 @@ enum InputState {
                     return (.insertWithoutMarkedText("　"), .transition(.none))
                 }
             case .suggest:
-                if Config.EnableOpenAiApiKey().value{
+                if Config.EnableOpenAiApiKey().value {
                     return (.requestSuggestion, .transition(.suggestion))
-                }else{
+                } else {
                     return (.fallthrough, .fallthrough)
                 }
             case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment, .tab:
