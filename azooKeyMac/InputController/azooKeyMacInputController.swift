@@ -164,7 +164,8 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             event,
             userAction: userAction,
             liveConversionEnabled: Config.LiveConversion().value,
-            enableDebugWindow: Config.DebugWindow().value
+            enableDebugWindow: Config.DebugWindow().value,
+            enableSuggestion: Config.EnableOpenAiApiKey().value
         )
         return handleClientAction(clientAction, clientActionCallback: clientActionCallback, client: client)
     }
