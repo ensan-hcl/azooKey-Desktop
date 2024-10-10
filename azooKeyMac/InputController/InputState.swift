@@ -41,8 +41,8 @@ enum InputState {
                 } else {
                     return (.insertWithoutMarkedText("　"), .transition(.none))
                 }
-            case .suggest:
-                if Config.EnableOpenAiApiKey().value {
+            case .suggest(let enableSuggest):
+                if  enableSuggest {
                     return (.requestSuggestion, .transition(.suggestion))
                 } else {
                     return (.fallthrough, .fallthrough)
@@ -225,9 +225,13 @@ enum InputState {
                 } else {
                     return (.insertWithoutMarkedText("　"), .transition(.none))
                 }
-            case .suggest:
-                // 再度リクエスト
-                return (.requestSuggestion, .transition(.none))
+            case .suggest(let enableSuggest):
+                if enableSuggest {
+                    // 再度リクエスト
+                    return (.requestSuggestion, .transition(.none))
+                } else {
+                    return (.fallthrough, .fallthrough)
+                }
             case .tab:
                 return (.submitSuggestion, .transition(.none))
             case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:

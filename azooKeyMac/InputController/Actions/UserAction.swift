@@ -12,7 +12,7 @@ enum UserAction {
     case function(Function)
     case number(Number)
     case editSegment(Int)
-    case suggest
+    case suggest(Bool)
 
     enum NavigationDirection {
         case up, down, right, left

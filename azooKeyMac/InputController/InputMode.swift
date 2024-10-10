@@ -74,7 +74,7 @@ enum InputMode {
             }
         case 0x01: // Control + s
             if event.modifierFlags.contains(.control) {
-                return .suggest
+                return .suggest(Config.EnableOpenAiApiKey().value)
             } else if let text = event.characters, isPrintable(text) {
                 return .input(KeyMap.h2zMap(text))
             } else {
