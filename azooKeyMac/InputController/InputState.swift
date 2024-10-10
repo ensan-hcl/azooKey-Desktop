@@ -13,7 +13,8 @@ enum InputState {
         _ event: NSEvent!,
         userAction: UserAction,
         liveConversionEnabled: Bool,
-        enableDebugWindow: Bool
+        enableDebugWindow: Bool,
+        enableSuggestion: Bool
     ) -> (ClientAction, ClientActionCallback) {
         if event.modifierFlags.contains(.command) {
             return (.fallthrough, .fallthrough)
@@ -42,7 +43,11 @@ enum InputState {
                     return (.insertWithoutMarkedText("　"), .transition(.none))
                 }
             case .suggest:
-                return (.requestSuggestion, .transition(.suggestion))
+                if enableSuggestion {
+                    return (.requestSuggestion, .transition(.suggestion))
+                } else {
+                    return (.fallthrough, .fallthrough)
+                }
             case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment, .tab:
                 return (.fallthrough, .fallthrough)
             }
