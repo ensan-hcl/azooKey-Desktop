@@ -388,7 +388,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         let apiKey = Config.OpenAiApiKey().value
 
         // Create the request
-        let request = OpenAIRequest(prompt: prompt)
+        let request = OpenAIRequest(prompt: prompt, target: "")
 
         // Asynchronously send API request
         Task {

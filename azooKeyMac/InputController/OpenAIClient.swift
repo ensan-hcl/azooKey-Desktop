@@ -10,6 +10,7 @@ import Foundation
 // OpenAIへのリクエストを表す構造体
 struct OpenAIRequest {
     let prompt: String
+    let target: String
 
     // リクエストをJSON形式に変換する関数
     func toJSON() -> [String: Any] {
@@ -18,9 +19,8 @@ struct OpenAIRequest {
             "messages": [
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
                 ["role": "user", "content": """
-                I want you to generate possible sentence completions for a given sentence fragment. The output should be a list of different possible endings for the fragment. For example, if I provide "りんごは", you should respond with a list of three possible sentence completions in Japanese, like ["赤いです。", "美味しいです。", "果物です。"]. Keep the completions short and natural. Here is the sentence fragment:
-
-            `\(prompt)`
+                Replace the text enclosed in <<>> in the article with the most suitable form for the previous sentence. Output only the text to be replaced. The output format should be plain text only. Output multiple candidates. The prompt is as follows:
+            `\(prompt)<<\(target)>>`
             """]
             ],
             "response_format": [
@@ -34,7 +34,7 @@ struct OpenAIRequest {
                                 "type": "array",
                                 "items": [
                                     "type": "string",
-                                    "description": "Predicted continuation of the given text."
+                                    "description": "Replace text"
                                 ]
                             ]
                         ],
