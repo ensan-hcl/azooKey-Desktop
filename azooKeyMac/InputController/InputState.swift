@@ -95,7 +95,13 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .unknown, .suggest, .tab:
+            case .suggest:
+                if enableSuggestion {
+                    return (.requestReplaceSuggestion, .transition(.selecting))
+                } else {
+                    return (.fallthrough, .fallthrough)
+                }
+            case .unknown, .tab:
                 return (.fallthrough, .fallthrough)
             }
         case .previewing:

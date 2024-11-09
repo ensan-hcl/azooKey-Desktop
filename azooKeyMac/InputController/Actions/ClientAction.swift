@@ -46,6 +46,7 @@ enum ClientAction {
 
     // Suggestion
     case requestSuggestion
+    case requestReplaceSuggestion
     case submitSuggestion
 
     case stopComposition
