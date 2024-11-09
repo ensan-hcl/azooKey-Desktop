@@ -443,7 +443,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         let errorMessage = "エラーが発生しました: \(error.localizedDescription)"
         self.segmentsManager.appendDebugMessage(errorMessage)
     }
-
     @MainActor func requestReplaceSuggestion(using composingText: String) {
         self.segmentsManager.appendDebugMessage("requestReplaceSuggestion: 開始")
 
@@ -486,6 +485,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                 await MainActor.run {
                     self.segmentsManager.appendDebugMessage("候補ウィンドウ更新中...")
                     self.candidatesViewController.updateCandidates(candidates, selectionIndex: nil, cursorLocation: getCursorLocation())
+
+                    // Display the candidatesWindow
+                    self.candidatesWindow.makeKeyAndOrderFront(nil)
+                    self.candidatesWindow.setIsVisible(true)
                     self.segmentsManager.appendDebugMessage("候補ウィンドウ更新完了")
                 }
             } catch {
