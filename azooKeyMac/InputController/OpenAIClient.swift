@@ -19,8 +19,8 @@ struct OpenAIRequest {
             "messages": [
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
                 ["role": "user", "content": """
-                Replace the text enclosed in <<>> in the article with the most suitable form for the previous sentence. Output only the text to be replaced. The output format should be plain text only. Output multiple candidates. The prompt is as follows:
-            `\(prompt)<<\(target)>>`
+                Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. Output only the text to be replaced. The output format should be plain text only. Output multiple candidates. The prompt is as follows:
+            `\(prompt)<\(target)>`
             """]
             ],
             "response_format": [
