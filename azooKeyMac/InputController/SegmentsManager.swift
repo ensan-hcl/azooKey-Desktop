@@ -312,6 +312,14 @@ final class SegmentsManager {
         self.selectionIndex = max(0, index)
     }
 
+    func requestSelectingSuggestionRow(_ index: Int) {
+        self.selectionIndex = max(0, index)
+    }
+
+    func stopSuggestionSelection() {
+        self.selectionIndex = nil
+    }
+
     func requestResettingSelection() {
         self.selectionIndex = nil
     }
@@ -325,7 +333,7 @@ final class SegmentsManager {
 
     func getCurrentCandidateWindow(inputState: InputState) -> CandidateWindow {
         switch inputState {
-        case .none, .previewing, .suggestion:
+        case .none, .previewing, .suggestion, .suggesting:
             return .hidden
         case .composing:
             if !self.liveConversionEnabled, let firstCandidate = self.rawCandidates?.mainResults.first {
@@ -416,7 +424,7 @@ final class SegmentsManager {
 
     func getCurrentMarkedText(inputState: InputState) -> MarkedText {
         switch inputState {
-        case .none, .composing, .suggestion:
+        case .none, .composing, .suggestion, .suggesting:
             let text = if self.lastOperation == .delete {
                 // 削除のあとは常にひらがなを示す
                 self.composingText.convertTarget
