@@ -7,10 +7,27 @@
 
 import Foundation
 
+// 例として、辞書を定義
+var promptDictionary: [String: String] = [
+    "えもじ": "Replace the text enclosed in <> in the article with the most suitable emoji for the previous sentence. Output only the emoji to be replaced. The output format should be emoji only. Output multiple candidates. The prompt is as follows:",
+    "きごう": "Replace the text enclosed in <> in the article with the most suitable symbol for the previous sentence. Output only the symobol to be replaced. The output format should be symbol only. Output multiple candidates. The prompt is as follows:"
+]
+
 // OpenAIへのリクエストを表す構造体
 struct OpenAIRequest {
     let prompt: String
     let target: String
+
+    let defaultPrompt: String = "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. Output only the text to be replaced. The output format should be plain text only. Output multiple candidates. The prompt is as follows:"
+
+    // 辞書に基づいてpromptを切り替える
+    private func adjustedPrompt() -> String {
+        if let specificPrompt = promptDictionary[target] {
+            return specificPrompt
+        } else {
+            return defaultPrompt
+        }
+    }
 
     // リクエストをJSON形式に変換する関数
     func toJSON() -> [String: Any] {
@@ -19,7 +36,7 @@ struct OpenAIRequest {
             "messages": [
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
                 ["role": "user", "content": """
-                Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. Output only the text to be replaced. The output format should be plain text only. Output multiple candidates. The prompt is as follows:
+            \(adjustedPrompt())
             `\(prompt)<\(target)>`
             """]
             ],
