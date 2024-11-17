@@ -134,6 +134,14 @@ class SuggestCandidatesViewController: NSViewController {
         self.updateSelection(to: nextRow)
     }
 
+    func selectPrevCandidate() {
+        if self.candidates.isEmpty {
+            return
+        }
+        let prevRow = (self.currentSelectedRow - 1 + self.candidates.count) % self.candidates.count
+        self.updateSelection(to: prevRow)
+    }
+
     func getSelectedCandidate() -> Candidate? {
         if self.currentSelectedRow >= 0 && self.currentSelectedRow < candidates.count {
             return candidates[self.currentSelectedRow]

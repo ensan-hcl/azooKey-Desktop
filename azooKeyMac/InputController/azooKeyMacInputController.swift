@@ -306,6 +306,8 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.requestReplaceSuggestion()
         case .selectNextSuggestionCandidate:
             self.suggestCandidatesViewController.selectNextCandidate()
+        case .selectPrevSuggestionCandidate:
+            self.suggestCandidatesViewController.selectPrevCandidate()
         case .submitSuggestionCandidate:
             self.submitSelectedSuggestionCandidate()
         case .hideSuggestCandidateWindow:

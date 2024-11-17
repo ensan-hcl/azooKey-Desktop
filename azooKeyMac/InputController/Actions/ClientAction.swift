@@ -49,6 +49,7 @@ enum ClientAction {
     case requestReplaceSuggestion
     case submitSuggestion
     case selectNextSuggestionCandidate
+    case selectPrevSuggestionCandidate
     case submitSuggestionCandidate
     case hideSuggestCandidateWindow
 

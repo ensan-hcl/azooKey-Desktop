@@ -245,6 +245,14 @@ enum InputState {
             switch userAction {
             case .space:
                 return (.selectNextSuggestionCandidate, .fallthrough)
+            case .navigation(let direction):
+                if direction == .down {
+                    return (.selectNextSuggestionCandidate, .fallthrough)
+                } else if direction == .up {
+                    return (.selectPrevSuggestionCandidate, .fallthrough)
+                } else {
+                    return (.consume, .fallthrough)
+                }
             case .enter:
                 return (.submitSuggestionCandidate, .transition(.none))
             case .backspace, .escape:
@@ -252,7 +260,6 @@ enum InputState {
             default:
                 return (.fallthrough, .fallthrough)
             }
-
         }
     }
 }
