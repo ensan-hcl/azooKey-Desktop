@@ -7,32 +7,35 @@
 
 import Foundation
 
-// 例として、辞書を定義
 var promptDictionary: [String: String] = [
-    "えもじ": "Replace the text enclosed in <> in the article with the most suitable emoji for the previous sentence. Output only the emoji to be replaced. The output format should be emoji only. Output multiple candidates. The prompt is as follows:",
-    "きごう": "Replace the text enclosed in <> in the article with the most suitable symbol for the previous sentence. Output only the symobol to be replaced. The output format should be symbol only. Output multiple candidates. The prompt is as follows:"
+    "えもじ": "Replace the text enclosed in <> in the article with the most suitable emoji for the previous sentence. Output only the emoji to be replaced. The output format should be emoji only.",
+    "きごう": "Replace the text enclosed in <> in the article with the most suitable symbol for the previous sentence. Output only the symbol to be replaced. The output format should be symbol only.",
+    "えいご": "Replace the text enclosed in <> in the article with the most suitable english text for the previous sentence. Output only the english text to be replaced. The output format should be symbol only.",
+    "てふ": "Replace the text enclosed in <> in the article with the most suitable tex command for the previous sentence. Output only the tex command to be replaced. The output format should be tex command only."
 ]
+
+let sharedPromptText: String = " Output multiple candidates. The prompt is as follows:"
 
 // OpenAIへのリクエストを表す構造体
 struct OpenAIRequest {
     let prompt: String
     let target: String
 
-    let defaultPrompt: String = "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. Output only the text to be replaced. The output format should be plain text only. Output multiple candidates. The prompt is as follows:"
+    let defaultPrompt: String = "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. Output only the text to be replaced. The output format should be plain text only."
 
     // 辞書に基づいてpromptを切り替える
     private func adjustedPrompt() -> String {
         if let specificPrompt = promptDictionary[target] {
-            return specificPrompt
+            return specificPrompt + sharedPromptText
         } else {
-            return defaultPrompt
+            return defaultPrompt + sharedPromptText
         }
     }
 
     // リクエストをJSON形式に変換する関数
     func toJSON() -> [String: Any] {
         [
-            "model": "gpt-4o-mini", // Structured Outputs対応モデル
+            "model": "gpt-4o", // Structured Outputs対応モデル
             "messages": [
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
                 ["role": "user", "content": """
