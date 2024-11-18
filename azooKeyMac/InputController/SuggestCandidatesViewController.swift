@@ -99,7 +99,7 @@ class SuggestCandidatesViewController: NSViewController {
         }
 
         // ウィンドウの幅を設定
-        let windowWidth = maxWidth + 20
+        let windowWidth = maxWidth + 30
 
         var newWindowFrame = window.frame
         newWindowFrame.size.width = windowWidth
