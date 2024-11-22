@@ -129,6 +129,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.segmentsManager.deactivate()
         self.candidatesWindow.orderOut(nil)
         self.suggestionWindow.orderOut(nil)
+        self.suggestCandidateWindow.orderOut(nil)
         self.candidatesViewController.updateCandidates([], selectionIndex: nil, cursorLocation: .zero)
         if let client = sender as? IMKTextInput {
             client.insertText("", replacementRange: .notFound)
