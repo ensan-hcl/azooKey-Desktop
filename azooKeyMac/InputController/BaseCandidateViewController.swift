@@ -60,6 +60,10 @@ class BaseCandidateViewController: NSViewController {
         scrollView.documentView = self.tableView
         scrollView.hasVerticalScroller = true
 
+        // デフォルトでスクロールバーを非表示に
+        scrollView.verticalScroller?.controlSize = .mini
+        scrollView.scrollerStyle = .overlay
+
         self.tableView.gridStyleMask = .solidHorizontalGridLineMask
         self.view = scrollView
 
@@ -84,7 +88,9 @@ class BaseCandidateViewController: NSViewController {
     }
 
     internal func configureWindowForRoundedCorners() {
-        guard let window = self.view.window else { return }
+        guard let window = self.view.window else {
+            return
+        }
 
         window.contentView?.wantsLayer = true
         window.contentView?.layer?.masksToBounds = true
@@ -109,7 +115,9 @@ class BaseCandidateViewController: NSViewController {
     }
 
     internal func updateSelection(to row: Int) {
-        if row == -1 { return }
+        if row == -1 {
+            return
+        }
         self.tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         self.tableView.scrollRowToVisible(row)
         self.updateSelectionCallback(row)
@@ -129,10 +137,14 @@ class BaseCandidateViewController: NSViewController {
     }
 
     internal func resizeWindowToFitContent(cursorLocation: CGPoint) {
-        guard let window = self.view.window, let screen = window.screen else { return }
+        guard let window = self.view.window, let screen = window.screen else {
+            return
+        }
 
         let numberOfRows = self.tableView.numberOfRows
-        if numberOfRows == 0 { return }
+        if numberOfRows == 0 {
+            return
+        }
 
         let rowHeight = self.tableView.rowHeight
         let tableViewHeight = CGFloat(numberOfRows) * rowHeight
@@ -170,18 +182,24 @@ class BaseCandidateViewController: NSViewController {
     }
 
     func getSelectedCandidate() -> Candidate? {
-        guard currentSelectedRow >= 0 && currentSelectedRow < candidates.count else { return nil }
+        guard currentSelectedRow >= 0 && currentSelectedRow < candidates.count else {
+            return nil
+        }
         return candidates[currentSelectedRow]
     }
 
     func selectNextCandidate() {
-        guard !candidates.isEmpty else { return }
+        guard !candidates.isEmpty else {
+            return
+        }
         let nextRow = (currentSelectedRow + 1) % candidates.count
         updateSelection(to: nextRow)
     }
 
     func selectPrevCandidate() {
-        guard !candidates.isEmpty else { return }
+        guard !candidates.isEmpty else {
+            return
+        }
         let prevRow = (currentSelectedRow - 1 + candidates.count) % candidates.count
         updateSelection(to: prevRow)
     }

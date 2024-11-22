@@ -75,10 +75,14 @@ class CandidatesViewController: BaseCandidateViewController {
     }
 
     override func resizeWindowToFitContent(cursorLocation: CGPoint) {
-        guard let window = self.view.window, let screen = window.screen else { return }
+        guard let window = self.view.window, let screen = window.screen else {
+            return
+        }
 
         let numberOfRows = min(9, self.tableView.numberOfRows)
-        if numberOfRows == 0 { return }
+        if numberOfRows == 0 {
+            return
+        }
 
         let rowHeight = self.tableView.rowHeight
         let tableViewHeight = CGFloat(numberOfRows) * rowHeight
