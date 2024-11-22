@@ -16,7 +16,6 @@ class BaseCandidateViewController: NSViewController, NSTableViewDelegate, NSTabl
         let scrollView = NSScrollView()
         self.tableView = NonClickableTableView()
         self.tableView.style = .plain
-        self.tableView.selectionHighlightStyle = .regular
         scrollView.documentView = self.tableView
         scrollView.hasVerticalScroller = true
 
@@ -81,7 +80,7 @@ class BaseCandidateViewController: NSViewController, NSTableViewDelegate, NSTabl
         guard let window = self.view.window,
               let screen = window.screen else { return }
 
-        let numberOfRows = self.getNumberOfVisibleRows()
+        let numberOfRows = self.tableView.numberOfRows
         if numberOfRows == 0 { return }
 
         let rowHeight = self.tableView.rowHeight
@@ -96,7 +95,7 @@ class BaseCandidateViewController: NSViewController, NSTableViewDelegate, NSTabl
             return max(maxWidth, attributedString.size().width)
         }
 
-        let windowWidth = getWindowWidth(for: maxWidth)
+        let windowWidth = maxWidth + 30
         var newWindowFrame = window.frame
         newWindowFrame.size.width = windowWidth
         newWindowFrame.size.height = tableViewHeight
@@ -120,15 +119,6 @@ class BaseCandidateViewController: NSViewController, NSTableViewDelegate, NSTabl
         if newWindowFrame != window.frame {
             window.setFrame(newWindowFrame, display: true, animate: false)
         }
-    }
-
-    // Override points for subclasses
-    func getWindowWidth(for contentWidth: CGFloat) -> CGFloat {
-        return contentWidth + 30
-    }
-
-    func getNumberOfVisibleRows() -> Int {
-        return candidates.count
     }
 
     func getSelectedCandidate() -> Candidate? {
@@ -159,17 +149,58 @@ class BaseCandidateViewController: NSViewController, NSTableViewDelegate, NSTabl
         return cell
     }
 
-    func tableView(_ tableView: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
-        return CandidateTableRowView()
-    }
-
     // Override point for subclasses
     @objc func configureCellView(_ cell: CandidateTableCellView, forRow row: Int) {
         cell.candidateTextField.stringValue = candidates[row].text
-        if currentSelectedRow == row {
-            cell.candidateTextField.textColor = .white
-        } else {
-            cell.candidateTextField.textColor = .textColor
-        }
+    }
+
+    // MARK: - Navigation Methods
+    func selectNextCandidate() {
+        if candidates.isEmpty { return }
+        let nextRow = (currentSelectedRow + 1) % candidates.count
+        updateSelection(to: nextRow)
+    }
+
+    func selectPrevCandidate() {
+        if candidates.isEmpty { return }
+        let prevRow = (currentSelectedRow - 1 + candidates.count) % candidates.count
+        updateSelection(to: prevRow)
+    }
+}
+
+// MARK: - Supporting Types
+class NonClickableTableView: NSTableView {
+    override func rightMouseDown(with event: NSEvent) {
+        // Ignore right click events
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        // Ignore left click events
+    }
+
+    override func otherMouseDown(with event: NSEvent) {
+        // Ignore other mouse button events
+    }
+}
+
+class CandidateTableCellView: NSTableCellView {
+    let candidateTextField: NSTextField
+
+    override init(frame frameRect: NSRect) {
+        self.candidateTextField = NSTextField(labelWithString: "")
+        self.candidateTextField.font = NSFont.systemFont(ofSize: 16)
+        super.init(frame: frameRect)
+        self.addSubview(self.candidateTextField)
+
+        self.candidateTextField.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            self.candidateTextField.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            self.candidateTextField.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            self.candidateTextField.centerYAnchor.constraint(equalTo: self.centerYAnchor)
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
