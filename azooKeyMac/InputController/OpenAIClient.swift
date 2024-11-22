@@ -7,7 +7,7 @@
 
 import Foundation
 
-var promptDictionary: [String: String] = [
+private var promptDictionary: [String: String] = [
     "えもじ": "Replace the text enclosed in <> in the article with the most suitable emoji for the previous sentence. Output only the emoji to be replaced. The output format should be emoji only.",
     "きごう": "Replace the text enclosed in <> in the article with the most suitable symbol for the previous sentence. Output only the symbol to be replaced. The output format should be symbol only.",
     "えいご": "Replace the text enclosed in <> in the article with the most suitable english text for the previous sentence. Output only the english text to be replaced. The output format should be symbol only.",
@@ -21,7 +21,7 @@ struct OpenAIRequest {
     let prompt: String
     let target: String
 
-    let defaultPrompt: String = "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. Output only the text to be replaced. The output format should be plain text only."
+    let defaultPrompt: String = "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. If the same content as the preceding text is received, convert it into a different format (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. OUTPUT ONLY THE TEXT TO BE REPLACED. The output format should be plain text only. Propose multiple candidates in order of appropriateness."
 
     // 辞書に基づいてpromptを切り替える
     private func adjustedPrompt() -> String {
@@ -40,6 +40,7 @@ struct OpenAIRequest {
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
                 ["role": "user", "content": """
             \(adjustedPrompt())
+
             `\(prompt)<\(target)>`
             """]
             ],
