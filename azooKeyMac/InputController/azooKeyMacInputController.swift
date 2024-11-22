@@ -480,6 +480,11 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     @MainActor func requestReplaceSuggestion() {
         self.segmentsManager.appendDebugMessage("requestReplaceSuggestion: 開始")
 
+        // リクエスト開始時に前回の候補をクリアし、ウィンドウを非表示にする
+        self.segmentsManager.setSuggestCandidates([])
+        self.suggestCandidateWindow.setIsVisible(false)
+        self.suggestCandidateWindow.orderOut(nil)
+
         let composingText = self.segmentsManager.convertTarget
 
         // プロンプトを取得
@@ -520,19 +525,17 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                 // 候補をウィンドウに更新
                 await MainActor.run {
                     self.segmentsManager.appendDebugMessage("候補ウィンドウ更新中...")
-                    // サジェスト候補を設定
-                    self.segmentsManager.setSuggestCandidates(candidates)
-                    self.suggestCandidatesViewController.updateCandidates(candidates, selectionIndex: nil, cursorLocation: getCursorLocation())
-
-                    // suggestCandidateWindowを表示
-                    self.suggestCandidateWindow.makeKeyAndOrderFront(nil)
-                    self.suggestCandidateWindow.setIsVisible(true)
-                    self.segmentsManager.appendDebugMessage("候補ウィンドウ更新完了")
+                    if !candidates.isEmpty {
+                        self.segmentsManager.setSuggestCandidates(candidates)
+                        self.suggestCandidatesViewController.updateCandidates(candidates, selectionIndex: nil, cursorLocation: getCursorLocation())
+                        self.suggestCandidateWindow.setIsVisible(true)
+                        self.suggestCandidateWindow.makeKeyAndOrderFront(nil)
+                        self.segmentsManager.appendDebugMessage("候補ウィンドウ更新完了")
+                    }
                 }
             } catch {
-                let errorMessage = "APIリクエストエラー: \(error.localizedDescription)"
-                self.segmentsManager.appendDebugMessage(errorMessage)
-                print(errorMessage)
+                self.segmentsManager.appendDebugMessage("APIリクエストエラー: \(error.localizedDescription)")
+                print("APIリクエストエラー: \(error.localizedDescription)")
             }
         }
         self.segmentsManager.appendDebugMessage("requestReplaceSuggestion: 終了")
