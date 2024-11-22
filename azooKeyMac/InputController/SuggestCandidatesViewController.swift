@@ -8,8 +8,9 @@
 import Cocoa
 import KanaKanjiConverterModule
 
-protocol SuggestCandidatesViewControllerDelegate: AnyObject {
+@MainActor protocol SuggestCandidatesViewControllerDelegate: AnyObject {
     func suggestCandidateSelectionChanged(_ row: Int)
+    func suggestCandidateSubmitted()
 }
 
 class SuggestCandidatesViewController: BaseCandidateViewController {
@@ -17,6 +18,16 @@ class SuggestCandidatesViewController: BaseCandidateViewController {
 
     override internal func updateSelectionCallback(_ row: Int) {
         delegate?.suggestCandidateSelectionChanged(row)
+    }
+
+    func submitSelectedCandidate() {
+        delegate?.suggestCandidateSubmitted()
+    }
+
+    // overrideキーワードを削除し、NSTableViewDelegateのメソッドとして実装
+    func tableView(_ tableView: NSTableView, shouldSelectRow row: Int) -> Bool {
+        updateSelection(to: row)
+        return true
     }
 
     override func resizeWindowToFitContent(cursorLocation: CGPoint) {

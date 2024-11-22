@@ -312,8 +312,8 @@ final class SegmentsManager {
         self.selectionIndex = max(0, index)
     }
 
-    func requestSelectingSuggestionRow(_ index: Int) {
-        self.selectionIndex = max(0, index)
+    func requestSelectingSuggestionRow(_ row: Int) {
+        suggestSelectionIndex = row
     }
 
     func stopSuggestionSelection() {
@@ -422,9 +422,24 @@ final class SegmentsManager {
         return text
     }
 
+    // サジェスト候補用の配列とインデックスを追加
+    private var suggestCandidates: [Candidate] = []
+    private var suggestSelectionIndex: Int?
+
+    // サジェスト候補を設定するメソッド
+    func setSuggestCandidates(_ candidates: [Candidate]) {
+        self.suggestCandidates = candidates
+        self.suggestSelectionIndex = nil
+    }
+
+    // サジェスト候補の選択状態をリセット
+    func resetSuggestionSelection() {
+        suggestSelectionIndex = nil
+    }
+
     func getCurrentMarkedText(inputState: InputState) -> MarkedText {
         switch inputState {
-        case .none, .composing, .suggestion, .suggesting:
+        case .none, .composing, .suggestion:
             let text = if self.lastOperation == .delete {
                 // 削除のあとは常にひらがなを示す
                 self.composingText.convertTarget
@@ -458,6 +473,21 @@ final class SegmentsManager {
                 )
             } else {
                 return MarkedText(text: [.init(content: self.composingText.convertTarget, focus: .none)], selectionRange: .notFound)
+            }
+
+        case .suggesting:
+            // サジェスト候補の選択状態を独立して管理
+            if let index = suggestSelectionIndex,
+               suggestCandidates.indices.contains(index) {
+                return MarkedText(
+                    text: [.init(content: suggestCandidates[index].text, focus: .focused)],
+                    selectionRange: NSRange(location: suggestCandidates[index].text.count, length: 0)
+                )
+            } else {
+                return MarkedText(
+                    text: [.init(content: composingText.convertTarget, focus: .none)],
+                    selectionRange: .notFound
+                )
             }
         }
     }

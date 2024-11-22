@@ -520,6 +520,8 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                 // 候補をウィンドウに更新
                 await MainActor.run {
                     self.segmentsManager.appendDebugMessage("候補ウィンドウ更新中...")
+                    // サジェスト候補を設定
+                    self.segmentsManager.setSuggestCandidates(candidates)
                     self.suggestCandidatesViewController.updateCandidates(candidates, selectionIndex: nil, cursorLocation: getCursorLocation())
 
                     // suggestCandidateWindowを表示
@@ -641,5 +643,19 @@ extension azooKeyMacInputController: SegmentManagerDelegate {
 extension azooKeyMacInputController: SuggestCandidatesViewControllerDelegate {
     @MainActor func suggestCandidateSelectionChanged(_ row: Int) {
         self.segmentsManager.requestSelectingSuggestionRow(row)
+    }
+
+    @MainActor func suggestCandidateSubmitted() {
+        if let candidate = self.suggestCandidatesViewController.getSelectedCandidate() {
+            if let client = self.client() {
+                // 選択された候補をテキストとして挿入
+                client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
+                // サジェスト候補ウィンドウを非表示にする
+                self.suggestCandidateWindow.setIsVisible(false)
+                self.suggestCandidateWindow.orderOut(nil)
+                // 変換状態をリセット
+                self.segmentsManager.stopComposition()
+            }
+        }
     }
 }
