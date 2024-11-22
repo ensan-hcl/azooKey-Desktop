@@ -2,8 +2,6 @@
 //  SuggestCandidatesViewController.swift
 //  azooKeyMac
 //
-//  Created by 高橋直希 on 2024/11/17.
-//
 
 import Cocoa
 import KanaKanjiConverterModule
@@ -19,46 +17,30 @@ class SuggestCandidatesViewController: BaseCandidateViewController {
         delegate?.suggestCandidateSelectionChanged(row)
     }
 
-    override func resizeWindowToFitContent(cursorLocation: CGPoint) {
-        guard let window = self.view.window,
-              let screen = window.screen else { return }
+    override func getWindowWidth(for contentWidth: CGFloat) -> CGFloat {
+        return contentWidth + 30  // Slightly different padding from CandidatesViewController
+    }
 
-        let numberOfRows = self.tableView.numberOfRows
-        if numberOfRows == 0 { return }
+    func selectNextCandidate() {
+        if candidates.isEmpty { return }
+        let nextRow = (currentSelectedRow + 1) % candidates.count
+        updateSelection(to: nextRow)
+    }
 
-        let rowHeight = self.tableView.rowHeight
-        let tableViewHeight = CGFloat(numberOfRows) * rowHeight
+    func selectPrevCandidate() {
+        if candidates.isEmpty { return }
+        let prevRow = (currentSelectedRow - 1 + candidates.count) % candidates.count
+        updateSelection(to: prevRow)
+    }
 
-        // Calculate maximum width of candidates
-        let maxWidth = candidates.reduce(0) { maxWidth, candidate in
-            let attributedString = NSAttributedString(
-                string: candidate.text,
-                attributes: [.font: NSFont.systemFont(ofSize: 16)]
-            )
-            return max(maxWidth, attributedString.size().width)
-        }
+    override func configureCellView(_ cell: CandidateTableCellView, forRow row: Int) {
+        super.configureCellView(cell, forRow: row)
 
-        let windowWidth = maxWidth + 30  // Slightly different padding from base class
-        var newWindowFrame = window.frame
-        newWindowFrame.size.width = windowWidth
-        newWindowFrame.size.height = tableViewHeight
-
-        let screenRect = screen.visibleFrame
-        let cursorY = cursorLocation.y
-        let cursorHeight: CGFloat = 16
-
-        if cursorY - tableViewHeight < screenRect.origin.y {
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + cursorHeight)
+        // Set text color based on selection state
+        if currentSelectedRow == row {
+            cell.candidateTextField.textColor = .white
         } else {
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - tableViewHeight - cursorHeight)
-        }
-
-        if newWindowFrame.maxX > screenRect.maxX {
-            newWindowFrame.origin.x = screenRect.maxX - newWindowFrame.width
-        }
-
-        if newWindowFrame != window.frame {
-            window.setFrame(newWindowFrame, display: true, animate: false)
+            cell.candidateTextField.textColor = .textColor
         }
     }
 }

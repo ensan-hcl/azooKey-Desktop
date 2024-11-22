@@ -18,8 +18,20 @@ class CandidatesViewController: BaseCandidateViewController {
     private var showedRows: ClosedRange = 0...8
     var showCandidateIndex = false
 
-    override func
-    configureCellView(_ cell: CandidateTableCellView, forRow row: Int) {
+    override func getNumberOfVisibleRows() -> Int {
+        return min(9, self.tableView.numberOfRows)
+    }
+
+    override func getWindowWidth(for contentWidth: CGFloat) -> CGFloat {
+        return contentWidth + (showCandidateIndex ? 48 : 20)
+    }
+
+    override func updateCandidates(_ candidates: [Candidate], selectionIndex: Int?, cursorLocation: CGPoint) {
+        self.showedRows = selectionIndex == nil ? 0...8 : self.showedRows
+        super.updateCandidates(candidates, selectionIndex: selectionIndex, cursorLocation: cursorLocation)
+    }
+
+    override func configureCellView(_ cell: CandidateTableCellView, forRow row: Int) {
         let isWithinShowedRows = self.showedRows.contains(row)
         let displayIndex = row - self.showedRows.lowerBound + 1
         let displayText: String
@@ -43,13 +55,18 @@ class CandidatesViewController: BaseCandidateViewController {
             ], range: numberRange)
         }
 
+        if currentSelectedRow == row {
+            cell.candidateTextField.textColor = .white
+        } else {
+            cell.candidateTextField.textColor = .textColor
+        }
+
         cell.candidateTextField.attributedStringValue = attributedString
     }
 
     override func handleSelectionChange(_ row: Int) {
         delegate?.candidateSelectionChanged(row)
 
-        // Update showed rows range if necessary
         if !self.showedRows.contains(row) {
             if row < self.showedRows.lowerBound {
                 self.showedRows = row...(row + 8)
@@ -58,7 +75,6 @@ class CandidatesViewController: BaseCandidateViewController {
             }
         }
 
-        // Update all visible cells to reflect new showing range
         self.tableView.reloadData()
     }
 
