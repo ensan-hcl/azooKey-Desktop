@@ -21,7 +21,7 @@ struct OpenAIRequest {
     let prompt: String
     let target: String
 
-    let defaultPrompt: String = "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. If the same content as the preceding text is received, convert it into a different format (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. OUTPUT ONLY THE TEXT TO BE REPLACED. The output format should be plain text only. Propose multiple candidates in order of appropriateness."
+    let defaultPrompt: String = "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. If the same content as the preceding text is received, convert it into a different format (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. If the text enclosed in <> is a language name, convert the text before the <> to that language. OUTPUT ONLY THE TEXT TO BE REPLACED. The output format should be plain text only. Propose multiple candidates in order of appropriateness."
 
     // 辞書に基づいてpromptを切り替える
     private func adjustedPrompt() -> String {
