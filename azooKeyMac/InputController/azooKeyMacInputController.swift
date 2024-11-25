@@ -626,12 +626,16 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
 }
 
 extension azooKeyMacInputController: CandidatesViewControllerDelegate {
-    @MainActor func candidateSubmitted() {
-        self.submitSelectedCandidate()
+    func candidateSubmitted() {
+        Task { @MainActor in
+            self.submitSelectedCandidate()
+        }
     }
 
-    @MainActor func candidateSelectionChanged(_ row: Int) {
-        self.segmentsManager.requestSelectingRow(row)
+    func candidateSelectionChanged(_ row: Int) {
+        Task { @MainActor in
+            self.segmentsManager.requestSelectingRow(row)
+        }
     }
 }
 
@@ -648,20 +652,24 @@ extension azooKeyMacInputController: SegmentManagerDelegate {
 }
 
 extension azooKeyMacInputController: SuggestCandidatesViewControllerDelegate {
-    @MainActor func suggestCandidateSelectionChanged(_ row: Int) {
-        self.segmentsManager.requestSelectingSuggestionRow(row)
+    func suggestCandidateSelectionChanged(_ row: Int) {
+        Task { @MainActor in
+            self.segmentsManager.requestSelectingSuggestionRow(row)
+        }
     }
 
-    @MainActor func suggestCandidateSubmitted() {
-        if let candidate = self.suggestCandidatesViewController.getSelectedCandidate() {
-            if let client = self.client() {
-                // 選択された候補をテキストとして挿入
-                client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
-                // サジェスト候補ウィンドウを非表示にする
-                self.suggestCandidateWindow.setIsVisible(false)
-                self.suggestCandidateWindow.orderOut(nil)
-                // 変換状態をリセット
-                self.segmentsManager.stopComposition()
+    func suggestCandidateSubmitted() {
+        Task { @MainActor in
+            if let candidate = self.suggestCandidatesViewController.getSelectedCandidate() {
+                if let client = self.client() {
+                    // 選択された候補をテキストとして挿入
+                    client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
+                    // サジェスト候補ウィンドウを非表示にする
+                    self.suggestCandidateWindow.setIsVisible(false)
+                    self.suggestCandidateWindow.orderOut(nil)
+                    // 変換状態をリセット
+                    self.segmentsManager.stopComposition()
+                }
             }
         }
     }
