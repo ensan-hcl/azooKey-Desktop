@@ -332,6 +332,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                 hideSuggestion()
                 hideSuggestionCandidateView()
             }
+            // 遷移した時にSuggestionViewをhideする
+            if inputState != .suggesting {
+                self.suggestCandidateWindow.orderOut(nil)
+            }
             self.inputState = inputState
         case .basedOnBackspace(let ifIsEmpty, let ifIsNotEmpty), .basedOnSubmitCandidate(let ifIsEmpty, let ifIsNotEmpty):
             self.inputState = self.segmentsManager.isEmpty ? ifIsEmpty : ifIsNotEmpty
