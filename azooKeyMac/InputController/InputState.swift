@@ -243,6 +243,9 @@ enum InputState {
             }
         case .suggesting:
             switch userAction {
+            // 入力があったらcomposingに戻る
+            case .input(let string):
+                return (.appendToMarkedText(string), .transition(.composing))
             case .space:
                 return (.selectNextSuggestionCandidate, .fallthrough)
             case .navigation(let direction):
@@ -253,6 +256,8 @@ enum InputState {
                 } else {
                     return (.consume, .fallthrough)
                 }
+            case .suggest:
+                return (.requestReplaceSuggestion, .fallthrough)
             case .enter:
                 return (.submitSuggestionCandidate, .transition(.none))
             case .backspace, .escape:
