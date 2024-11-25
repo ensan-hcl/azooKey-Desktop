@@ -35,7 +35,7 @@ struct OpenAIRequest {
     // リクエストをJSON形式に変換する関数
     func toJSON() -> [String: Any] {
         [
-            "model": "gpt-4o", // Structured Outputs対応モデル
+            "model": "gpt-4o-mini", // Structured Outputs対応モデル
             "messages": [
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
                 ["role": "user", "content": """
