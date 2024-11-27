@@ -556,10 +556,8 @@ extension azooKeyMacInputController: SegmentManagerDelegate {
 }
 
 extension azooKeyMacInputController: SuggestCandidatesViewControllerDelegate {
-    func suggestCandidateSelectionChanged(_ row: Int) {
-        Task { @MainActor in
+    @MainActor func suggestCandidateSelectionChanged(_ row: Int) {
             self.segmentsManager.requestSelectingSuggestionRow(row)
-        }
     }
 
     func suggestCandidateSubmitted() {
