@@ -7,30 +7,34 @@
 
 import Foundation
 
-private var promptDictionary: [String: String] = [
-    "えもじ": "Replace the text enclosed in <> in the article with the most suitable emoji for the previous sentence. Output only the emoji to be replaced. The output format should be emoji only.",
-    "きごう": "Replace the text enclosed in <> in the article with the most suitable symbol for the previous sentence. Output only the symbol to be replaced. The output format should be symbol only.",
-    "えいご": "Replace the text enclosed in <> in the article with the most suitable english text for the previous sentence. Output only the english text to be replaced. The output format should be symbol only.",
-    "てふ": "Replace the text enclosed in <> in the article with the most suitable tex command for the previous sentence. Output only the tex command to be replaced. The output format should be tex command only."
-]
+private struct Prompt {
+    static let dictionary: [String: String] = [
+        "えもじ": "Replace the text enclosed in <> in the article with the most suitable emoji for the previous sentence. Output only the emoji to be replaced.",
+        "きごう": "Replace the text enclosed in <> in the article with the most suitable symbol for the previous sentence. Output only the symbol to be replaced.",
+        "えいご": "Replace the text enclosed in <> in the article with the most suitable english text for the previous sentence. Output only the english text to be replaced.",
+        "てふ": "Replace the text enclosed in <> in the article with the most suitable tex command for the previous sentence. Output only the tex command to be replaced."
+    ]
 
-let sharedPromptText: String = " Output multiple candidates. The prompt is as follows:"
+    static let sharedText = " Output multiple candidates."
+
+    static let defaultPrompt = """
+        Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. \
+        If the same content as the preceding text is received, convert it into a different format \
+        (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. \
+        If the text enclosed in <> is a language name, convert the text before the <> to that language. \
+        OUTPUT ONLY THE TEXT TO BE REPLACED.
+        """
+
+    static func getPromptText(for target: String) -> String {
+        let basePrompt = dictionary[target] ?? defaultPrompt
+        return basePrompt + sharedText
+    }
+}
 
 // OpenAIへのリクエストを表す構造体
 struct OpenAIRequest {
     let prompt: String
     let target: String
-
-    let defaultPrompt: String = "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. If the same content as the preceding text is received, convert it into a different format (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. If the text enclosed in <> is a language name, convert the text before the <> to that language. OUTPUT ONLY THE TEXT TO BE REPLACED. The output format should be plain text only. Propose multiple candidates in order of appropriateness."
-
-    // 辞書に基づいてpromptを切り替える
-    private func adjustedPrompt() -> String {
-        if let specificPrompt = promptDictionary[target] {
-            return specificPrompt + sharedPromptText
-        } else {
-            return defaultPrompt + sharedPromptText
-        }
-    }
 
     // リクエストをJSON形式に変換する関数
     func toJSON() -> [String: Any] {
@@ -39,10 +43,10 @@ struct OpenAIRequest {
             "messages": [
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
                 ["role": "user", "content": """
-            \(adjustedPrompt())
+                    \(Prompt.getPromptText(for: target))
 
-            `\(prompt)<\(target)>`
-            """]
+                    `\(prompt)<\(target)>`
+                    """]
             ],
             "response_format": [
                 "type": "json_schema",
@@ -55,7 +59,7 @@ struct OpenAIRequest {
                                 "type": "array",
                                 "items": [
                                     "type": "string",
-                                    "description": "Replace text"
+                                    "description": "Replaced text"
                                 ]
                             ]
                         ],
@@ -68,12 +72,35 @@ struct OpenAIRequest {
     }
 }
 
-// OpenAI APIクライアントをenumで実装
+enum OpenAIError: LocalizedError {
+    case invalidURL
+    case noServerResponse
+    case invalidResponseStatus(code: Int, body: String)
+    case parseError(String)
+    case invalidResponseStructure(Any)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "Invalid URL"
+        case .noServerResponse:
+            return "No response from server"
+        case .invalidResponseStatus(let code, let body):
+            return "Invalid response from server. Status code: \(code), Response body: \(body)"
+        case .parseError(let message):
+            return "Parse error: \(message)"
+        case .invalidResponseStructure(let received):
+            return "Failed to parse response structure. Received: \(received)"
+        }
+    }
+}
+
+// OpenAI APIクライアント
 enum OpenAIClient {
     // APIリクエストを送信する静的メソッド
     static func sendRequest(_ request: OpenAIRequest, apiKey: String, segmentsManager: SegmentsManager) async throws -> [String] {
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+            throw OpenAIError.invalidURL
         }
 
         var urlRequest = URLRequest(url: url)
@@ -82,22 +109,19 @@ enum OpenAIClient {
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let body = request.toJSON()
-        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        // 非同期でリクエストを送信
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
 
-        // レスポンスの検証
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No response from server"])
+            throw OpenAIError.noServerResponse
         }
 
         guard httpResponse.statusCode == 200 else {
             let responseBody = String(decoding: data, as: UTF8.self)
-            throw NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Invalid response from server. Status code: \(httpResponse.statusCode), Response body: \(responseBody)"])
+            throw OpenAIError.invalidResponseStatus(code: httpResponse.statusCode, body: responseBody)
         }
 
-        // レスポンスデータの解析
         return try parseResponseData(data, segmentsManager: segmentsManager)
     }
 
@@ -107,15 +131,15 @@ enum OpenAIClient {
 
         let jsonObject: Any
         do {
-            jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+            jsonObject = try JSONSerialization.jsonObject(with: data)
         } catch {
             segmentsManager.appendDebugMessage("Failed to parse JSON response")
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
+            throw OpenAIError.parseError("Failed to parse response")
         }
 
         guard let jsonDict = jsonObject as? [String: Any],
               let choices = jsonDict["choices"] as? [[String: Any]] else {
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response structure. Received: \(jsonObject)"])
+            throw OpenAIError.invalidResponseStructure(jsonObject)
         }
 
         var allPredictions: [String] = []
@@ -133,7 +157,7 @@ enum OpenAIClient {
             }
 
             do {
-                guard let parsedContent = try JSONSerialization.jsonObject(with: contentData, options: []) as? [String: [String]],
+                guard let parsedContent = try JSONSerialization.jsonObject(with: contentData) as? [String: [String]],
                       let predictions = parsedContent["predictions"] else {
                     segmentsManager.appendDebugMessage("Failed to parse `content` as expected JSON dictionary: \(contentString)")
                     continue
