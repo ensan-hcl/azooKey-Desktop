@@ -377,12 +377,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.suggestionWindow.orderOut(nil)
     }
 
-    @MainActor
-    func hideSuggestionCandidateView() {
-        self.suggestCandidateWindow.setIsVisible(false)
-        self.suggestCandidateWindow.orderOut(nil)
-    }
-
     var retryCount = 0
     let maxRetries = 3
 
@@ -461,99 +455,9 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         }
     }
 
-    @MainActor func retrySuggestionRequestIfNeeded(cursorPosition: CGPoint) {
-        if retryCount < maxRetries {
-            retryCount += 1
-            self.segmentsManager.appendDebugMessage("再試行中... (\(retryCount)回目)")
-
-            // 再試行を0.5秒後に実行
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.requestSuggestion()
-            }
-        } else {
-            self.segmentsManager.appendDebugMessage("再試行上限に達しました。")
-            retryCount = 0
-        }
-    }
-
     @MainActor func handleSuggestionError(_ error: Error, cursorPosition: CGPoint) {
         let errorMessage = "エラーが発生しました: \(error.localizedDescription)"
         self.segmentsManager.appendDebugMessage(errorMessage)
-    }
-
-    @MainActor func requestReplaceSuggestion() {
-        self.segmentsManager.appendDebugMessage("requestReplaceSuggestion: 開始")
-
-        // リクエスト開始時に前回の候補をクリアし、ウィンドウを非表示にする
-        self.segmentsManager.setSuggestCandidates([])
-        self.suggestCandidateWindow.setIsVisible(false)
-        self.suggestCandidateWindow.orderOut(nil)
-
-        let composingText = self.segmentsManager.convertTarget
-
-        // プロンプトを取得
-        guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
-            self.segmentsManager.appendDebugMessage("プロンプト取得失敗: 再試行を開始")
-            retrySuggestionRequestIfNeeded(cursorPosition: .zero)
-            return
-        }
-
-        self.segmentsManager.appendDebugMessage("プロンプト取得成功: \(prompt) << \(composingText)")
-
-        let apiKey = Config.OpenAiApiKey().value
-        let request = OpenAIRequest(prompt: prompt, target: composingText)
-        self.segmentsManager.appendDebugMessage("APIリクエスト準備完了: prompt=\(prompt), target=\(composingText)")
-
-        // 非同期タスクでリクエストを送信
-        Task {
-            do {
-                self.segmentsManager.appendDebugMessage("APIリクエスト送信中...")
-                let predictions = try await OpenAIClient.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
-                self.segmentsManager.appendDebugMessage("APIレスポンス受信成功: \(predictions)")
-
-                // String配列からCandidate配列に変換
-                let candidates = predictions.map { text in
-                    Candidate(
-                        text: text,
-                        value: PValue(0),
-                        correspondingCount: text.count,
-                        lastMid: 0,
-                        data: [],
-                        actions: [],
-                        inputable: true
-                    )
-                }
-
-                self.segmentsManager.appendDebugMessage("候補変換成功: \(candidates.map { $0.text })")
-
-                // 候補をウィンドウに更新
-                await MainActor.run {
-                    self.segmentsManager.appendDebugMessage("候補ウィンドウ更新中...")
-                    if !candidates.isEmpty {
-                        self.segmentsManager.setSuggestCandidates(candidates)
-                        self.suggestCandidatesViewController.updateCandidates(candidates, selectionIndex: nil, cursorLocation: getCursorLocation())
-                        self.suggestCandidateWindow.setIsVisible(true)
-                        self.suggestCandidateWindow.makeKeyAndOrderFront(nil)
-                        self.segmentsManager.appendDebugMessage("候補ウィンドウ更新完了")
-                    }
-                }
-            } catch {
-                self.segmentsManager.appendDebugMessage("APIリクエストエラー: \(error.localizedDescription)")
-                print("APIリクエストエラー: \(error.localizedDescription)")
-            }
-        }
-        self.segmentsManager.appendDebugMessage("requestReplaceSuggestion: 終了")
-    }
-
-    @MainActor func submitSelectedSuggestionCandidate() {
-        if let candidate = self.suggestCandidatesViewController.getSelectedCandidate() {
-            if let client = self.client() {
-                client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
-                self.suggestCandidateWindow.setIsVisible(false)
-                self.suggestCandidateWindow.orderOut(nil)
-                self.segmentsManager.stopComposition()
-            }
-        }
     }
 
     func getCursorLocation() -> CGPoint {
@@ -671,6 +575,125 @@ extension azooKeyMacInputController: SuggestCandidatesViewControllerDelegate {
                     self.segmentsManager.stopComposition()
                 }
             }
+        }
+    }
+}
+
+// Suggest Candidate
+extension azooKeyMacInputController {
+    // MARK: - Window Setup
+    func setupSuggestCandidateWindow() {
+        self.suggestCandidatesViewController = SuggestCandidatesViewController()
+        self.suggestCandidateWindow = NSWindow(contentViewController: self.suggestCandidatesViewController)
+        self.suggestCandidateWindow.styleMask = [.borderless]
+        self.suggestCandidateWindow.level = .popUpMenu
+
+        var rect: NSRect = .zero
+        if let client = self.client() as? IMKTextInput {
+            client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+        }
+        rect.size = .init(width: 400, height: 1000)
+        self.suggestCandidateWindow.setFrame(rect, display: true)
+        self.suggestCandidateWindow.setIsVisible(false)
+        self.suggestCandidateWindow.orderOut(nil)
+
+        self.suggestCandidatesViewController.delegate = self
+    }
+
+    // MARK: - Suggestion Request Handling
+    @MainActor func requestReplaceSuggestion() {
+        self.segmentsManager.appendDebugMessage("requestReplaceSuggestion: 開始")
+
+        // リクエスト開始時に前回の候補をクリアし、ウィンドウを非表示にする
+        self.segmentsManager.setSuggestCandidates([])
+        self.suggestCandidateWindow.setIsVisible(false)
+        self.suggestCandidateWindow.orderOut(nil)
+
+        let composingText = self.segmentsManager.convertTarget
+
+        // プロンプトを取得
+        guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
+            self.segmentsManager.appendDebugMessage("プロンプト取得失敗: 再試行を開始")
+            retrySuggestionRequestIfNeeded(cursorPosition: .zero)
+            return
+        }
+
+        self.segmentsManager.appendDebugMessage("プロンプト取得成功: \(prompt) << \(composingText)")
+
+        let apiKey = Config.OpenAiApiKey().value
+        let request = OpenAIRequest(prompt: prompt, target: composingText)
+        self.segmentsManager.appendDebugMessage("APIリクエスト準備完了: prompt=\(prompt), target=\(composingText)")
+
+        // 非同期タスクでリクエストを送信
+        Task {
+            do {
+                self.segmentsManager.appendDebugMessage("APIリクエスト送信中...")
+                let predictions = try await OpenAIClient.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
+                self.segmentsManager.appendDebugMessage("APIレスポンス受信成功: \(predictions)")
+
+                // String配列からCandidate配列に変換
+                let candidates = predictions.map { text in
+                    Candidate(
+                        text: text,
+                        value: PValue(0),
+                        correspondingCount: text.count,
+                        lastMid: 0,
+                        data: [],
+                        actions: [],
+                        inputable: true
+                    )
+                }
+
+                self.segmentsManager.appendDebugMessage("候補変換成功: \(candidates.map { $0.text })")
+
+                // 候補をウィンドウに更新
+                await MainActor.run {
+                    self.segmentsManager.appendDebugMessage("候補ウィンドウ更新中...")
+                    if !candidates.isEmpty {
+                        self.segmentsManager.setSuggestCandidates(candidates)
+                        self.suggestCandidatesViewController.updateCandidates(candidates, selectionIndex: nil, cursorLocation: getCursorLocation())
+                        self.suggestCandidateWindow.setIsVisible(true)
+                        self.suggestCandidateWindow.makeKeyAndOrderFront(nil)
+                        self.segmentsManager.appendDebugMessage("候補ウィンドウ更新完了")
+                    }
+                }
+            } catch {
+                self.segmentsManager.appendDebugMessage("APIリクエストエラー: \(error.localizedDescription)")
+                print("APIリクエストエラー: \(error.localizedDescription)")
+            }
+        }
+        self.segmentsManager.appendDebugMessage("requestReplaceSuggestion: 終了")
+    }
+
+    // MARK: - Window Management
+    @MainActor func hideSuggestionCandidateView() {
+        self.suggestCandidateWindow.setIsVisible(false)
+        self.suggestCandidateWindow.orderOut(nil)
+    }
+
+    @MainActor func submitSelectedSuggestionCandidate() {
+        if let candidate = self.suggestCandidatesViewController.getSelectedCandidate() {
+            if let client = self.client() {
+                client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
+                self.suggestCandidateWindow.setIsVisible(false)
+                self.suggestCandidateWindow.orderOut(nil)
+                self.segmentsManager.stopComposition()
+            }
+        }
+    }
+
+    // MARK: - Helper Methods
+    private func retrySuggestionRequestIfNeeded(cursorPosition: CGPoint) {
+        if retryCount < maxRetries {
+            retryCount += 1
+            self.segmentsManager.appendDebugMessage("再試行中... (\(retryCount)回目)")
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.requestReplaceSuggestion()
+            }
+        } else {
+            self.segmentsManager.appendDebugMessage("再試行上限に達しました。")
+            retryCount = 0
         }
     }
 }
