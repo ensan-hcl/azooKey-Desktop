@@ -9,10 +9,22 @@ import Foundation
 
 private struct Prompt {
     static let dictionary: [String: String] = [
-        "えもじ": "Replace the text enclosed in <> in the article with the most suitable emoji for the previous sentence. Output only the emoji to be replaced.",
-        "きごう": "Replace the text enclosed in <> in the article with the most suitable symbol for the previous sentence. Output only the symbol to be replaced.",
-        "えいご": "Replace the text enclosed in <> in the article with the most suitable english text for the previous sentence. Output only the english text to be replaced.",
-        "てふ": "Replace the text enclosed in <> in the article with the most suitable tex command for the previous sentence. Output only the tex command to be replaced."
+        // プロンプトなし
+        "": """
+        I want you to generate possible sentence completions for a given sentence fragment. The output should be a list of different possible endings for the fragment. For example, if I provide "りんごは", you should respond with a list of three possible sentence completions in Japanese, like ["赤いです。", "美味しいです。", "果物です。"]. Keep the completions short and natural. Here is the sentence fragment:
+        """,
+        "えもじ": """
+        Replace the text enclosed in <> in the article with the most suitable emoji for the previous sentence. Output only the emoji to be replaced.
+        """,
+        "きごう": """
+        Replace the text enclosed in <> in the article with the most suitable symbol for the previous sentence. Output only the symbol to be replaced.
+        """,
+        "えいご": """
+        Replace the text enclosed in <> in the article with the most suitable english text for the previous sentence. Output only the english text to be replaced.
+        """,
+        "てふ": """
+        Replace the text enclosed in <> in the article with the most suitable tex command for the previous sentence. Output only the tex command to be replaced.
+        """
     ]
 
     static let sharedText = " Output multiple candidates."
