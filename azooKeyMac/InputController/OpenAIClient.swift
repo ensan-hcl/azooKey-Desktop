@@ -30,7 +30,7 @@ private struct Prompt {
     static let sharedText = "Propose multiple candidates in order of appropriateness."
 
     static let defaultPrompt = """
-        Replace the text enclosed in <> in the article with the most suitable form for the preceding sentence. If the same content as the preceding text is received, convert it into a different format (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. If the text enclosed in <> is a language name, convert the text before the <> to that language. OUTPUT ONLY THE TEXT TO BE REPLACED. The output format should be plain text only.
+        "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. If the same content as the preceding text is received, convert it into a different format (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. If the text enclosed in <> is a language name, convert the text before the <> to that language. OUTPUT ONLY THE TEXT TO BE REPLACED. The output format should be plain text only.
         """
 
     static func getPromptText(for target: String) -> String {
@@ -67,7 +67,7 @@ struct OpenAIRequest {
                                 "type": "array",
                                 "items": [
                                     "type": "string",
-                                    "description": "Replacement text doesn't include the preceding text."
+                                    "description": "Replacement text"
                                 ]
                             ]
                         ],
