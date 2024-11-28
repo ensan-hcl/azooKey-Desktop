@@ -37,19 +37,20 @@ class CandidatesViewController: BaseCandidateViewController {
 
     override internal func configureCellView(_ cell: CandidateTableCellView, forRow row: Int) {
         let isWithinShowedRows = self.showedRows.contains(row)
-        let displayIndex = row - self.showedRows.lowerBound + 1
+        let displayIndex = row - self.showedRows.lowerBound + 1 // showedRowsの下限からの相対的な位置
         let displayText: String
 
         if isWithinShowedRows && self.showCandidateIndex {
             if displayIndex > 9 {
-                displayText = " " + self.candidates[row].text
+                displayText = " " + self.candidates[row].text // 行番号が10以上の場合、インデントを調整
             } else {
                 displayText = "\(displayIndex). " + self.candidates[row].text
             }
         } else {
-            displayText = self.candidates[row].text
+            displayText = self.candidates[row].text // showedRowsの範囲外では番号を付けない
         }
 
+        // 数字部分と候補部分を別々に設定
         let attributedString = NSMutableAttributedString(string: displayText)
         let numberRange = (displayText as NSString).range(of: "\(displayIndex).")
 
@@ -83,7 +84,6 @@ class CandidatesViewController: BaseCandidateViewController {
         if numberOfRows == 0 {
             return
         }
-
         let rowHeight = self.tableView.rowHeight
         let tableViewHeight = CGFloat(numberOfRows) * rowHeight
 
@@ -95,6 +95,8 @@ class CandidatesViewController: BaseCandidateViewController {
             return max(maxWidth, attributedString.size().width)
         }
 
+        // ウィンドウの幅を設定（番号とパディングのための追加幅を考慮）
+        // 20 = corner radius * 2
         let windowWidth = if self.showCandidateIndex {
             maxWidth + 48
         } else {
@@ -104,11 +106,15 @@ class CandidatesViewController: BaseCandidateViewController {
         var newWindowFrame = window.frame
         newWindowFrame.size.width = windowWidth
         newWindowFrame.size.height = tableViewHeight
+        
         // 画面のサイズを取得
         let screenRect = screen.visibleFrame
         let cursorY = cursorLocation.y
-        let cursorHeight: CGFloat = 16
 
+        // カーソルの高さを考慮してウィンドウ位置を調整
+        let cursorHeight: CGFloat = 16 // カーソルの高さを16ピクセルと仮定
+
+        // ウィンドウをカーソルの下に表示
         if cursorY - tableViewHeight < screenRect.origin.y {
             newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + cursorHeight)
         } else {
@@ -119,7 +125,6 @@ class CandidatesViewController: BaseCandidateViewController {
         if newWindowFrame.maxX > screenRect.maxX {
             newWindowFrame.origin.x = screenRect.maxX - newWindowFrame.width
         }
-
         if newWindowFrame != window.frame {
             window.setFrame(newWindowFrame, display: true, animate: false)
         }

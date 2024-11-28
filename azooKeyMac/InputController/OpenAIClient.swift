@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 private struct Prompt {
     static let dictionary: [String: String] = [
         // プロンプトなし
@@ -119,8 +120,10 @@ enum OpenAIClient {
         let body = request.toJSON()
         urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
 
+        // 非同期でリクエストを送信
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
 
+        // レスポンスの検証
         guard let httpResponse = response as? HTTPURLResponse else {
             throw OpenAIError.noServerResponse
         }
@@ -130,6 +133,7 @@ enum OpenAIClient {
             throw OpenAIError.invalidResponseStatus(code: httpResponse.statusCode, body: responseBody)
         }
 
+        // レスポンスデータの解析
         return try parseResponseData(data, segmentsManager: segmentsManager)
     }
 
