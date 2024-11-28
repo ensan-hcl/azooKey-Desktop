@@ -14,23 +14,23 @@ private struct Prompt {
         I want you to generate possible sentence completions for a given sentence fragment. The output should be a list of different possible endings for the fragment. For example, if I provide "りんごは", you should respond with a list of three possible sentence completions in Japanese, like ["赤いです。", "美味しいです。", "果物です。"]. Keep the completions short and natural.
         """,
         "えもじ": """
-        Replace the text enclosed in <> in the article with the most suitable emoji for the previous sentence. Output only the emoji to be replaced.
+        Replace the text enclosed in <> in the article with the most suitable emoji for the preceding sentence. Output only the emoji to be replaced.
         """,
         "きごう": """
-        Replace the text enclosed in <> in the article with the most suitable symbol for the previous sentence. Output only the symbol to be replaced.
+        Replace the text enclosed in <> in the article with the most suitable symbol for the preceding sentence. Output only the symbol to be replaced.
         """,
         "えいご": """
-        Replace the text enclosed in <> in the article with the most suitable english text for the previous sentence. Output only the english text to be replaced.
+        Replace the text enclosed in <> in the article with the most suitable english text for the preceding sentence. Output only the english text to be replaced.
         """,
         "てふ": """
-        Replace the text enclosed in <> in the article with the most suitable tex command for the previous sentence. Output only the tex command to be replaced.
+        Replace the text enclosed in <> in the article with the most suitable tex command for the preceding sentence. Output only the tex command to be replaced.
         """
     ]
 
     static let sharedText = "Propose multiple candidates in order of appropriateness."
 
     static let defaultPrompt = """
-        Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. If the same content as the preceding text is received, convert it into a different format (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. If the text enclosed in <> is a language name, convert the text before the <> to that language. OUTPUT ONLY THE TEXT TO BE REPLACED. The output format should be plain text only.
+        Replace the text enclosed in <> in the article with the most suitable form for the preceding sentence. If the same content as the preceding text is received, convert it into a different format (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. If the text enclosed in <> is a language name, convert the text before the <> to that language. OUTPUT ONLY THE TEXT TO BE REPLACED. The output format should be plain text only.
         """
 
     static func getPromptText(for target: String) -> String {
@@ -67,7 +67,7 @@ struct OpenAIRequest {
                                 "type": "array",
                                 "items": [
                                     "type": "string",
-                                    "description": "Replacement text doesn't include the previous text."
+                                    "description": "Replacement text doesn't include the preceding text."
                                 ]
                             ]
                         ],
