@@ -5,8 +5,8 @@ enum InputState {
     case composing
     case previewing
     case selecting
-    case suggestion
-    case suggesting
+    case predictiveSuggestion
+    case replacingSuggestion
 
     // この種のコードは複雑にしかならないので、lintを無効にする
     // swiftlint:disable:next cyclomatic_complexity
@@ -45,7 +45,7 @@ enum InputState {
                 }
             case .suggest:
                 if enableSuggestion {
-                    return (.requestSuggestion, .transition(.suggestion))
+                    return (.requestSuggestion, .transition(.predictiveSuggestion))
                 } else {
                     return (.fallthrough, .fallthrough)
                 }
@@ -98,7 +98,7 @@ enum InputState {
                 return (.editSegment(count), .transition(.selecting))
             case .suggest:
                 if enableSuggestion {
-                    return (.requestReplaceSuggestion, .transition(.suggesting))
+                    return (.requestReplaceSuggestion, .transition(.replacingSuggestion))
                 } else {
                     return (.fallthrough, .fallthrough)
                 }
@@ -215,7 +215,7 @@ enum InputState {
             case .unknown, .suggest, .tab:
                 return (.fallthrough, .fallthrough)
             }
-        case .suggestion:
+        case .predictiveSuggestion:
             // tab以外は.none同様にそのまま入力できる
             switch userAction {
             case .input(let string):
@@ -241,7 +241,7 @@ enum InputState {
             case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:
                 return (.fallthrough, .fallthrough)
             }
-        case .suggesting:
+        case .replacingSuggestion:
             switch userAction {
             // 入力があったらcomposingに戻る
             case .input(let string):

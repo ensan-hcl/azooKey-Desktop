@@ -328,12 +328,12 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             break
         case .transition(let inputState):
             // 遷移した時にSuggestionViewをhideする
-            if inputState != .suggestion {
+            if inputState != .predictiveSuggestion {
                 hideSuggestion()
                 hideSuggestionCandidateView()
             }
             // 遷移した時にsuggestCandidateWindowをhideする
-            if inputState != .suggesting {
+            if inputState != .replacingSuggestion {
                 self.suggestCandidateWindow.orderOut(nil)
             }
             self.inputState = inputState

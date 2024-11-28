@@ -333,7 +333,7 @@ final class SegmentsManager {
 
     func getCurrentCandidateWindow(inputState: InputState) -> CandidateWindow {
         switch inputState {
-        case .none, .previewing, .suggestion, .suggesting:
+        case .none, .previewing, .predictiveSuggestion, .replacingSuggestion:
             return .hidden
         case .composing:
             if !self.liveConversionEnabled, let firstCandidate = self.rawCandidates?.mainResults.first {
@@ -439,7 +439,7 @@ final class SegmentsManager {
 
     func getCurrentMarkedText(inputState: InputState) -> MarkedText {
         switch inputState {
-        case .none, .composing, .suggestion:
+        case .none, .composing, .predictiveSuggestion:
             let text = if self.lastOperation == .delete {
                 // 削除のあとは常にひらがなを示す
                 self.composingText.convertTarget
@@ -475,7 +475,7 @@ final class SegmentsManager {
                 return MarkedText(text: [.init(content: self.composingText.convertTarget, focus: .none)], selectionRange: .notFound)
             }
 
-        case .suggesting:
+        case .replacingSuggestion:
             // サジェスト候補の選択状態を独立して管理
             if let index = suggestSelectionIndex,
                suggestCandidates.indices.contains(index) {
