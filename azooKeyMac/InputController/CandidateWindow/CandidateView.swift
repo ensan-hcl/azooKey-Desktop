@@ -104,7 +104,7 @@ class CandidatesViewController: BaseCandidateViewController {
         var newWindowFrame = window.frame
         newWindowFrame.size.width = windowWidth
         newWindowFrame.size.height = tableViewHeight
-
+        // 画面のサイズを取得
         let screenRect = screen.visibleFrame
         let cursorY = cursorLocation.y
         let cursorHeight: CGFloat = 16
@@ -115,6 +115,7 @@ class CandidatesViewController: BaseCandidateViewController {
             newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - tableViewHeight - cursorHeight)
         }
 
+        // 右端でウィンドウが画面外に出る場合は左にシフト
         if newWindowFrame.maxX > screenRect.maxX {
             newWindowFrame.origin.x = screenRect.maxX - newWindowFrame.width
         }
