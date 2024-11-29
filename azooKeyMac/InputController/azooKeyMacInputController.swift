@@ -610,11 +610,7 @@ extension azooKeyMacInputController {
         let composingText = self.segmentsManager.convertTarget
 
         // プロンプトを取得
-        guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
-            self.segmentsManager.appendDebugMessage("プロンプト取得失敗: 再試行を開始")
-            retrySuggestionRequestIfNeeded(cursorPosition: .zero)
-            return
-        }
+        let prompt = self.getLeftSideContext(maxCount: 100) ?? ""
 
         self.segmentsManager.appendDebugMessage("プロンプト取得成功: \(prompt) << \(composingText)")
 
