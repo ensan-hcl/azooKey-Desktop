@@ -106,7 +106,7 @@ class CandidatesViewController: BaseCandidateViewController {
         var newWindowFrame = window.frame
         newWindowFrame.size.width = windowWidth
         newWindowFrame.size.height = tableViewHeight
-        
+
         // 画面のサイズを取得
         let screenRect = screen.visibleFrame
         let cursorY = cursorLocation.y
