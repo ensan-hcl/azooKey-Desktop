@@ -7,36 +7,102 @@
 
 import Foundation
 
-
 private struct Prompt {
     static let dictionary: [String: String] = [
-        // プロンプトなし
+        // 文章補完プロンプト（デフォルト）
         "": """
-        I want you to generate possible sentence completions for a given sentence fragment. The output should be a list of different possible endings for the fragment. For example, if I provide "りんごは", you should respond with a list of three possible sentence completions in Japanese, like ["赤いです。", "美味しいです。", "果物です。"]. Keep the completions short and natural.
+        Generate 3-5 natural sentence completions for the given fragment.
+        Return them as a simple array of strings.
+
+        Example:
+        Input: "りんごは"
+        Output: ["赤いです。", "甘いです。", "美味しいです。", "1個200円です。", "果物です。"]
         """,
+
+        // 絵文字変換プロンプト
         "えもじ": """
-        Replace the text enclosed in <> in the article with the most suitable emoji for the preceding sentence. Output only the emoji to be replaced.
+        Generate 3-5 emoji options that best represent the meaning of the text.
+        Return them as a simple array of strings.
+
+        Example:
+        Input: "嬉しいです<えもじ>"
+        Output: ["😊", "🥰", "😄", "💖", "✨"]
         """,
+
+        // 記号変換プロンプト
         "きごう": """
-        Replace the text enclosed in <> in the article with the most suitable symbol for the preceding sentence. Output only the symbol to be replaced.
+        Propose 3-5 symbol options to represent the given context.
+        Return them as a simple array of strings.
+
+        Example:
+        Input: "総和<きごう>"
+        Output: ["Σ", "+", "⊕"]
         """,
-        "えいご": """
-        Replace the text enclosed in <> in the article with the most suitable english text for the preceding sentence. Output only the english text to be replaced.
-        """,
+
+        // TeXコマンド変換プロンプト
         "てふ": """
-        Replace the text enclosed in <> in the article with the most suitable tex command for the preceding sentence. Output only the tex command to be replaced.
+        Generate 3-5 TeX command options for the given mathematical content.
+        Return them as a simple array of strings.
+
+         Example:
+        Input: "二次方程式<てふ>"
+        Output: ["$x^2$", "$\\alpha$", "$\\frac{1}{2}$"]
+
+        Input: "積分<てふ>"
+        Output: ["$\\int$", "$\\oint$", "$\\sum$"]
+
+        Input: "平方根<てふ>"
+        Output: ["$\\sqrt{x}$", "$\\sqrt[n]{x}$", "$x^{1/2}$"]
+        """,
+
+        // 説明プロンプト
+        "せつめい": """
+        Provide 3-5 explanation to represent the given context.
+        Return them as a simple array of Japanese strings.
         """
     ]
 
-    static let sharedText = "Propose multiple candidates in order of appropriateness."
+    static let sharedText = """
+    Return 3-5 options as a simple array of strings, ordered from:
+    - Most standard/common to more specific/creative
+    - Most formal to more casual (where applicable)
+    - Most direct to more nuanced interpretations
+    """
 
     static let defaultPrompt = """
-        "Replace the text enclosed in <> in the article with the most suitable form for the previous sentence. If the same content as the preceding text is received, convert it into a different format (such as symbols, rephrasing, or changing the overall linguistic style) while preserving its meaning. If the text enclosed in <> is a language name, convert the text before the <> to that language. OUTPUT ONLY THE TEXT TO BE REPLACED. The output format should be plain text only.
-        """
+    If the text in <> is a language name (e.g., <えいご>, <ふらんすご>, <すぺいんご>, <ちゅうごくご>, <かんこくご>, etc.),
+    translate the preceding text into that language with 3-5 different variations.
+    Otherwise, generate 3-5 alternative expressions of the text in <> that maintain its core meaning, following the sentence preceding <>.
+    considering:
+    - Different word choices
+    - Varying formality levels
+    - Alternative phrases or expressions
+    - Different rhetorical approaches
+    Return results as a simple array of strings.
+
+    Example:
+    Input: "おはようございます。今日も<てんき>"
+    Output: ["いい天気", "雨", "晴れ", "快晴" , "曇り"]
+
+    Input: "先日は失礼しました。<ごめん>"
+    Output: ["すいません。", "ごめんなさい", "申し訳ありません"]
+
+    Input: "すぐに戻ります<まってて>"
+    Output: ["ただいま戻ります", "少々お待ちください", "すぐ参ります", "まもなく戻ります", "しばらくお待ちを"]
+
+    Input: "遅刻してすいません。<いいわけ>"
+    Output: ["電車の遅延", "寝坊", "道に迷って"]
+
+    Input: "こんにちは<ふらんすご>"
+    Output: ["Bonjour", "Salut", "Bon après-midi", "Coucou", "Allô"]
+
+    Input: "ありがとう<すぺいんご>"
+    Output: ["Gracias", "Muchas gracias", "Te lo agradezco", "Mil gracias", "Gracias mil"]
+    """
 
     static func getPromptText(for target: String) -> String {
         let basePrompt = dictionary[target] ?? defaultPrompt
-        return basePrompt + sharedText
+        return basePrompt + "\n\n" + sharedText
     }
 }
 
