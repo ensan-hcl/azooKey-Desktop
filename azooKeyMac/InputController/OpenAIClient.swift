@@ -106,16 +106,14 @@ private struct Prompt {
     }
 }
 
-/**
- OpenAI APIに送信するリクエスト構造体。
-
- - プロパティ:
-    - prompt: 変換対象の前のテキスト
-    - target: 変換対象のテキスト
-
- - メソッド:
-    - toJSON(): リクエストをOpenAI APIに適したJSON形式に変換する。
- */
+// OpenAI APIに送信するリクエスト構造体。
+//
+// - properties:
+//    - prompt: 変換対象の前のテキスト
+//    - target: 変換対象のテキスト
+//
+// - methods:
+//    - toJSON(): リクエストをOpenAI APIに適したJSON形式に変換する。
 struct OpenAIRequest {
     let prompt: String
     let target: String
