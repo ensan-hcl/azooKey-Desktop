@@ -11,6 +11,10 @@ identifier_name:
   max_length: 10000 # 長さ上限を無効化
   excluded: ["英数|かな"]
 
+type_name:
+  min_length: 1
+  max_length: 10000 # 長さ上限を無効化
+
 analyzer_rules:
   - unused_import
   - unused_declaration
