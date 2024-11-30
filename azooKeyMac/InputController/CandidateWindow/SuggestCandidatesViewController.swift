@@ -1,5 +1,5 @@
 //
-//  SuggestCandidatesViewController.swift
+//  ReplaceSuggestionsViewController.swift
 //  azooKeyMac
 //
 //  Created by 高橋直希 on 2024/11/17.
@@ -8,20 +8,20 @@
 import Cocoa
 import KanaKanjiConverterModule
 
-@MainActor protocol SuggestCandidatesViewControllerDelegate: AnyObject {
-    func suggestCandidateSelectionChanged(_ row: Int)
-    func suggestCandidateSubmitted()
+@MainActor protocol ReplaceSuggestionsViewControllerDelegate: AnyObject {
+    func replaceSuggestionSelectionChanged(_ row: Int)
+    func replaceSuggestionSubmitted()
 }
 
-class SuggestCandidatesViewController: BaseCandidateViewController {
-    weak var delegate: (any SuggestCandidatesViewControllerDelegate)?
+class ReplaceSuggestionsViewController: BaseCandidateViewController {
+    weak var delegate: (any ReplaceSuggestionsViewControllerDelegate)?
 
     override internal func updateSelectionCallback(_ row: Int) {
-        delegate?.suggestCandidateSelectionChanged(row)
+        delegate?.replaceSuggestionSelectionChanged(row)
     }
 
     func submitSelectedCandidate() {
-        delegate?.suggestCandidateSubmitted()
+        delegate?.replaceSuggestionSubmitted()
     }
 
     // overrideキーワードを削除し、NSTableViewDelegateのメソッドとして実装

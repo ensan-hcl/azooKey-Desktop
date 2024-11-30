@@ -44,14 +44,16 @@ enum ClientAction {
     case submitHiraganaCandidate
     case submitHankakuKatakanaCandidate
 
-    // Suggestion
-    case requestSuggestion
-    case requestReplaceSuggestion
+    // PredictiveSuggestion
+    case requestPredictiveSuggestion
     case submitSuggestion
-    case selectNextSuggestionCandidate
-    case selectPrevSuggestionCandidate
-    case submitSuggestionCandidate
-    case hideSuggestCandidateWindow
+
+    // ReplaceSuggestion
+    case requestReplaceSuggestion
+    case selectNextReplaceSuggestionCandidate
+    case selectPrevReplaceSuggestionCandidate
+    case submitReplaceSuggestionCandidate
+    case hideReplaceSuggestionWindow
 
     case stopComposition
 

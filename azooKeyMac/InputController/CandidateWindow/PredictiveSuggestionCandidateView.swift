@@ -1,12 +1,12 @@
 //
-//  Suggestion.swift
+//  PredictiveSuggestionCandidateView.swift
 //  azooKeyMac
 //
 //  Created by 高橋直希 on 2024/09/21.
 //
 import Cocoa
 
-class SuggestionView: NSView {
+class PredictiveSuggestionCandidateView: NSView {
     private let textField: NSTextField
     private let statusLabel: NSTextField
     private var currentCandidate: String = ""
@@ -107,18 +107,18 @@ class SuggestionView: NSView {
         self.currentCandidate.isEmpty ? nil : self.currentCandidate
     }
 }
-class SuggestionViewController: NSViewController {
+class PredictiveSuggestionCandidateViewController: NSViewController {
     override func loadView() {
-        self.view = SuggestionView()
+        self.view = PredictiveSuggestionCandidateView()
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureWindowForRoundedCorners()
         // サンプルのデータを設定
-        if let suggestion = self.view as? SuggestionView {
-            suggestion.displayCandidate("...")
-            suggestion.displayStatusText("..")
+        if let predictiveSuggestionCandidateView = self.view as? PredictiveSuggestionCandidateView {
+            predictiveSuggestionCandidateView.displayCandidate("...")
+            predictiveSuggestionCandidateView.displayStatusText("..")
         }
     }
 
@@ -140,24 +140,24 @@ class SuggestionViewController: NSViewController {
     }
 
     func displayCandidate(_ candidate: String, cursorPosition: NSPoint, fontSize: CGFloat = 16) {
-        if let suggestionView = self.view as? SuggestionView {
-            suggestionView.displayCandidate(candidate, rectHeight: fontSize)
+        if let predictiveSuggestionCandidateView = self.view as? PredictiveSuggestionCandidateView {
+            predictiveSuggestionCandidateView.displayCandidate(candidate, rectHeight: fontSize)
 
             // ウィンドウのサイズを更新
             if let window = self.view.window {
-                window.setContentSize(suggestionView.intrinsicContentSize)
+                window.setContentSize(predictiveSuggestionCandidateView.intrinsicContentSize)
             }
         }
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
     }
 
     func displayStatusText(_ statusText: String, cursorPosition: NSPoint, fontSize: CGFloat = 16) {
-        if let suggestionView = self.view as? SuggestionView {
-            suggestionView.displayStatusText(statusText, rectHeight: fontSize)
+        if let predictiveSuggestionCandidateView = self.view as? PredictiveSuggestionCandidateView {
+            predictiveSuggestionCandidateView.displayStatusText(statusText, rectHeight: fontSize)
 
             // ウィンドウのサイズを更新
             if let window = self.view.window {
-                window.setContentSize(suggestionView.intrinsicContentSize)
+                window.setContentSize(predictiveSuggestionCandidateView.intrinsicContentSize)
             }
         }
         self.positionWindowAtCursor(cursorPosition: cursorPosition)
@@ -179,6 +179,6 @@ class SuggestionViewController: NSViewController {
     }
 
     func getSelectedCandidate() -> String? {
-        (self.view as? SuggestionView)?.getSelectedCandidate()
+        (self.view as? PredictiveSuggestionCandidateView)?.getSelectedCandidate()
     }
 }

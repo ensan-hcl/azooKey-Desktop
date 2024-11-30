@@ -45,7 +45,7 @@ enum InputState {
                 }
             case .suggest:
                 if enableSuggestion {
-                    return (.requestSuggestion, .transition(.predictiveSuggestion))
+                    return (.requestPredictiveSuggestion, .transition(.predictiveSuggestion))
                 } else {
                     return (.fallthrough, .fallthrough)
                 }
@@ -235,7 +235,7 @@ enum InputState {
                 }
             case .suggest:
                 // 再度リクエスト
-                return (.requestSuggestion, .transition(.none))
+                return (.requestPredictiveSuggestion, .transition(.none))
             case .tab:
                 return (.submitSuggestion, .transition(.none))
             case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:
@@ -247,21 +247,21 @@ enum InputState {
             case .input(let string):
                 return (.appendToMarkedText(string), .transition(.composing))
             case .space:
-                return (.selectNextSuggestionCandidate, .fallthrough)
+                return (.selectNextReplaceSuggestionCandidate, .fallthrough)
             case .navigation(let direction):
                 if direction == .down {
-                    return (.selectNextSuggestionCandidate, .fallthrough)
+                    return (.selectNextReplaceSuggestionCandidate, .fallthrough)
                 } else if direction == .up {
-                    return (.selectPrevSuggestionCandidate, .fallthrough)
+                    return (.selectPrevReplaceSuggestionCandidate, .fallthrough)
                 } else {
                     return (.consume, .fallthrough)
                 }
             case .suggest:
                 return (.requestReplaceSuggestion, .fallthrough)
             case .enter:
-                return (.submitSuggestionCandidate, .transition(.none))
+                return (.submitReplaceSuggestionCandidate, .transition(.none))
             case .backspace, .escape:
-                return (.hideSuggestCandidateWindow, .transition(.composing))
+                return (.hideReplaceSuggestionWindow, .transition(.composing))
             default:
                 return (.fallthrough, .fallthrough)
             }

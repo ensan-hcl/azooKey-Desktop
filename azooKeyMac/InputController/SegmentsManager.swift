@@ -38,7 +38,7 @@ final class SegmentsManager {
     private var shouldShowDebugCandidateWindow: Bool = false
     private var debugCandidates: [Candidate] = []
 
-    private var suggestCandidates: [Candidate] = []
+    private var replaceSuggestions: [Candidate] = []
     private var suggestSelectionIndex: Int?
 
     private enum Operation: Sendable {
@@ -426,8 +426,8 @@ final class SegmentsManager {
     }
 
     // サジェスト候補を設定するメソッド
-    func setSuggestCandidates(_ candidates: [Candidate]) {
-        self.suggestCandidates = candidates
+    func setReplaceSuggestions(_ candidates: [Candidate]) {
+        self.replaceSuggestions = candidates
         self.suggestSelectionIndex = nil
     }
 
@@ -477,10 +477,10 @@ final class SegmentsManager {
         case .replacingSuggestion:
             // サジェスト候補の選択状態を独立して管理
             if let index = suggestSelectionIndex,
-               suggestCandidates.indices.contains(index) {
+               replaceSuggestions.indices.contains(index) {
                 return MarkedText(
-                    text: [.init(content: suggestCandidates[index].text, focus: .focused)],
-                    selectionRange: NSRange(location: suggestCandidates[index].text.count, length: 0)
+                    text: [.init(content: replaceSuggestions[index].text, focus: .focused)],
+                    selectionRange: NSRange(location: replaceSuggestions[index].text.count, length: 0)
                 )
             } else {
                 return MarkedText(
