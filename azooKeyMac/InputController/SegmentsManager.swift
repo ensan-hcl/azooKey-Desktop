@@ -336,7 +336,7 @@ final class SegmentsManager {
 
     func getCurrentCandidateWindow(inputState: InputState) -> CandidateWindow {
         switch inputState {
-        case .none, .previewing, .predictiveSuggestion, .replacingSuggestion:
+        case .none, .previewing, .predictiveSuggestion, .replaceSuggestion:
             return .hidden
         case .composing:
             if !self.liveConversionEnabled, let firstCandidate = self.rawCandidates?.mainResults.first {
@@ -474,7 +474,7 @@ final class SegmentsManager {
                 return MarkedText(text: [.init(content: self.composingText.convertTarget, focus: .none)], selectionRange: .notFound)
             }
 
-        case .replacingSuggestion:
+        case .replaceSuggestion:
             // サジェスト候補の選択状態を独立して管理
             if let index = suggestSelectionIndex,
                replaceSuggestions.indices.contains(index) {

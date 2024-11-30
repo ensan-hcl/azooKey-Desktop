@@ -335,7 +335,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
                 hideReplaceSuggestionCandidateView()
             }
             // 遷移した時にreplaceSuggestionWindowをhideする
-            if inputState != .replacingSuggestion {
+            if inputState != .replaceSuggestion {
                 self.replaceSuggestionWindow.orderOut(nil)
             }
             self.inputState = inputState
