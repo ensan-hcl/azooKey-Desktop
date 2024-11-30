@@ -29,6 +29,16 @@ private struct Prompt {
         Output: ["😊", "🥰", "😄", "💖", "✨"]
         """,
 
+        // 顔文字変換プロンプト
+        "かおもじ": """
+        Generate 3-5 kaomoji (Japanese emoticon) options that best express the emotion or meaning of the text.
+        Return them as a simple array of strings.
+
+        Example:
+        Input: "嬉しいです<かおもじ>"
+        Output: ["(≧▽≦)", "(^_^)", "(o^▽^o)", "(｡♥‿♥｡)"]
+        """,
+
         // 記号変換プロンプト
         "きごう": """
         Propose 3-5 symbol options to represent the given context.
@@ -37,6 +47,26 @@ private struct Prompt {
         Example:
         Input: "総和<きごう>"
         Output: ["Σ", "+", "⊕"]
+        """,
+
+        // 類義語変換プロンプト
+        "るいぎご": """
+        Generate 3-5 synonymous word options for the given text.
+        Return them as a simple array of Japanese strings.
+
+        Example:
+        Input: "楽しい<るいぎご>"
+        Output: ["愉快", "面白い", "嬉しい", "快活", "ワクワクする"]
+        """,
+
+        // 対義語変換プロンプト
+        "たいぎご": """
+        Generate 3-5 antonymous word options for the given text.
+        Return them as a simple array of Japanese strings.
+
+        Example:
+        Input: "楽しい<たいぎご>"
+        Output: ["悲しい", "つまらない", "不愉快", "退屈", "憂鬱"]
         """,
 
         // TeXコマンド変換プロンプト
