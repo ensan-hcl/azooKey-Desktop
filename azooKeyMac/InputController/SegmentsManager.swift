@@ -38,6 +38,9 @@ final class SegmentsManager {
     private var shouldShowDebugCandidateWindow: Bool = false
     private var debugCandidates: [Candidate] = []
 
+    private var replaceSuggestions: [Candidate] = []
+    private var suggestSelectionIndex: Int?
+
     private enum Operation: Sendable {
         case insert
         case delete
@@ -312,6 +315,14 @@ final class SegmentsManager {
         self.selectionIndex = max(0, index)
     }
 
+    func requestSelectingSuggestionRow(_ row: Int) {
+        suggestSelectionIndex = row
+    }
+
+    func stopSuggestionSelection() {
+        self.selectionIndex = nil
+    }
+
     func requestResettingSelection() {
         self.selectionIndex = nil
     }
@@ -325,7 +336,7 @@ final class SegmentsManager {
 
     func getCurrentCandidateWindow(inputState: InputState) -> CandidateWindow {
         switch inputState {
-        case .none, .previewing, .suggestion:
+        case .none, .previewing, .predictiveSuggestion, .replaceSuggestion:
             return .hidden
         case .composing:
             if !self.liveConversionEnabled, let firstCandidate = self.rawCandidates?.mainResults.first {
@@ -414,9 +425,20 @@ final class SegmentsManager {
         return text
     }
 
+    // サジェスト候補を設定するメソッド
+    func setReplaceSuggestions(_ candidates: [Candidate]) {
+        self.replaceSuggestions = candidates
+        self.suggestSelectionIndex = nil
+    }
+
+    // サジェスト候補の選択状態をリセット
+    func resetSuggestionSelection() {
+        suggestSelectionIndex = nil
+    }
+
     func getCurrentMarkedText(inputState: InputState) -> MarkedText {
         switch inputState {
-        case .none, .composing, .suggestion:
+        case .none, .composing, .predictiveSuggestion:
             let text = if self.lastOperation == .delete {
                 // 削除のあとは常にひらがなを示す
                 self.composingText.convertTarget
@@ -450,6 +472,21 @@ final class SegmentsManager {
                 )
             } else {
                 return MarkedText(text: [.init(content: self.composingText.convertTarget, focus: .none)], selectionRange: .notFound)
+            }
+
+        case .replaceSuggestion:
+            // サジェスト候補の選択状態を独立して管理
+            if let index = suggestSelectionIndex,
+               replaceSuggestions.indices.contains(index) {
+                return MarkedText(
+                    text: [.init(content: replaceSuggestions[index].text, focus: .focused)],
+                    selectionRange: NSRange(location: replaceSuggestions[index].text.count, length: 0)
+                )
+            } else {
+                return MarkedText(
+                    text: [.init(content: composingText.convertTarget, focus: .none)],
+                    selectionRange: .notFound
+                )
             }
         }
     }

@@ -7,9 +7,116 @@
 
 import Foundation
 
-// OpenAIへのリクエストを表す構造体
+private struct Prompt {
+    static let dictionary: [String: String] = [
+        // 文章補完プロンプト（デフォルト）
+        "": """
+        Generate 3-5 natural sentence completions for the given fragment.
+        Return them as a simple array of strings.
+
+        Example:
+        Input: "りんごは"
+        Output: ["赤いです。", "甘いです。", "美味しいです。", "1個200円です。", "果物です。"]
+        """,
+
+        // 絵文字変換プロンプト
+        "えもじ": """
+        Generate 3-5 emoji options that best represent the meaning of the text.
+        Return them as a simple array of strings.
+
+        Example:
+        Input: "嬉しいです<えもじ>"
+        Output: ["😊", "🥰", "😄", "💖", "✨"]
+        """,
+
+        // 記号変換プロンプト
+        "きごう": """
+        Propose 3-5 symbol options to represent the given context.
+        Return them as a simple array of strings.
+
+        Example:
+        Input: "総和<きごう>"
+        Output: ["Σ", "+", "⊕"]
+        """,
+
+        // TeXコマンド変換プロンプト
+        "てふ": """
+        Generate 3-5 TeX command options for the given mathematical content.
+        Return them as a simple array of strings.
+
+         Example:
+        Input: "二次方程式<てふ>"
+        Output: ["$x^2$", "$\\alpha$", "$\\frac{1}{2}$"]
+
+        Input: "積分<てふ>"
+        Output: ["$\\int$", "$\\oint$", "$\\sum$"]
+
+        Input: "平方根<てふ>"
+        Output: ["$\\sqrt{x}$", "$\\sqrt[n]{x}$", "$x^{1/2}$"]
+        """,
+
+        // 説明プロンプト
+        "せつめい": """
+        Provide 3-5 explanation to represent the given context.
+        Return them as a simple array of Japanese strings.
+        """
+    ]
+
+    static let sharedText = """
+    Return 3-5 options as a simple array of strings, ordered from:
+    - Most standard/common to more specific/creative
+    - Most formal to more casual (where applicable)
+    - Most direct to more nuanced interpretations
+    """
+
+    static let defaultPrompt = """
+    If the text in <> is a language name (e.g., <えいご>, <ふらんすご>, <すぺいんご>, <ちゅうごくご>, <かんこくご>, etc.),
+    translate the preceding text into that language with 3-5 different variations.
+    Otherwise, generate 3-5 alternative expressions of the text in <> that maintain its core meaning, following the sentence preceding <>.
+    considering:
+    - Different word choices
+    - Varying formality levels
+    - Alternative phrases or expressions
+    - Different rhetorical approaches
+    Return results as a simple array of strings.
+
+    Example:
+    Input: "おはようございます。今日も<てんき>"
+    Output: ["いい天気", "雨", "晴れ", "快晴" , "曇り"]
+
+    Input: "先日は失礼しました。<ごめん>"
+    Output: ["すいません。", "ごめんなさい", "申し訳ありません"]
+
+    Input: "すぐに戻ります<まってて>"
+    Output: ["ただいま戻ります", "少々お待ちください", "すぐ参ります", "まもなく戻ります", "しばらくお待ちを"]
+
+    Input: "遅刻してすいません。<いいわけ>"
+    Output: ["電車の遅延", "寝坊", "道に迷って"]
+
+    Input: "こんにちは<ふらんすご>"
+    Output: ["Bonjour", "Salut", "Bon après-midi", "Coucou", "Allô"]
+
+    Input: "ありがとう<すぺいんご>"
+    Output: ["Gracias", "Muchas gracias", "Te lo agradezco", "Mil gracias", "Gracias mil"]
+    """
+
+    static func getPromptText(for target: String) -> String {
+        let basePrompt = dictionary[target] ?? defaultPrompt
+        return basePrompt + "\n\n" + sharedText
+    }
+}
+
+// OpenAI APIに送信するリクエスト構造体。
+//
+// - properties:
+//    - prompt: 変換対象の前のテキスト
+//    - target: 変換対象のテキスト
+//
+// - methods:
+//    - toJSON(): リクエストをOpenAI APIに適したJSON形式に変換する。
 struct OpenAIRequest {
     let prompt: String
+    let target: String
 
     // リクエストをJSON形式に変換する関数
     func toJSON() -> [String: Any] {
@@ -18,10 +125,10 @@ struct OpenAIRequest {
             "messages": [
                 ["role": "system", "content": "You are an assistant that predicts the continuation of short text."],
                 ["role": "user", "content": """
-                I want you to generate possible sentence completions for a given sentence fragment. The output should be a list of different possible endings for the fragment. For example, if I provide "りんごは", you should respond with a list of three possible sentence completions in Japanese, like ["赤いです。", "美味しいです。", "果物です。"]. Keep the completions short and natural. Here is the sentence fragment:
+                    \(Prompt.getPromptText(for: target))
 
-            `\(prompt)`
-            """]
+                    `\(prompt)<\(target)>`
+                    """]
             ],
             "response_format": [
                 "type": "json_schema",
@@ -34,7 +141,7 @@ struct OpenAIRequest {
                                 "type": "array",
                                 "items": [
                                     "type": "string",
-                                    "description": "Predicted continuation of the given text."
+                                    "description": "Replacement text"
                                 ]
                             ]
                         ],
@@ -47,12 +154,35 @@ struct OpenAIRequest {
     }
 }
 
-// OpenAI APIクライアントをenumで実装
+enum OpenAIError: LocalizedError {
+    case invalidURL
+    case noServerResponse
+    case invalidResponseStatus(code: Int, body: String)
+    case parseError(String)
+    case invalidResponseStructure(Any)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "Invalid URL"
+        case .noServerResponse:
+            return "No response from server"
+        case .invalidResponseStatus(let code, let body):
+            return "Invalid response from server. Status code: \(code), Response body: \(body)"
+        case .parseError(let message):
+            return "Parse error: \(message)"
+        case .invalidResponseStructure(let received):
+            return "Failed to parse response structure. Received: \(received)"
+        }
+    }
+}
+
+// OpenAI APIクライアント
 enum OpenAIClient {
     // APIリクエストを送信する静的メソッド
     static func sendRequest(_ request: OpenAIRequest, apiKey: String, segmentsManager: SegmentsManager) async throws -> [String] {
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+            throw OpenAIError.invalidURL
         }
 
         var urlRequest = URLRequest(url: url)
@@ -61,19 +191,19 @@ enum OpenAIClient {
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let body = request.toJSON()
-        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body, options: [])
+        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         // 非同期でリクエストを送信
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
 
         // レスポンスの検証
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No response from server"])
+            throw OpenAIError.noServerResponse
         }
 
         guard httpResponse.statusCode == 200 else {
             let responseBody = String(decoding: data, as: UTF8.self)
-            throw NSError(domain: "", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Invalid response from server. Status code: \(httpResponse.statusCode), Response body: \(responseBody)"])
+            throw OpenAIError.invalidResponseStatus(code: httpResponse.statusCode, body: responseBody)
         }
 
         // レスポンスデータの解析
@@ -86,15 +216,15 @@ enum OpenAIClient {
 
         let jsonObject: Any
         do {
-            jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+            jsonObject = try JSONSerialization.jsonObject(with: data)
         } catch {
             segmentsManager.appendDebugMessage("Failed to parse JSON response")
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response"])
+            throw OpenAIError.parseError("Failed to parse response")
         }
 
         guard let jsonDict = jsonObject as? [String: Any],
               let choices = jsonDict["choices"] as? [[String: Any]] else {
-            throw NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse response structure. Received: \(jsonObject)"])
+            throw OpenAIError.invalidResponseStructure(jsonObject)
         }
 
         var allPredictions: [String] = []
@@ -112,7 +242,7 @@ enum OpenAIClient {
             }
 
             do {
-                guard let parsedContent = try JSONSerialization.jsonObject(with: contentData, options: []) as? [String: [String]],
+                guard let parsedContent = try JSONSerialization.jsonObject(with: contentData) as? [String: [String]],
                       let predictions = parsedContent["predictions"] else {
                     segmentsManager.appendDebugMessage("Failed to parse `content` as expected JSON dictionary: \(contentString)")
                     continue

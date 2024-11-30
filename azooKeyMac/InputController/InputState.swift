@@ -5,7 +5,8 @@ enum InputState {
     case composing
     case previewing
     case selecting
-    case suggestion
+    case predictiveSuggestion
+    case replaceSuggestion
 
     // この種のコードは複雑にしかならないので、lintを無効にする
     // swiftlint:disable:next cyclomatic_complexity
@@ -44,7 +45,7 @@ enum InputState {
                 }
             case .suggest:
                 if enableSuggestion {
-                    return (.requestSuggestion, .transition(.suggestion))
+                    return (.requestPredictiveSuggestion, .transition(.predictiveSuggestion))
                 } else {
                     return (.fallthrough, .fallthrough)
                 }
@@ -95,7 +96,13 @@ enum InputState {
                 }
             case .editSegment(let count):
                 return (.editSegment(count), .transition(.selecting))
-            case .unknown, .suggest, .tab:
+            case .suggest:
+                if enableSuggestion {
+                    return (.requestReplaceSuggestion, .transition(.replaceSuggestion))
+                } else {
+                    return (.fallthrough, .fallthrough)
+                }
+            case .unknown, .tab:
                 return (.fallthrough, .fallthrough)
             }
         case .previewing:
@@ -208,7 +215,7 @@ enum InputState {
             case .unknown, .suggest, .tab:
                 return (.fallthrough, .fallthrough)
             }
-        case .suggestion:
+        case .predictiveSuggestion:
             // tab以外は.none同様にそのまま入力できる
             switch userAction {
             case .input(let string):
@@ -228,10 +235,34 @@ enum InputState {
                 }
             case .suggest:
                 // 再度リクエスト
-                return (.requestSuggestion, .transition(.none))
+                return (.requestPredictiveSuggestion, .transition(.none))
             case .tab:
                 return (.submitSuggestion, .transition(.none))
             case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:
+                return (.fallthrough, .fallthrough)
+            }
+        case .replaceSuggestion:
+            switch userAction {
+            // 入力があったらcomposingに戻る
+            case .input(let string):
+                return (.appendToMarkedText(string), .transition(.composing))
+            case .space:
+                return (.selectNextReplaceSuggestionCandidate, .fallthrough)
+            case .navigation(let direction):
+                if direction == .down {
+                    return (.selectNextReplaceSuggestionCandidate, .fallthrough)
+                } else if direction == .up {
+                    return (.selectPrevReplaceSuggestionCandidate, .fallthrough)
+                } else {
+                    return (.consume, .fallthrough)
+                }
+            case .suggest:
+                return (.requestReplaceSuggestion, .fallthrough)
+            case .enter:
+                return (.submitReplaceSuggestionCandidate, .transition(.none))
+            case .backspace, .escape:
+                return (.hideReplaceSuggestionWindow, .transition(.composing))
+            default:
                 return (.fallthrough, .fallthrough)
             }
         }
