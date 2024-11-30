@@ -38,6 +38,9 @@ final class SegmentsManager {
     private var shouldShowDebugCandidateWindow: Bool = false
     private var debugCandidates: [Candidate] = []
 
+    private var suggestCandidates: [Candidate] = []
+    private var suggestSelectionIndex: Int?
+
     private enum Operation: Sendable {
         case insert
         case delete
@@ -421,10 +424,6 @@ final class SegmentsManager {
         self.stopComposition()
         return text
     }
-
-    // サジェスト候補用の配列とインデックスを追加
-    private var suggestCandidates: [Candidate] = []
-    private var suggestSelectionIndex: Int?
 
     // サジェスト候補を設定するメソッド
     func setSuggestCandidates(_ candidates: [Candidate]) {
