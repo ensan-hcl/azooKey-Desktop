@@ -129,46 +129,67 @@ class BaseCandidateViewController: NSViewController {
         }
     }
 
-    internal func resizeWindowToFitContent(cursorLocation: CGPoint) {
+    func getNewWindowFrame(currentFrame: NSRect, screenRect: NSRect, cursorLocation: CGPoint, desiredSize: CGSize, cursorHeight: CGFloat = 16) -> NSRect {
+        var newWindowFrame = currentFrame
+        newWindowFrame.size = desiredSize
+
+        // 画面のサイズを取得
+        let cursorY = cursorLocation.y
+
+        // カーソルの高さを考慮してウィンドウ位置を調整
+        // ウィンドウをカーソルの下に表示
+        if cursorY - desiredSize.height < screenRect.origin.y {
+            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + cursorHeight)
+        } else {
+            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - desiredSize.height - cursorHeight)
+        }
+
+        // 右端でウィンドウが画面外に出る場合は左にシフト
+        if newWindowFrame.maxX > screenRect.maxX {
+            newWindowFrame.origin.x = screenRect.maxX - newWindowFrame.width
+        }
+        return newWindowFrame
+    }
+
+    func getMaxTextWidth(candidates: some Sequence<String>, font: NSFont = .systemFont(ofSize: 16)) -> CGFloat {
+        candidates.reduce(0) { maxWidth, candidate in
+            let attributedString = NSAttributedString(
+                string: candidate,
+                attributes: [.font: font]
+            )
+            return max(maxWidth, attributedString.size().width)
+        }
+    }
+
+    var numberOfVisibleRows: Int {
+        self.candidates.count
+    }
+
+    func getWindowWidth(maxContentWidth: CGFloat) -> CGFloat {
+        maxContentWidth
+    }
+
+    func resizeWindowToFitContent(cursorLocation: CGPoint) {
         guard let window = self.view.window, let screen = window.screen else {
             return
         }
 
-        let numberOfRows = self.tableView.numberOfRows
-        if numberOfRows == 0 {
+        if self.numberOfVisibleRows == 0 {
             return
         }
 
         let rowHeight = self.tableView.rowHeight
-        let tableViewHeight = CGFloat(numberOfRows) * rowHeight
+        let tableViewHeight = CGFloat(self.numberOfVisibleRows) * rowHeight
 
-        let maxWidth = candidates.reduce(0) { maxWidth, candidate in
-            let attributedString = NSAttributedString(
-                string: candidate.text,
-                attributes: [.font: NSFont.systemFont(ofSize: 16)]
-            )
-            return max(maxWidth, attributedString.size().width)
-        }
+        let maxWidth = self.getMaxTextWidth(candidates: self.candidates.lazy.map { $0.text })
+        let windowWidth = self.getWindowWidth(maxContentWidth: maxWidth)
 
-        let windowWidth = maxWidth + 20
-        var newWindowFrame = window.frame
-        newWindowFrame.size.width = windowWidth
-        newWindowFrame.size.height = tableViewHeight
-
-        let screenRect = screen.visibleFrame
-        let cursorY = cursorLocation.y
-        let cursorHeight: CGFloat = 16
-
-        if cursorY - tableViewHeight < screenRect.origin.y {
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + cursorHeight)
-        } else {
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - tableViewHeight - cursorHeight)
-        }
-
-        if newWindowFrame.maxX > screenRect.maxX {
-            newWindowFrame.origin.x = screenRect.maxX - newWindowFrame.width
-        }
-
+        let newWindowFrame = self.getNewWindowFrame(
+            currentFrame: window.frame,
+            screenRect: screen.visibleFrame,
+            cursorLocation: cursorLocation,
+            desiredSize: CGSize(width: windowWidth, height: tableViewHeight)
+        )
         if newWindowFrame != window.frame {
             window.setFrame(newWindowFrame, display: true, animate: false)
         }

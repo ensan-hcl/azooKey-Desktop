@@ -30,50 +30,11 @@ class ReplaceSuggestionsViewController: BaseCandidateViewController {
         return true
     }
 
-    override func resizeWindowToFitContent(cursorLocation: CGPoint) {
-        guard let window = self.view.window, let screen = window.screen else {
-            return
-        }
+    override var numberOfVisibleRows: Int {
+        self.tableView.numberOfRows
+    }
 
-        let numberOfRows = self.tableView.numberOfRows
-        if numberOfRows == 0 {
-            return
-        }
-
-        let rowHeight = self.tableView.rowHeight
-        let tableViewHeight = CGFloat(numberOfRows) * rowHeight
-
-        let maxWidth = candidates.reduce(0) { maxWidth, candidate in
-            let attributedString = NSAttributedString(
-                string: candidate.text,
-                attributes: [.font: NSFont.systemFont(ofSize: 16)]
-            )
-            return max(maxWidth, attributedString.size().width)
-        }
-
-        // サジェストビュー用に横幅を広めに設定
-        let windowWidth = maxWidth + 40
-
-        var newWindowFrame = window.frame
-        newWindowFrame.size.width = windowWidth
-        newWindowFrame.size.height = tableViewHeight
-
-        let screenRect = screen.visibleFrame
-        let cursorY = cursorLocation.y
-        let cursorHeight: CGFloat = 16
-
-        if cursorY - tableViewHeight < screenRect.origin.y {
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + cursorHeight)
-        } else {
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - tableViewHeight - cursorHeight)
-        }
-
-        if newWindowFrame.maxX > screenRect.maxX {
-            newWindowFrame.origin.x = screenRect.maxX - newWindowFrame.width
-        }
-
-        if newWindowFrame != window.frame {
-            window.setFrame(newWindowFrame, display: true, animate: false)
-        }
+    override func getWindowWidth(maxContentWidth: CGFloat) -> CGFloat {
+        maxContentWidth + 40
     }
 }

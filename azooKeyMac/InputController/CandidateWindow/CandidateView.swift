@@ -75,58 +75,15 @@ class CandidatesViewController: BaseCandidateViewController {
         self.showedRows = 0...8
     }
 
-    override func resizeWindowToFitContent(cursorLocation: CGPoint) {
-        guard let window = self.view.window, let screen = window.screen else {
-            return
-        }
+    override var numberOfVisibleRows: Int {
+        min(9, self.tableView.numberOfRows)
+    }
 
-        let numberOfRows = min(9, self.tableView.numberOfRows)
-        if numberOfRows == 0 {
-            return
-        }
-        let rowHeight = self.tableView.rowHeight
-        let tableViewHeight = CGFloat(numberOfRows) * rowHeight
-
-        let maxWidth = candidates.reduce(0) { maxWidth, candidate in
-            let attributedString = NSAttributedString(
-                string: candidate.text,
-                attributes: [.font: NSFont.systemFont(ofSize: 16)]
-            )
-            return max(maxWidth, attributedString.size().width)
-        }
-
-        // ウィンドウの幅を設定（番号とパディングのための追加幅を考慮）
-        // 20 = corner radius * 2
-        let windowWidth = if self.showCandidateIndex {
-            maxWidth + 48
+    override func getWindowWidth(maxContentWidth: CGFloat) -> CGFloat {
+        if self.showCandidateIndex {
+            maxContentWidth + 48
         } else {
-            maxWidth + 20
-        }
-
-        var newWindowFrame = window.frame
-        newWindowFrame.size.width = windowWidth
-        newWindowFrame.size.height = tableViewHeight
-
-        // 画面のサイズを取得
-        let screenRect = screen.visibleFrame
-        let cursorY = cursorLocation.y
-
-        // カーソルの高さを考慮してウィンドウ位置を調整
-        let cursorHeight: CGFloat = 16 // カーソルの高さを16ピクセルと仮定
-
-        // ウィンドウをカーソルの下に表示
-        if cursorY - tableViewHeight < screenRect.origin.y {
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y + cursorHeight)
-        } else {
-            newWindowFrame.origin = CGPoint(x: cursorLocation.x, y: cursorLocation.y - tableViewHeight - cursorHeight)
-        }
-
-        // 右端でウィンドウが画面外に出る場合は左にシフト
-        if newWindowFrame.maxX > screenRect.maxX {
-            newWindowFrame.origin.x = screenRect.maxX - newWindowFrame.width
-        }
-        if newWindowFrame != window.frame {
-            window.setFrame(newWindowFrame, display: true, animate: false)
+            maxContentWidth + 20
         }
     }
 }
