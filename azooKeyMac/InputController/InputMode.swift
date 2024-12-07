@@ -100,16 +100,30 @@ enum InputMode {
                 return .input(KeyMap.h2zMap("¥"))
             }
         case 43: // Comma
-            if Config.TypeCommaAndPeriod().value {
+            switch (Config.TypeCommaAndPeriod().value, event.modifierFlags.contains(.shift)) {
+            case (true, false):
                 return .input(KeyMap.h2zMap("，"))
-            } else {
+            case (false, false):
                 return .input(KeyMap.h2zMap("、"))
+            case (_, true):
+                if let text = event.characters, isPrintable(text) {
+                    return .input(KeyMap.h2zMap(text))
+                } else {
+                    return .unknown
+                }
             }
         case 47: // Period
-            if Config.TypeCommaAndPeriod().value {
+            switch (Config.TypeCommaAndPeriod().value, event.modifierFlags.contains(.shift)) {
+            case (true, false):
                 return .input(KeyMap.h2zMap("．"))
-            } else {
+            case (false, false):
                 return .input(KeyMap.h2zMap("。"))
+            case (_, true):
+                if let text = event.characters, isPrintable(text) {
+                    return .input(KeyMap.h2zMap(text))
+                } else {
+                    return .unknown
+                }
             }
         case 97: // F6
             return .function(.six)
