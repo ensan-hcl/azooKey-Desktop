@@ -15,6 +15,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     var segmentsManager: SegmentsManager
     private var inputState: InputState = .none
     private var directMode = false
+    private var selectedRange: NSRange?  // Add this line to store the selected range
     var zenzaiEnabled: Bool {
         Config.ZenzaiIntegration().value
     }
@@ -388,9 +389,39 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.predictiveSuggestionCandidateWindow.makeKeyAndOrderFront(nil)
 
         var rect: NSRect = .zero
-        self.client()?.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+        guard let client = self.client() else {
+            return
+        }
+        client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
         let cursorPosition = rect.origin
         self.predictiveSuggestionCandidateController.displayStatusText("...", cursorPosition: cursorPosition)
+
+        // 選択範囲あり
+        let selectedRange = client.selectedRange()
+        if selectedRange.length > 0,
+           let selectedText = client.attributedSubstring(from: selectedRange)?.string,
+           !selectedText.isEmpty {
+            self.segmentsManager.appendDebugMessage("選択範囲アリ: \(selectedText)")
+
+            let apiKey = Config.OpenAiApiKey().value
+            let request = OpenAIRequest(prompt: "Rewrite, solve or answer it\n" + selectedText, target: "", model: "gpt-4o", noneAdditionalPrompt: true)
+
+            Task {
+                do {
+                    let predictions = try await OpenAIClient.sendRequest(request, apiKey: apiKey, segmentsManager: segmentsManager)
+                    await MainActor.run {
+                        self.predictiveSuggestionCandidateController.displayCandidate(predictions[0], cursorPosition: cursorPosition, fontSize: rect.size.height)
+                    }
+                } catch {
+                    await MainActor.run {
+                        let errorMessage = "エラー: \(error.localizedDescription)"
+                        self.predictiveSuggestionCandidateController.displayStatusText(errorMessage, cursorPosition: cursorPosition)
+                        self.segmentsManager.appendDebugMessage(errorMessage)
+                    }
+                }
+            }
+            return
+        }
 
         // Get the text from getLeftSideContext
         guard let prompt = self.getLeftSideContext(maxCount: 100), !prompt.isEmpty else {
@@ -506,7 +537,13 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         if let selectedCandidate = predictiveSuggestionCandidateController.getSelectedCandidate() {
             if let client = self.client() {
                 // 選択された候補をテキスト入力に挿入
-                client.insertText(selectedCandidate, replacementRange: NSRange(location: NSNotFound, length: 0))
+                if let selectedRange = self.selectedRange {
+                    client.insertText(selectedCandidate, replacementRange: selectedRange)
+                    self.selectedRange = nil  // Clear the stored range
+                } else {
+                    // Default behavior for normal predictions
+                    client.insertText(selectedCandidate, replacementRange: NSRange(location: NSNotFound, length: 0))
+                }
                 // ウィンドウを非表示にする
                 self.hidePredictiveSuggestionCandidateView()
             }
