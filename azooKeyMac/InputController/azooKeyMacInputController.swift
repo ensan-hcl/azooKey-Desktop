@@ -9,6 +9,7 @@ import Cocoa
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
 import OSLog
+import SwiftNGram
 
 @objc(azooKeyMacInputController)
 class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this type_name
@@ -38,6 +39,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
 
     private var replaceSuggestionWindow: NSWindow
     private var replaceSuggestionsViewController: ReplaceSuggestionsViewController
+
+    private var lmBase: LM!
+    private var lmPerson: LM!
+    private var tokenizer: ZenzTokenizer!
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.segmentsManager = SegmentsManager()
@@ -101,6 +106,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.replaceSuggestionsViewController.delegate = self
         self.segmentsManager.delegate = self
         self.setupMenu()
+
+        Task {
+            await self.asyncSetup()
+        }
     }
 
     @MainActor
@@ -529,6 +538,20 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.requestResettingSelection()
         }
     }
+
+    private func asyncSetup() async {
+        await loadNGramModel()  // Now called inside an async function
+        let inputText = "彼は"
+        let mixAlpha: Double = 0.5
+
+        guard let lmBase = self.lmBase, let lmPerson = self.lmPerson, let tokenizer = self.tokenizer else {
+            self.segmentsManager.appendDebugMessage("load failed")
+            return
+        }
+
+        let generatedTex = generateText(inputText: inputText, mixAlpha: mixAlpha, lmBase: lmBase, lmPerson: lmPerson, tokenizer: tokenizer, maxCount: 20)
+        self.segmentsManager.appendDebugMessage("生成テキスト: \(generatedTex)")
+    }
 }
 
 extension azooKeyMacInputController: CandidatesViewControllerDelegate {
@@ -692,4 +715,23 @@ extension azooKeyMacInputController {
             retryCount = 0
         }
     }
+
+    @MainActor
+    private func loadNGramModel() async {
+        let baseFilename = self.segmentsManager.azooKeyMemoryDir.appendingPathComponent("lm").path
+
+        self.segmentsManager.appendDebugMessage("Loading LM base: \(baseFilename)")
+
+        do {
+            //　FIXME: ここで落ちてるっぽい
+            self.tokenizer = await ZenzTokenizer()
+            self.lmBase = LM(baseFilename: baseFilename, n: 5, d: 0.75, tokenizer: tokenizer)
+            self.lmPerson = LM(baseFilename: baseFilename, n: 5, d: 0.75, tokenizer: tokenizer)
+            self.segmentsManager.appendDebugMessage("N-gram モデルのロード完了")
+
+        } catch {
+            self.segmentsManager.appendDebugMessage("N-gram モデルのロードに失敗しました: \(error)")
+        }
+    }
 }
+
