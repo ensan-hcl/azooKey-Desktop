@@ -107,9 +107,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.segmentsManager.delegate = self
         self.setupMenu()
 
-        Task {
-            await self.asyncSetup()
-        }
     }
 
     @MainActor
@@ -538,20 +535,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
             self.segmentsManager.requestResettingSelection()
         }
     }
-
-    private func asyncSetup() async {
-        await loadNGramModel()  // Now called inside an async function
-        let inputText = "彼は"
-        let mixAlpha: Double = 0.5
-
-        guard let lmBase = self.lmBase, let lmPerson = self.lmPerson, let tokenizer = self.tokenizer else {
-            self.segmentsManager.appendDebugMessage("load failed")
-            return
-        }
-
-        let generatedTex = generateText(inputText: inputText, mixAlpha: mixAlpha, lmBase: lmBase, lmPerson: lmPerson, tokenizer: tokenizer, maxCount: 20)
-        self.segmentsManager.appendDebugMessage("生成テキスト: \(generatedTex)")
-    }
 }
 
 extension azooKeyMacInputController: CandidatesViewControllerDelegate {
@@ -718,15 +701,31 @@ extension azooKeyMacInputController {
 
     @MainActor
     private func loadNGramModel() async {
-        let baseFilename = self.segmentsManager.azooKeyMemoryDir.appendingPathComponent("lm").path
+        let fileManager = FileManager.default
 
-        self.segmentsManager.appendDebugMessage("Loading LM base: \(baseFilename)")
+        // `Application Support/SwiftNGram` 内のファイルを読み込む
+        guard let containerURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.dev.ensan.inputmethod.azooKeyMac") else {
+            self.segmentsManager.appendDebugMessage("❌ Failed to get container URL.")
+        }
+
+        let directoryPath = containerURL.appendingPathComponent("Library/Application Support/SwiftNGram").path
 
         do {
-            //　FIXME: ここで落ちてるっぽい
             self.tokenizer = await ZenzTokenizer()
-            self.lmBase = LM(baseFilename: baseFilename, n: 5, d: 0.75, tokenizer: tokenizer)
-            self.lmPerson = LM(baseFilename: baseFilename, n: 5, d: 0.75, tokenizer: tokenizer)
+            self.lmBase = LM(baseFilename: directoryPath + "/lm", n: 5, d: 0.75, tokenizer: tokenizer)
+            self.lmPerson = LM(baseFilename: directoryPath + "/lm", n: 5, d: 0.75, tokenizer: tokenizer)
+
+            
+            let alphaList: [Double] = [0.1, 0.3, 0.5, 0.7, 0.9]
+            
+            for mixAlpha in alphaList {
+                let inputText = "彼は"
+                
+                // 時間計測
+                let generatedText =  generateText(inputText: inputText, mixAlpha: mixAlpha, lmBase: lmBase, lmPerson: lmPerson, tokenizer: tokenizer, maxCount: 20)
+                
+                self.segmentsManager.appendDebugMessage("\(generatedText)")
+            }
             self.segmentsManager.appendDebugMessage("N-gram モデルのロード完了")
 
         } catch {
