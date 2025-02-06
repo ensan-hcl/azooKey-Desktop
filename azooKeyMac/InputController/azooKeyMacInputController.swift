@@ -706,6 +706,7 @@ extension azooKeyMacInputController {
         // `Application Support/SwiftNGram` 内のファイルを読み込む
         guard let containerURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.dev.ensan.inputmethod.azooKeyMac") else {
             self.segmentsManager.appendDebugMessage("❌ Failed to get container URL.")
+            return
         }
 
         let directoryPath = containerURL.appendingPathComponent("Library/Application Support/SwiftNGram").path
@@ -732,5 +733,6 @@ extension azooKeyMacInputController {
             self.segmentsManager.appendDebugMessage("N-gram モデルのロードに失敗しました: \(error)")
         }
     }
+
 }
 
