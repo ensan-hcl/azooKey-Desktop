@@ -106,7 +106,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.replaceSuggestionsViewController.delegate = self
         self.segmentsManager.delegate = self
         self.setupMenu()
-
     }
 
     @MainActor
@@ -716,7 +715,6 @@ extension azooKeyMacInputController {
             self.lmBase = LM(baseFilename: directoryPath + "/lm", n: 5, d: 0.75, tokenizer: tokenizer)
             self.lmPerson = LM(baseFilename: directoryPath + "/lm", n: 5, d: 0.75, tokenizer: tokenizer)
 
-            
             let alphaList: [Double] = [0.1, 0.3, 0.5, 0.7, 0.9]
             
             for mixAlpha in alphaList {
@@ -733,6 +731,4 @@ extension azooKeyMacInputController {
             self.segmentsManager.appendDebugMessage("N-gram モデルのロードに失敗しました: \(error)")
         }
     }
-
 }
-
