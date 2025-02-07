@@ -43,6 +43,7 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     private var lmBase: LM!
     private var lmPerson: LM!
     private var tokenizer: ZenzTokenizer!
+    private var marisaExistance: Bool = true
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.segmentsManager = SegmentsManager()
@@ -106,6 +107,10 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.replaceSuggestionsViewController.delegate = self
         self.segmentsManager.delegate = self
         self.setupMenu()
+
+        Task {
+            await loadNGramModel()
+        }
     }
 
     @MainActor
@@ -710,19 +715,33 @@ extension azooKeyMacInputController {
 
         let directoryPath = containerURL.appendingPathComponent("Library/Application Support/SwiftNGram").path
 
+        // .marisaのファイルが存在するかチェック
+        let paths = [
+            "\(directoryPath)/lm_c_abc.marisa",
+            "\(directoryPath)/lm_c_abx.marisa",
+            "\(directoryPath)/lm_u_abx.marisa",
+            "\(directoryPath)/lm_u_xbc.marisa",
+            "\(directoryPath)/lm_u_xbx.marisa",
+            "\(directoryPath)/lm_r_xbx.marisa",
+            "\(directoryPath)/lm_vocab.marisa"
+        ]
+        for path in paths where !fileManager.fileExists(atPath: path) {
+            self.segmentsManager.appendDebugMessage("❌ Marisa file does not exist.")
+            marisaExistance = false
+            return
+        }
+
         do {
             self.tokenizer = await ZenzTokenizer()
+            self.segmentsManager.appendDebugMessage("load n-gram model")
             self.lmBase = LM(baseFilename: directoryPath + "/lm", n: 5, d: 0.75, tokenizer: tokenizer)
             self.lmPerson = LM(baseFilename: directoryPath + "/lm", n: 5, d: 0.75, tokenizer: tokenizer)
 
             let alphaList: [Double] = [0.1, 0.3, 0.5, 0.7, 0.9]
-            
+
             for mixAlpha in alphaList {
                 let inputText = "彼は"
-                
-                // 時間計測
-                let generatedText =  generateText(inputText: inputText, mixAlpha: mixAlpha, lmBase: lmBase, lmPerson: lmPerson, tokenizer: tokenizer, maxCount: 20)
-                
+                let generatedText = generateText(inputText: inputText, mixAlpha: mixAlpha, lmBase: lmBase, lmPerson: lmPerson, tokenizer: tokenizer, maxCount: 20)
                 self.segmentsManager.appendDebugMessage("\(generatedText)")
             }
             self.segmentsManager.appendDebugMessage("N-gram モデルのロード完了")
