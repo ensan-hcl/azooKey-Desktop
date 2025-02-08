@@ -1,6 +1,6 @@
-[submodule "azooKeyMac/Resources/zenz-v2-gguf"]
-	path = azooKeyMac/Resources/zenz-v2-gguf
-	url = https://huggingface.co/Miwa-Keita/zenz-v2-gguf
 [submodule "azooKeyMac/Resources/base_n5_lm"]
 	path = azooKeyMac/Resources/base_n5_lm
 	url = https://huggingface.co/Miwa-Keita/base_n5_lm
+[submodule "azooKeyMac/Resources/zenz-v3-small-gguf"]
+	path = azooKeyMac/Resources/zenz-v3-small-gguf
+	url = https://huggingface.co/Miwa-Keita/zenz-v3-small-gguf
