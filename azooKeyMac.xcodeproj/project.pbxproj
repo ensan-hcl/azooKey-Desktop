@@ -689,7 +689,7 @@
 			repositoryURL = "https://github.com/ensan-hcl/AzooKeyKanaKanjiConverter";
 			requirement = {
 				kind = revision;
-				revision = c6fa42fdfe922089e880899c4f59ae3454df69df;
+				revision = 00375ba20a8111dc5ce752cd901935fd0d9c9350;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
