@@ -28,6 +28,9 @@ final class SegmentsManager {
     private var userDictionary: Config.UserDictionary.Value {
         Config.UserDictionary().value
     }
+    private var zenzaiPersonalizationLevel: Config.ZenzaiPersonalizationLevel.Value {
+        Config.ZenzaiPersonalizationLevel().value
+    }
     private var rawCandidates: ConversionResult?
 
     private var selectionIndex: Int?
@@ -44,6 +47,11 @@ final class SegmentsManager {
     private lazy var zenzaiPersonalizationMode: ConvertRequestOptions.ZenzaiMode.PersonalizationMode? = self.getZenzaiPersonalizationMode()
 
     private func getZenzaiPersonalizationMode() -> ConvertRequestOptions.ZenzaiMode.PersonalizationMode? {
+        let alpha = self.zenzaiPersonalizationLevel.alpha
+        // オフなので。
+        if alpha == 0 {
+            return nil
+        }
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.dev.ensan.inputmethod.azooKeyMac") else {
             self.appendDebugMessage("❌ Failed to get container URL.")
             return nil
@@ -62,7 +70,7 @@ final class SegmentsManager {
             return nil
         }
 
-        return .init(baseNgramLanguageModel: base, personalNgramLanguageModel: personal)
+        return .init(baseNgramLanguageModel: base, personalNgramLanguageModel: personal, alpha: alpha)
     }
 
     private enum Operation: Sendable {

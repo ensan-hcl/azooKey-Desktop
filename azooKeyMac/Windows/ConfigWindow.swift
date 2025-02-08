@@ -14,6 +14,7 @@ struct ConfigWindow: View {
     @ConfigState private var typeCommaAndPeriod = Config.TypeCommaAndPeriod()
     @ConfigState private var zenzai = Config.ZenzaiIntegration()
     @ConfigState private var zenzaiProfile = Config.ZenzaiProfile()
+    @ConfigState private var zenzaiPersonalizationLevel = Config.ZenzaiPersonalizationLevel()
     @ConfigState private var enableOpenAiApiKey = Config.EnableOpenAiApiKey()
     @ConfigState private var openAiApiKey = Config.OpenAiApiKey()
     @ConfigState private var learning = Config.Learning()
@@ -53,10 +54,16 @@ struct ConfigWindow: View {
                 ScrollView {
                     Form {
 
-                        Picker("学習", selection: $learning) {
+                        Picker("履歴学習", selection: $learning) {
                             Text("学習する").tag(Config.Learning.Value.inputAndOutput)
                             Text("学習を停止").tag(Config.Learning.Value.onlyOutput)
                             Text("学習を無視").tag(Config.Learning.Value.nothing)
+                        }
+                        Picker("パーソナライズ", selection: $zenzaiPersonalizationLevel) {
+                            Text("オフ").tag(Config.ZenzaiPersonalizationLevel.Value.off)
+                            Text("弱く").tag(Config.ZenzaiPersonalizationLevel.Value.soft)
+                            Text("普通").tag(Config.ZenzaiPersonalizationLevel.Value.normal)
+                            Text("強く").tag(Config.ZenzaiPersonalizationLevel.Value.hard)
                         }
                         Divider()
                         HStack {
