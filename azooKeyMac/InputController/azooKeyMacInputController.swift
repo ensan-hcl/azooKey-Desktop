@@ -38,8 +38,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     private var replaceSuggestionWindow: NSWindow
     private var replaceSuggestionsViewController: ReplaceSuggestionsViewController
 
-    private var marisaExistance: Bool = true
-
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         self.segmentsManager = SegmentsManager()
 

@@ -41,7 +41,9 @@ final class SegmentsManager {
     private var replaceSuggestions: [Candidate] = []
     private var suggestSelectionIndex: Int?
 
-    private lazy var zenzaiPersonalizationMode: ConvertRequestOptions.ZenzaiMode.PersonalizationMode? = { () -> ConvertRequestOptions.ZenzaiMode.PersonalizationMode? in
+    private lazy var zenzaiPersonalizationMode: ConvertRequestOptions.ZenzaiMode.PersonalizationMode? = self.getZenzaiPersonalizationMode()
+
+    private func getZenzaiPersonalizationMode() -> ConvertRequestOptions.ZenzaiMode.PersonalizationMode? {
         guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.dev.ensan.inputmethod.azooKeyMac") else {
             self.appendDebugMessage("❌ Failed to get container URL.")
             return nil
@@ -61,7 +63,7 @@ final class SegmentsManager {
         }
 
         return .init(baseNgramLanguageModel: base, personalNgramLanguageModel: personal)
-    }()
+    }
 
     private enum Operation: Sendable {
         case insert
@@ -141,6 +143,7 @@ final class SegmentsManager {
     func activate() {
         self.shouldShowCandidateWindow = false
         self.kanaKanjiConverter.sendToDicdataStore(.setRequestOptions(options()))
+        self.zenzaiPersonalizationMode = self.getZenzaiPersonalizationMode()
     }
 
     @MainActor
