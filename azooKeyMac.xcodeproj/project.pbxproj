@@ -10,6 +10,10 @@
 		1A41E61C26E745DD009B65D7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E61B26E745DD009B65D7 /* Assets.xcassets */; };
 		1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64126E74627009B65D7 /* AppDelegate.swift */; };
 		1A41E64726E74937009B65D7 /* main.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E64626E74937009B65D7 /* main.tiff */; };
+		551434E52D576B6600A9B5CA /* lm_u_abx.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E32D576B6600A9B5CA /* lm_u_abx.marisa */; };
+		551434E62D576B6600A9B5CA /* lm_u_xbc.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E42D576B6600A9B5CA /* lm_u_xbc.marisa */; };
+		551434E72D576B6600A9B5CA /* lm_r_xbx.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E22D576B6600A9B5CA /* lm_r_xbx.marisa */; };
+		551434E82D576B6600A9B5CA /* lm_c_abc.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E12D576B6600A9B5CA /* lm_c_abc.marisa */; };
 		5557C42C2BF3C9140048F976 /* zenz-v2-Q5_K_M.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */; };
 		556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52F92BAAAF7D00EB343F /* en.tiff */; };
 		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
@@ -17,7 +21,6 @@
 		55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 55A9C54A2BA847A1007F6F02 /* main@2x.tiff */; };
 		55E0A5BE2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BD2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary */; };
 		55E0A5C02BA8AE3200FACF50 /* SwiftUtils in Frameworks */ = {isa = PBXBuildFile; productRef = 55E0A5BF2BA8AE3200FACF50 /* SwiftUtils */; };
-		E91CED872D525C9000C9C00F /* SwiftNGram in Frameworks */ = {isa = PBXBuildFile; productRef = E91CED862D525C9000C9C00F /* SwiftNGram */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +49,10 @@
 		1A41E64526E7470D009B65D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1A41E64626E74937009B65D7 /* main.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = main.tiff; path = azooKeyMac/main.tiff; sourceTree = SOURCE_ROOT; };
 		1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = azooKeyMac.entitlements; sourceTree = "<group>"; };
+		551434E12D576B6600A9B5CA /* lm_c_abc.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_c_abc.marisa; path = base_n5_lm/lm_c_abc.marisa; sourceTree = "<group>"; };
+		551434E22D576B6600A9B5CA /* lm_r_xbx.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_r_xbx.marisa; path = base_n5_lm/lm_r_xbx.marisa; sourceTree = "<group>"; };
+		551434E32D576B6600A9B5CA /* lm_u_abx.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_u_abx.marisa; path = base_n5_lm/lm_u_abx.marisa; sourceTree = "<group>"; };
+		551434E42D576B6600A9B5CA /* lm_u_xbc.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_u_xbc.marisa; path = base_n5_lm/lm_u_xbc.marisa; sourceTree = "<group>"; };
 		5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "zenz-v2-Q5_K_M.gguf"; path = "zenz-v2-gguf/zenz-v2-Q5_K_M.gguf"; sourceTree = "<group>"; };
 		556C52F92BAAAF7D00EB343F /* en.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = en.tiff; sourceTree = "<group>"; };
 		556C52FA2BAAAF7D00EB343F /* en@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "en@2x.tiff"; sourceTree = "<group>"; };
@@ -71,7 +78,6 @@
 			files = (
 				55E0A5C02BA8AE3200FACF50 /* SwiftUtils in Frameworks */,
 				55E0A5BE2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary in Frameworks */,
-				E91CED872D525C9000C9C00F /* SwiftNGram in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,6 +144,10 @@
 		55E1E7412BEF63AE0084A069 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				551434E12D576B6600A9B5CA /* lm_c_abc.marisa */,
+				551434E22D576B6600A9B5CA /* lm_r_xbx.marisa */,
+				551434E32D576B6600A9B5CA /* lm_u_abx.marisa */,
+				551434E42D576B6600A9B5CA /* lm_u_xbc.marisa */,
 				5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */,
 			);
 			path = Resources;
@@ -170,7 +180,6 @@
 			packageProductDependencies = (
 				55E0A5BD2BA8AE3200FACF50 /* KanaKanjiConverterModuleWithDefaultDictionary */,
 				55E0A5BF2BA8AE3200FACF50 /* SwiftUtils */,
-				E91CED862D525C9000C9C00F /* SwiftNGram */,
 			);
 			productName = azooKeyMac;
 			productReference = 1A41E61426E745D9009B65D7 /* azooKeyMac.app */;
@@ -252,7 +261,6 @@
 			mainGroup = 1A41E60B26E745D9009B65D7;
 			packageReferences = (
 				55E0A5BA2BA8AE3200FACF50 /* XCRemoteSwiftPackageReference "AzooKeyKanaKanjiConverter" */,
-				E91CED852D525C9000C9C00F /* XCRemoteSwiftPackageReference "SwiftNGramWiithMarisaTrie" */,
 			);
 			productRefGroup = 1A41E61526E745D9009B65D7 /* Products */;
 			projectDirPath = "";
@@ -271,6 +279,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A41E64726E74937009B65D7 /* main.tiff in Resources */,
+				551434E52D576B6600A9B5CA /* lm_u_abx.marisa in Resources */,
+				551434E62D576B6600A9B5CA /* lm_u_xbc.marisa in Resources */,
+				551434E72D576B6600A9B5CA /* lm_r_xbx.marisa in Resources */,
+				551434E82D576B6600A9B5CA /* lm_c_abc.marisa in Resources */,
 				556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */,
 				55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */,
 				556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */,
@@ -677,15 +689,7 @@
 			repositoryURL = "https://github.com/ensan-hcl/AzooKeyKanaKanjiConverter";
 			requirement = {
 				kind = revision;
-				revision = 552d6d803be4933be0b4dd627d56869213ca8b7a;
-			};
-		};
-		E91CED852D525C9000C9C00F /* XCRemoteSwiftPackageReference "SwiftNGramWiithMarisaTrie" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/nyanko3141592/SwiftNGramWiithMarisaTrie";
-			requirement = {
-				branch = feat/use_raw_api;
-				kind = branch;
+				revision = c6fa42fdfe922089e880899c4f59ae3454df69df;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -700,11 +704,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 55E0A5BA2BA8AE3200FACF50 /* XCRemoteSwiftPackageReference "AzooKeyKanaKanjiConverter" */;
 			productName = SwiftUtils;
-		};
-		E91CED862D525C9000C9C00F /* SwiftNGram */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E91CED852D525C9000C9C00F /* XCRemoteSwiftPackageReference "SwiftNGramWiithMarisaTrie" */;
-			productName = SwiftNGram;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

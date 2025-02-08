@@ -8,8 +8,6 @@
 import Cocoa
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
-import OSLog
-import SwiftNGram
 
 @objc(azooKeyMacInputController)
 class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this type_name
@@ -40,9 +38,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     private var replaceSuggestionWindow: NSWindow
     private var replaceSuggestionsViewController: ReplaceSuggestionsViewController
 
-    private var lmBase: LM!
-    private var lmPerson: LM!
-    private var tokenizer: ZenzTokenizer!
     private var marisaExistance: Bool = true
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
@@ -107,10 +102,6 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
         self.replaceSuggestionsViewController.delegate = self
         self.segmentsManager.delegate = self
         self.setupMenu()
-
-        Task {
-            await loadNGramModel()
-        }
     }
 
     @MainActor
@@ -700,54 +691,6 @@ extension azooKeyMacInputController {
         } else {
             self.segmentsManager.appendDebugMessage("再試行上限に達しました。")
             retryCount = 0
-        }
-    }
-
-    @MainActor
-    private func loadNGramModel() async {
-        let fileManager = FileManager.default
-
-        // `Application Support/SwiftNGram` 内のファイルを読み込む
-        guard let containerURL = fileManager.containerURL(forSecurityApplicationGroupIdentifier: "group.dev.ensan.inputmethod.azooKeyMac") else {
-            self.segmentsManager.appendDebugMessage("❌ Failed to get container URL.")
-            return
-        }
-
-        let directoryPath = containerURL.appendingPathComponent("Library/Application Support/SwiftNGram").path
-
-        // .marisaのファイルが存在するかチェック
-        let paths = [
-            "\(directoryPath)/lm_c_abc.marisa",
-            "\(directoryPath)/lm_c_abx.marisa",
-            "\(directoryPath)/lm_u_abx.marisa",
-            "\(directoryPath)/lm_u_xbc.marisa",
-            "\(directoryPath)/lm_u_xbx.marisa",
-            "\(directoryPath)/lm_r_xbx.marisa",
-            "\(directoryPath)/lm_vocab.marisa"
-        ]
-        for path in paths where !fileManager.fileExists(atPath: path) {
-            self.segmentsManager.appendDebugMessage("❌ Marisa file does not exist.")
-            marisaExistance = false
-            return
-        }
-
-        do {
-            self.tokenizer = await ZenzTokenizer()
-            self.segmentsManager.appendDebugMessage("load n-gram model")
-            self.lmBase = LM(baseFilename: directoryPath + "/lm", n: 5, d: 0.75, tokenizer: tokenizer)
-            self.lmPerson = LM(baseFilename: directoryPath + "/lm", n: 5, d: 0.75, tokenizer: tokenizer)
-
-            let alphaList: [Double] = [0.1, 0.3, 0.5, 0.7, 0.9]
-
-            for mixAlpha in alphaList {
-                let inputText = "彼は"
-                let generatedText = generateText(inputText: inputText, mixAlpha: mixAlpha, lmBase: lmBase, lmPerson: lmPerson, tokenizer: tokenizer, maxCount: 20)
-                self.segmentsManager.appendDebugMessage("\(generatedText)")
-            }
-            self.segmentsManager.appendDebugMessage("N-gram モデルのロード完了")
-
-        } catch {
-            self.segmentsManager.appendDebugMessage("N-gram モデルのロードに失敗しました: \(error)")
         }
     }
 }

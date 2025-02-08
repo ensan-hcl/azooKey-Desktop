@@ -41,6 +41,28 @@ final class SegmentsManager {
     private var replaceSuggestions: [Candidate] = []
     private var suggestSelectionIndex: Int?
 
+    private lazy var zenzaiPersonalizationMode: ConvertRequestOptions.ZenzaiMode.PersonalizationMode? = { () -> ConvertRequestOptions.ZenzaiMode.PersonalizationMode? in
+        guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.dev.ensan.inputmethod.azooKeyMac") else {
+            self.appendDebugMessage("❌ Failed to get container URL.")
+            return nil
+        }
+
+        let base = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/", isDirectory: false).path + "/lm"
+        let personal = containerURL.appendingPathComponent("Library/Application Support/SwiftNGram").path + "/lm"
+        // check personal lm existence
+        guard [
+            FileManager.default.fileExists(atPath: personal + "_c_abc.marisa"),
+            FileManager.default.fileExists(atPath: personal + "_r_xbx.marisa"),
+            FileManager.default.fileExists(atPath: personal + "_u_abx.marisa"),
+            FileManager.default.fileExists(atPath: personal + "_u_xbc.marisa")
+        ].allSatisfy(\.self) else {
+            self.appendDebugMessage("❌ Seems like there is missing marisa file for prefix \(personal)")
+            return nil
+        }
+
+        return .init(baseNgramLanguageModel: base, personalNgramLanguageModel: personal)
+    }()
+
     private enum Operation: Sendable {
         case insert
         case delete
@@ -76,6 +98,7 @@ final class SegmentsManager {
                 weight: Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/zenz-v2-Q5_K_M.gguf", isDirectory: false),
                 inferenceLimit: Config.ZenzaiInferenceLimit().value,
                 requestRichCandidates: requestRichCandidates,
+                personalizationMode: self.zenzaiPersonalizationMode,
                 versionDependentMode: .v2(
                     .init(
                         profile: Config.ZenzaiProfile().value,
