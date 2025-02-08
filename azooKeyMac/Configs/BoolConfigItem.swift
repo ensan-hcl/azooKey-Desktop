@@ -29,7 +29,7 @@ extension BoolConfigItem {
 extension Config {
     /// デバッグウィンドウにd/Dで遷移する設定
     struct DebugWindow: BoolConfigItem {
-        static let `default` = true
+        static let `default` = false
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.debug.enableDebugWindow"
     }
     /// ライブ変換を有効化する設定
