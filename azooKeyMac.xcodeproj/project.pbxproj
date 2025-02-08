@@ -14,7 +14,7 @@
 		551434E62D576B6600A9B5CA /* lm_u_xbc.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E42D576B6600A9B5CA /* lm_u_xbc.marisa */; };
 		551434E72D576B6600A9B5CA /* lm_r_xbx.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E22D576B6600A9B5CA /* lm_r_xbx.marisa */; };
 		551434E82D576B6600A9B5CA /* lm_c_abc.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E12D576B6600A9B5CA /* lm_c_abc.marisa */; };
-		5557C42C2BF3C9140048F976 /* zenz-v2-Q5_K_M.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */; };
+		551434EA2D57A8AC00A9B5CA /* ggml-model-Q5_K_M.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 551434E92D57A8AC00A9B5CA /* ggml-model-Q5_K_M.gguf */; };
 		556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52F92BAAAF7D00EB343F /* en.tiff */; };
 		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
 		55A27D022BAAADDB00512DCD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 55A27D002BAAADDB00512DCD /* InfoPlist.strings */; };
@@ -53,7 +53,7 @@
 		551434E22D576B6600A9B5CA /* lm_r_xbx.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_r_xbx.marisa; path = base_n5_lm/lm_r_xbx.marisa; sourceTree = "<group>"; };
 		551434E32D576B6600A9B5CA /* lm_u_abx.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_u_abx.marisa; path = base_n5_lm/lm_u_abx.marisa; sourceTree = "<group>"; };
 		551434E42D576B6600A9B5CA /* lm_u_xbc.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_u_xbc.marisa; path = base_n5_lm/lm_u_xbc.marisa; sourceTree = "<group>"; };
-		5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "zenz-v2-Q5_K_M.gguf"; path = "zenz-v2-gguf/zenz-v2-Q5_K_M.gguf"; sourceTree = "<group>"; };
+		551434E92D57A8AC00A9B5CA /* ggml-model-Q5_K_M.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "ggml-model-Q5_K_M.gguf"; path = "zenz-v3-small-gguf/ggml-model-Q5_K_M.gguf"; sourceTree = "<group>"; };
 		556C52F92BAAAF7D00EB343F /* en.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = en.tiff; sourceTree = "<group>"; };
 		556C52FA2BAAAF7D00EB343F /* en@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "en@2x.tiff"; sourceTree = "<group>"; };
 		55A27D012BAAADDB00512DCD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -148,7 +148,7 @@
 				551434E22D576B6600A9B5CA /* lm_r_xbx.marisa */,
 				551434E32D576B6600A9B5CA /* lm_u_abx.marisa */,
 				551434E42D576B6600A9B5CA /* lm_u_xbc.marisa */,
-				5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */,
+				551434E92D57A8AC00A9B5CA /* ggml-model-Q5_K_M.gguf */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -286,9 +286,9 @@
 				556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */,
 				55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */,
 				556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */,
-				5557C42C2BF3C9140048F976 /* zenz-v2-Q5_K_M.gguf in Resources */,
 				1A41E61C26E745DD009B65D7 /* Assets.xcassets in Resources */,
 				55A27D022BAAADDB00512DCD /* InfoPlist.strings in Resources */,
+				551434EA2D57A8AC00A9B5CA /* ggml-model-Q5_K_M.gguf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -505,7 +505,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LLVM_LTO = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.ensan.inputmethod.azooKeyMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -540,7 +540,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LLVM_LTO = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.ensan.inputmethod.azooKeyMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";

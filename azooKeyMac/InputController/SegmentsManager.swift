@@ -105,11 +105,11 @@ final class SegmentsManager {
     private func zenzaiMode(leftSideContext: String?, requestRichCandidates: Bool) -> ConvertRequestOptions.ZenzaiMode {
         if self.zenzaiEnabled {
             return .on(
-                weight: Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/zenz-v2-Q5_K_M.gguf", isDirectory: false),
+                weight: Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/ggml-model-Q5_K_M.gguf", isDirectory: false),
                 inferenceLimit: Config.ZenzaiInferenceLimit().value,
                 requestRichCandidates: requestRichCandidates,
                 personalizationMode: self.zenzaiPersonalizationMode,
-                versionDependentMode: .v2(
+                versionDependentMode: .v3(
                     .init(
                         profile: Config.ZenzaiProfile().value,
                         leftSideContext: leftSideContext
