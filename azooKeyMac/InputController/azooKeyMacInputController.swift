@@ -8,7 +8,6 @@
 import Cocoa
 import InputMethodKit
 import KanaKanjiConverterModuleWithDefaultDictionary
-import OSLog
 
 @objc(azooKeyMacInputController)
 class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this type_name

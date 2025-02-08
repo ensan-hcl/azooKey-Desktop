@@ -105,3 +105,30 @@ extension Config {
     }
 
 }
+
+extension Config {
+    /// Zenzaiのパーソナライズ強度
+    struct ZenzaiPersonalizationLevel: CustomCodableConfigItem {
+        enum Value: String, Codable, Equatable, Hashable {
+            case off
+            case soft
+            case normal
+            case hard
+
+            var alpha: Float {
+                switch self {
+                case .off:
+                    0
+                case .soft:
+                    0.2
+                case .normal:
+                    0.5
+                case .hard:
+                    0.8
+                }
+            }
+        }
+        static var `default`: Value = .normal
+        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.zenzai.personalization_level"
+    }
+}

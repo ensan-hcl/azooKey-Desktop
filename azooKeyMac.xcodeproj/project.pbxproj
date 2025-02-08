@@ -10,6 +10,10 @@
 		1A41E61C26E745DD009B65D7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E61B26E745DD009B65D7 /* Assets.xcassets */; };
 		1A41E64226E74627009B65D7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E64126E74627009B65D7 /* AppDelegate.swift */; };
 		1A41E64726E74937009B65D7 /* main.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 1A41E64626E74937009B65D7 /* main.tiff */; };
+		551434E52D576B6600A9B5CA /* lm_u_abx.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E32D576B6600A9B5CA /* lm_u_abx.marisa */; };
+		551434E62D576B6600A9B5CA /* lm_u_xbc.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E42D576B6600A9B5CA /* lm_u_xbc.marisa */; };
+		551434E72D576B6600A9B5CA /* lm_r_xbx.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E22D576B6600A9B5CA /* lm_r_xbx.marisa */; };
+		551434E82D576B6600A9B5CA /* lm_c_abc.marisa in Resources */ = {isa = PBXBuildFile; fileRef = 551434E12D576B6600A9B5CA /* lm_c_abc.marisa */; };
 		5557C42C2BF3C9140048F976 /* zenz-v2-Q5_K_M.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */; };
 		556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52F92BAAAF7D00EB343F /* en.tiff */; };
 		556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 556C52FA2BAAAF7D00EB343F /* en@2x.tiff */; };
@@ -45,6 +49,10 @@
 		1A41E64526E7470D009B65D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1A41E64626E74937009B65D7 /* main.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; name = main.tiff; path = azooKeyMac/main.tiff; sourceTree = SOURCE_ROOT; };
 		1A41E64826E7495A009B65D7 /* azooKeyMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = azooKeyMac.entitlements; sourceTree = "<group>"; };
+		551434E12D576B6600A9B5CA /* lm_c_abc.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_c_abc.marisa; path = base_n5_lm/lm_c_abc.marisa; sourceTree = "<group>"; };
+		551434E22D576B6600A9B5CA /* lm_r_xbx.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_r_xbx.marisa; path = base_n5_lm/lm_r_xbx.marisa; sourceTree = "<group>"; };
+		551434E32D576B6600A9B5CA /* lm_u_abx.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_u_abx.marisa; path = base_n5_lm/lm_u_abx.marisa; sourceTree = "<group>"; };
+		551434E42D576B6600A9B5CA /* lm_u_xbc.marisa */ = {isa = PBXFileReference; lastKnownFileType = file; name = lm_u_xbc.marisa; path = base_n5_lm/lm_u_xbc.marisa; sourceTree = "<group>"; };
 		5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "zenz-v2-Q5_K_M.gguf"; path = "zenz-v2-gguf/zenz-v2-Q5_K_M.gguf"; sourceTree = "<group>"; };
 		556C52F92BAAAF7D00EB343F /* en.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = en.tiff; sourceTree = "<group>"; };
 		556C52FA2BAAAF7D00EB343F /* en@2x.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = "en@2x.tiff"; sourceTree = "<group>"; };
@@ -136,6 +144,10 @@
 		55E1E7412BEF63AE0084A069 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				551434E12D576B6600A9B5CA /* lm_c_abc.marisa */,
+				551434E22D576B6600A9B5CA /* lm_r_xbx.marisa */,
+				551434E32D576B6600A9B5CA /* lm_u_abx.marisa */,
+				551434E42D576B6600A9B5CA /* lm_u_xbc.marisa */,
 				5557C42B2BF3C9130048F976 /* zenz-v2-Q5_K_M.gguf */,
 			);
 			path = Resources;
@@ -267,6 +279,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A41E64726E74937009B65D7 /* main.tiff in Resources */,
+				551434E52D576B6600A9B5CA /* lm_u_abx.marisa in Resources */,
+				551434E62D576B6600A9B5CA /* lm_u_xbc.marisa in Resources */,
+				551434E72D576B6600A9B5CA /* lm_r_xbx.marisa in Resources */,
+				551434E82D576B6600A9B5CA /* lm_c_abc.marisa in Resources */,
 				556C52FC2BAAAF7E00EB343F /* en@2x.tiff in Resources */,
 				55A9C54B2BA847A1007F6F02 /* main@2x.tiff in Resources */,
 				556C52FB2BAAAF7E00EB343F /* en.tiff in Resources */,
@@ -489,11 +505,12 @@
 					"@executable_path/../Frameworks",
 				);
 				LLVM_LTO = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 14;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.ensan.inputmethod.azooKeyMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -523,11 +540,12 @@
 					"@executable_path/../Frameworks",
 				);
 				LLVM_LTO = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 14;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.ensan.inputmethod.azooKeyMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -671,7 +689,7 @@
 			repositoryURL = "https://github.com/ensan-hcl/AzooKeyKanaKanjiConverter";
 			requirement = {
 				kind = revision;
-				revision = 552d6d803be4933be0b4dd627d56869213ca8b7a;
+				revision = 00375ba20a8111dc5ce752cd901935fd0d9c9350;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
