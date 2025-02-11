@@ -1,6 +1,6 @@
 # azooKey on Desktop
 
-iOSのキーボードアプリ「[azooKey](https://github.com/ensan-hcl/azooKey)」のデスクトップ版です。
+iOSのキーボードアプリ「[azooKey](https://github.com/ensan-hcl/azooKey)」のデスクトップ版です。高精度なニューラルかな漢字変換エンジン「Zenzai」を導入した、オープンソースの日本語入力システムです。
 
 **現在アルファ版のため、動作は一切保証できません**。
 
@@ -103,3 +103,6 @@ Thanks to authors!!
 * https://www.logcg.com/en/archives/2078.html
 * https://stackoverflow.com/questions/27813151/how-to-develop-a-simple-input-method-for-mac-os-x-in-swift
 * https://mzp.booth.pm/items/809262
+
+## Acknowledgement
+本プロジェクトは情報処理推進機構(IPA)による[2024年度未踏IT人材発掘・育成事業](https://www.ipa.go.jp/jinzai/mitou/it/2024/koubokekka.html)の支援を受けて開発を行いました。
