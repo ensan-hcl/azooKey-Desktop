@@ -1,10 +1,3 @@
-//
-//  KeychainHelper.swift
-//  azooKeyMac
-//
-//  Created by 高橋直希 on 2024/10/03.
-//
-
 import Foundation
 import Security
 

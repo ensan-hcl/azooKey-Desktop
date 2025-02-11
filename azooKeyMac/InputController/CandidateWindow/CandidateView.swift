@@ -1,10 +1,3 @@
-//
-//  CandidateView.swift
-//  azooKeyMac
-//
-//  Created by 高橋直希 on 2024/08/03.
-//
-
 import Cocoa
 import KanaKanjiConverterModule
 
