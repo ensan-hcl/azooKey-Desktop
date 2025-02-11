@@ -6,7 +6,7 @@ private struct Prompt {
         "": """
         Generate 3-5 natural sentence completions for the given fragment.
         Return them as a simple array of strings.
-
+        
         Example:
         Input: "りんごは"
         Output: ["赤いです。", "甘いです。", "美味しいです。", "1個200円です。", "果物です。"]
@@ -16,7 +16,7 @@ private struct Prompt {
         "えもじ": """
         Generate 3-5 emoji options that best represent the meaning of the text.
         Return them as a simple array of strings.
-
+        
         Example:
         Input: "嬉しいです<えもじ>"
         Output: ["😊", "🥰", "😄", "💖", "✨"]
@@ -26,7 +26,7 @@ private struct Prompt {
         "かおもじ": """
         Generate 3-5 kaomoji (Japanese emoticon) options that best express the emotion or meaning of the text.
         Return them as a simple array of strings.
-
+        
         Example:
         Input: "嬉しいです<かおもじ>"
         Output: ["(≧▽≦)", "(^_^)", "(o^▽^o)", "(｡♥‿♥｡)"]
@@ -36,7 +36,7 @@ private struct Prompt {
         "きごう": """
         Propose 3-5 symbol options to represent the given context.
         Return them as a simple array of strings.
-
+        
         Example:
         Input: "総和<きごう>"
         Output: ["Σ", "+", "⊕"]
@@ -46,7 +46,7 @@ private struct Prompt {
         "るいぎご": """
         Generate 3-5 synonymous word options for the given text.
         Return them as a simple array of Japanese strings.
-
+        
         Example:
         Input: "楽しい<るいぎご>"
         Output: ["愉快", "面白い", "嬉しい", "快活", "ワクワクする"]
@@ -56,7 +56,7 @@ private struct Prompt {
         "たいぎご": """
         Generate 3-5 antonymous word options for the given text.
         Return them as a simple array of Japanese strings.
-
+        
         Example:
         Input: "楽しい<たいぎご>"
         Output: ["悲しい", "つまらない", "不愉快", "退屈", "憂鬱"]
@@ -70,10 +70,10 @@ private struct Prompt {
         Example:
         Input: "二次方程式<てふ>"
         Output: ["$x^2$", "$\\alpha$", "$\\frac{1}{2}$"]
-
+        
         Input: "積分<てふ>"
         Output: ["$\\int$", "$\\oint$", "$\\sum$"]
-
+        
         Input: "平方根<てふ>"
         Output: ["$\\sqrt{x}$", "$\\sqrt[n]{x}$", "$x^{1/2}$"]
         """,
@@ -120,29 +120,55 @@ private struct Prompt {
     - Alternative phrases or expressions
     - Different rhetorical approaches
     Return results as a simple array of strings.
-
+    
     Example:
     Input: "おはようございます。今日も<てんき>"
     Output: ["いい天気", "雨", "晴れ", "快晴" , "曇り"]
-
+    
     Input: "先日は失礼しました。<ごめん>"
     Output: ["すいません。", "ごめんなさい", "申し訳ありません"]
-
+    
     Input: "すぐに戻ります<まってて>"
     Output: ["ただいま戻ります", "少々お待ちください", "すぐ参ります", "まもなく戻ります", "しばらくお待ちを"]
-
+    
     Input: "遅刻してすいません。<いいわけ>"
     Output: ["電車の遅延", "寝坊", "道に迷って"]
-
+    
     Input: "こんにちは<ふらんすご>"
     Output: ["Bonjour", "Salut", "Bon après-midi", "Coucou", "Allô"]
-
+    
     Input: "ありがとう<すぺいんご>"
     Output: ["Gracias", "Muchas gracias", "Te lo agradezco", "Mil gracias", "Gracias mil"]
     """
 
     static func getPromptText(for target: String) -> String {
-        let basePrompt = dictionary[target] ?? defaultPrompt
+        let basePrompt = if let prompt = dictionary[target] {
+            prompt
+        } else if target.hasSuffix("えもじ") {
+            """
+            Generate 3-5 emoji options that best represent the meaning of "<\(target)>" in the context.
+            Return them as a simple array of strings.
+            Example:
+            Input: "嬉しいです<はーとのえもじ>"
+            Output: ["💖", "💕", "💓", "❤️", "💝"]
+            Example:
+            Input: "怒るよ<こわいえもじ>"
+            Output: ["🔪", "👿", "👺", "💢", "😡"]
+            """
+        } else if target.hasSuffix("きごう") {
+            """
+            Generate 3-5 emoji options that best represent the meaning of "<\(target)>" in the context.
+            Return them as a simple array of strings.
+            Example:
+            Input: "えー<びっくりきごう>"
+            Output: ["！", "❗️", "❕"]
+            Example:
+            Input: "公式は<せきぶんきごう>"
+            Output: ["∫", "∬", "∭", "∮"]
+            """
+        } else {
+            defaultPrompt
+        }
         return basePrompt + "\n\n" + sharedText
     }
 }
