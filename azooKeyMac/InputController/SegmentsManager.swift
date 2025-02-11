@@ -274,7 +274,30 @@ final class SegmentsManager {
         self.composingText.isEmpty
     }
 
-    @MainActor private func updateRawCandidate(requestRichCandidates: Bool = false) {
+    func getCleanLeftSideContext(maxCount: Int) -> String? {
+        self.delegate?.getLeftSideContext(maxCount: 30).map {
+            var last = $0.split(separator: "\n", omittingEmptySubsequences: false).last ?? $0[...]
+            // 前方の空白を削除する
+            while last.first?.isWhitespace ?? false {
+                last = last.dropFirst()
+            }
+            return String(last)
+        }
+    }
+
+    /// Updates the `self.rawCandidates` based on the current input context.
+    ///
+    /// This function is responsible for handling candidate conversion,
+    /// taking into account partial confirmations and optionally fetching rich candidates.
+    /// It also allows an override for the left-side context when necessary.
+    ///
+    /// - Parameters:
+    ///   - requestRichCandidates: A Boolean flag indicating whether to fetch rich candidates (default is `false`). Generating rich candidates takes longer time.
+    ///   - forcedLeftSideContext: An optional string that overrides the left-side context (default is `nil`).
+    ///
+    /// - Note:
+    ///   This function is executed on the `@MainActor` to ensure UI consistency.
+    @MainActor private func updateRawCandidate(requestRichCandidates: Bool = false, forcedLeftSideContext: String? = nil) {
         // 不要
         if composingText.isEmpty {
             self.rawCandidates = nil
@@ -288,17 +311,7 @@ final class SegmentsManager {
         self.appendDebugMessage("userDictionaryCount: \(self.userDictionary.items.count)")
 
         let prefixComposingText = self.composingText.prefixToCursorPosition()
-        let leftSideContext = self.delegate?.getLeftSideContext(maxCount: 30).map {
-            var last = $0.split(separator: "\n", omittingEmptySubsequences: false).last ?? $0[...]
-            // 空白を削除する
-            while last.first?.isWhitespace ?? false {
-                last = last.dropFirst()
-            }
-            while last.last?.isWhitespace ?? false {
-                last = last.dropLast()
-            }
-            return String(last)
-        }
+        let leftSideContext = forcedLeftSideContext ?? self.getCleanLeftSideContext(maxCount: 30)
         let result = self.kanaKanjiConverter.requestCandidates(prefixComposingText, options: options(leftSideContext: leftSideContext, requestRichCandidates: requestRichCandidates))
         self.rawCandidates = result
     }
@@ -308,7 +321,8 @@ final class SegmentsManager {
         self.shouldShowCandidateWindow = true
     }
 
-    @MainActor func prefixCandidateCommited(_ candidate: Candidate) {
+    /// - note: 画面更新との整合性を保つため、この関数の実行前に左文脈を取得し、これを引数として与える
+    @MainActor func prefixCandidateCommited(_ candidate: Candidate, leftSideContext: String) {
         self.kanaKanjiConverter.setCompletedData(candidate)
         self.kanaKanjiConverter.updateLearningData(candidate)
         self.composingText.prefixComplete(correspondingCount: candidate.correspondingCount)
@@ -319,7 +333,7 @@ final class SegmentsManager {
             self.didExperienceSegmentEdition = false
             self.shouldShowCandidateWindow = true
             self.selectionIndex = nil
-            self.updateRawCandidate()
+            self.updateRawCandidate(requestRichCandidates: true, forcedLeftSideContext: leftSideContext + candidate.text)
         }
     }
 
@@ -453,7 +467,7 @@ final class SegmentsManager {
         let markedText = self.getCurrentMarkedText(inputState: inputState)
         let text = markedText.reduce(into: "") {$0.append(contentsOf: $1.content)}
         if let candidate = self.candidates?.first(where: {$0.text == text}) {
-            self.prefixCandidateCommited(candidate)
+            self.prefixCandidateCommited(candidate, leftSideContext: "")
         }
         self.stopComposition()
         return text
