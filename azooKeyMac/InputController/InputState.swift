@@ -5,7 +5,6 @@ enum InputState {
     case composing
     case previewing
     case selecting
-    case predictiveSuggestion
     case replaceSuggestion
 
     // この種のコードは複雑にしかならないので、lintを無効にする
@@ -45,7 +44,7 @@ enum InputState {
                 }
             case .suggest:
                 if enableSuggestion {
-                    return (.requestPredictiveSuggestion, .transition(.predictiveSuggestion))
+                    return (.requestPredictiveSuggestion, .transition(.replaceSuggestion))
                 } else {
                     return (.fallthrough, .fallthrough)
                 }
@@ -213,32 +212,6 @@ enum InputState {
             case .英数:
                 return (.commitMarkedTextAndSelectInputMode(.roman), .transition(.none))
             case .unknown, .suggest, .tab:
-                return (.fallthrough, .fallthrough)
-            }
-        case .predictiveSuggestion:
-            // tab以外は.none同様にそのまま入力できる
-            switch userAction {
-            case .input(let string):
-                return (.appendToMarkedText(string), .transition(.composing))
-            case .number(let number):
-                return (.appendToMarkedText(number.inputString), .transition(.composing))
-            case .かな:
-                return (.selectInputMode(.japanese), .transition(.none))
-            case .英数:
-                return (.selectInputMode(.roman), .transition(.none))
-            case .space:
-                // Shift+Spaceでは半角スペースを入力
-                if event.modifierFlags.contains(.shift) {
-                    return (.insertWithoutMarkedText(" "), .transition(.none))
-                } else {
-                    return (.insertWithoutMarkedText("　"), .transition(.none))
-                }
-            case .suggest:
-                // 再度リクエスト
-                return (.requestPredictiveSuggestion, .transition(.none))
-            case .tab:
-                return (.submitSuggestion, .transition(.none))
-            case .unknown, .navigation, .backspace, .enter, .escape, .function, .editSegment:
                 return (.fallthrough, .fallthrough)
             }
         case .replaceSuggestion:
