@@ -126,13 +126,27 @@ private struct Prompt {
     static func getPromptText(for target: String) -> String {
         let basePrompt = if let prompt = dictionary[target] {
             prompt
-        } else if target.hasSuffix("のえもじ") {
+        } else if target.hasSuffix("えもじ") {
             """
             Generate 3-5 emoji options that best represent the meaning of "<\(target)>" in the context.
             Return them as a simple array of strings.
             Example:
             Input: "嬉しいです<はーとのえもじ>"
             Output: ["💖", "💕", "💓", "❤️", "💝"]
+            Example:
+            Input: "怒るよ<こわいえもじ>"
+            Output: ["🔪", "👿", "👺", "💢", "😡"]
+            """
+        } else if target.hasSuffix("きごう") {
+            """
+            Generate 3-5 emoji options that best represent the meaning of "<\(target)>" in the context.
+            Return them as a simple array of strings.
+            Example:
+            Input: "えー<びっくりきごう>"
+            Output: ["！", "❗️", "❕"]
+            Example:
+            Input: "公式は<せきぶんきごう>"
+            Output: ["∫", "∬", "∭", "∮"]
             """
         } else {
             defaultPrompt
