@@ -1,9 +1,3 @@
-//
-//  PredictiveSuggestionCandidateView.swift
-//  azooKeyMac
-//
-//  Created by 高橋直希 on 2024/09/21.
-//
 import Cocoa
 
 class PredictiveSuggestionCandidateView: NSView {

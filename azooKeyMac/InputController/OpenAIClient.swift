@@ -1,10 +1,3 @@
-//
-//  OpenAIClient.swift
-//  azooKeyMac
-//
-//  Created by 高橋直希 on 2024/09/21.
-//
-
 import Foundation
 
 private struct Prompt {

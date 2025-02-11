@@ -590,7 +590,7 @@ extension azooKeyMacInputController {
         self.replaceSuggestionWindow.level = .popUpMenu
 
         var rect: NSRect = .zero
-        if let client = self.client() as? IMKTextInput {
+        if let client = self.client() {
             client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
         }
         rect.size = .init(width: 400, height: 1000)

@@ -83,7 +83,6 @@ struct UserDictionaryEditorWindow: View {
                     }
                     if let undoItem {
                         Button("元に戻す", systemImage: "arrow.uturn.backward") {
-                            let newItem = Config.UserDictionary.Item(word: "", reading: "", hint: nil)
                             self.userDictionary.value.items.append(undoItem)
                             self.undoItem = nil
                         }
