@@ -515,9 +515,11 @@ class azooKeyMacInputController: IMKInputController { // swiftlint:disable:this 
     @MainActor
     func submitCandidate(_ candidate: Candidate) {
         if let client = self.client() {
+            // インサートを行う前にコンテキストを取得する
+            let cleanLeftSideContext = self.segmentsManager.getCleanLeftSideContext(maxCount: 30)
             client.insertText(candidate.text, replacementRange: NSRange(location: NSNotFound, length: 0))
             // アプリケーションサポートのディレクトリを準備しておく
-            self.segmentsManager.prefixCandidateCommited(candidate)
+            self.segmentsManager.prefixCandidateCommited(candidate, leftSideContext: cleanLeftSideContext ?? "")
         }
     }
 
