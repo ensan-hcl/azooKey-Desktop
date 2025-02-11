@@ -142,20 +142,7 @@ private struct Prompt {
     """
 
     static func getPromptText(for target: String) -> String {
-        let basePrompt = if let prompt = dictionary[target] {
-            prompt
-        } else if target.hasSuffix("のえもじ") {
-            """
-            Generate 3-5 emoji options that best represent the meaning of "<\(target)>" in the context.
-            Return them as a simple array of strings.
-
-            Example:
-            Input: "嬉しいです<はーとのえもじ>"
-            Output: ["💖", "💕", "💓", "❤️", "💝"]
-            """
-        } else {
-            defaultPrompt
-        }
+        let basePrompt = dictionary[target] ?? defaultPrompt
         return basePrompt + "\n\n" + sharedText
     }
 }
