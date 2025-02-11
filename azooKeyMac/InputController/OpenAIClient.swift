@@ -67,7 +67,7 @@ private struct Prompt {
         Generate 3-5 TeX command options for the given mathematical content.
         Return them as a simple array of strings.
 
-         Example:
+        Example:
         Input: "二次方程式<てふ>"
         Output: ["$x^2$", "$\\alpha$", "$\\frac{1}{2}$"]
 
@@ -82,6 +82,24 @@ private struct Prompt {
         "せつめい": """
         Provide 3-5 explanation to represent the given context.
         Return them as a simple array of Japanese strings.
+        """,
+
+        // つづきプロンプト
+        "つづき": """
+        Generate 2-5 short continuation options for the given context.
+        Return them as a simple array of strings.
+
+        Example:
+        Input: "吾輩は猫である。<つづき>"
+        Output: ["名前はまだない。", "名前はまだ無い。"]
+
+        Example:
+        Input: "10個の飴を5人に配る場合を考えます。<つづき>"
+        Output: ["一人あたり10÷5=2個の飴を貰えます。", "1人2個の飴を貰えます。", "計算してみましょう"]
+
+        Example:
+        Input: "<つづき>"
+        Output: ["👍"]
         """
     ]
 

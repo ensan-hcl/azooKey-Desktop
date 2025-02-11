@@ -46,7 +46,6 @@ enum ClientAction {
 
     // PredictiveSuggestion
     case requestPredictiveSuggestion
-    case submitSuggestion
 
     // ReplaceSuggestion
     case requestReplaceSuggestion
