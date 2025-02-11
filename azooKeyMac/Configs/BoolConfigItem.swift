@@ -57,11 +57,6 @@ extension Config {
         static let `default` = true
         static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzai"
     }
-    /// Zenzaiを利用時、候補ウィンドウを出すタイミングでリッチな候補の要求を行う
-    struct ZenzaiRichCandidatesMode: BoolConfigItem {
-        static let `default` = true
-        static var key: String = "dev.ensan.inputmethod.azooKeyMac.preference.enableZenzaiRichCandidatesMode"
-    }
     /// OpenAI APIキー
     struct EnableOpenAiApiKey: BoolConfigItem {
         static let `default` = false
