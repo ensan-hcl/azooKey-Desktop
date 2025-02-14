@@ -1,12 +1,12 @@
-# azooKey on Desktop
+# azooKey on macOS
 
-iOSのキーボードアプリ「[azooKey](https://github.com/ensan-hcl/azooKey)」のデスクトップ版です。高精度なニューラルかな漢字変換エンジン「Zenzai」を導入した、オープンソースの日本語入力システムです。
+[azooKey](https://github.com/ensan-hcl/azooKey)のmacOS版です。高精度なニューラルかな漢字変換エンジン「Zenzai」を導入した、オープンソースの日本語入力システムです。
 
 **現在アルファ版のため、動作は一切保証できません**。
 
 ## 動作環境
 
-macOS 14.3で動作確認しています。古いOSでの動作は検証していません。
+macOS 14とmacOS 15で動作確認しています。macOS 13でも利用できますが、動作は検証していません。
 
 ## リリース版インストール
 
@@ -30,14 +30,15 @@ GitHub Sponsorsをご利用ください。
 
 ## 機能
 
-* ニューラルかな漢字変換システム「Zenzai」による高精度な変換のサポート
-* iOSのキーボードアプリazooKeyと同レベルの日本語入力のサポート
-* ライブ変換のサポート
-  * 設定メニューでのライブ変換の切り替え
-* 学習機能
-* ユーザ辞書機能
-* 「プロフィール付き変換」機能
-* `.pkg`形式のインストーラ
+* ニューラルかな漢字変換システム「Zenzai」による高精度な変換
+  * プロフィールプロンプト機能
+  * 履歴学習機能
+  * ユーザ辞書機能
+  * 個人最適化システム「[Tuner](https://github.com/azooKey/Tuner)」との連携機能
+
+* ライブ変換
+* LLMによる「いい感じ変換」機能
+* その他の
 
 ## 開発ガイド
 
@@ -54,7 +55,7 @@ GitHub Sponsorsをご利用ください。
 cloneする際には`--recursive`をつけてサブモジュールまでローカルに落としてください。
 
 ```bash
-git clone https://github.com/ensan-hcl/azooKey-Desktop --recursive
+git clone https://github.com/azooKey/azooKey-Desktop --recursive
 ```
 
 以下のスクリプトを用いて最新のコードをビルドしてください。`.pkg`によるインストールと同等になります。その後、上記の手順を行ってください。また、submoduleが更新されている場合は `git submodule update --init` を行ってください。
@@ -77,7 +78,7 @@ git submodule update --init
 * 「Packages are not supported when using legacy build locations, but the current project has them enabled.」と表示される場合は[https://qiita.com/glassmonkey/items/3e8203900b516878ff2c](https://qiita.com/glassmonkey/items/3e8203900b516878ff2c)を参考に、Xcodeの設定をご確認ください
 
 変換精度がリリース版に比べて悪いと感じた場合、以下をご確認ください。
-* Git LFSが導入されていない環境では、重みファイルがローカル環境に落とせていない場合があります。`azooKeyMac/Resources/zenz-v2-gguf/zenz-v2-Q5_K_M.gguf`が70MB程度のファイルとなっているかを確認してください
+* Git LFSが導入されていない環境では、重みファイルがローカル環境に落とせていない場合があります。`azooKey-Desktop/azooKeyMac/Resources/zenz-v3-small-gguf/ggml-model-Q5_K_M.gguf`が70MB程度のファイルとなっているかを確認してください
 
 ### pkgファイルの作成
 `pkgbuild.sh`によって配布用のdmgファイルを作成できます。`build/azooKeyMac.app` としてDeveloper IDで署名済みの.appを配置してください。
@@ -86,6 +87,8 @@ git submodule update --init
 * 予測変換を表示する
 * CIを増やす
   * アルファ版を自動リリースする
+* 「いい感じ変換」の改良
+* 「Tuner」との相互運用性の向上
 
 ### Future Direction
 
