@@ -58,7 +58,7 @@ final class SegmentsManager {
         }
 
         let base = Bundle.main.bundleURL.appendingPathComponent("Contents/Resources/", isDirectory: false).path + "/lm"
-        let personal = containerURL.appendingPathComponent("Library/Application Support/SwiftNGram").path + "/lm"
+        let personal = containerURL.appendingPathComponent("Library/Application Support/p13n_v1").path + "/lm"
         // check personal lm existence
         guard [
             FileManager.default.fileExists(atPath: personal + "_c_abc.marisa"),
